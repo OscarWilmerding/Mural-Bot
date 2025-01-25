@@ -73,7 +73,7 @@ unsigned long prePokePause   = 0;
 unsigned long chassisWaitTime = 2500;
 
 // Additional data from G-code
-float pulleySpacingGlobal   = 0.0;  
+float pulleySpacing   = 0.0;  
 int   numberOfDrawnColumns  = 0;    
 float stripeVelocity        = 1.0;  // default to 1 m/s for stripes
 
@@ -121,8 +121,12 @@ int     currentCommandIndex = 0;
 void determineStripeVelocities(float posA, float posB, float &velA, float &velB) {
   // TODO: Replace with your equation that ensures a certain chassis velocity, etc.
   // For demonstration, set both to half the global stripeVelocity
-  velA = 
-  velB = 
+  float Vx = 0; //no movement in x direction.
+  float Vy = 1; //this means the velocity in y direction is positive, which is moving down the wall.
+
+  //these equations were extracted from 'new velocity math' 
+  velA = pow(-pow(pulleySpacing,4.0f)+(2.0f*a_len*a_len+2.0f*b_len*b_len)*pulleySpacing*pulleySpacing-pow((a_len-b_len),2.0f)*pow((a_len+b_len),2.0f),-0.5f)*a_len*(Vx*sqrt(-pow(pulleySpacing,4.0f)+(2.0f*a_len*a_len+2.0f*b_len*b_len)*pulleySpacing*pulleySpacing-pow((a_len-b_len),2.0f)*pow((a_len+b_len),2.0f))-Vy*(a_len*a_len-b_len*b_len-pulleySpacing*pulleySpacing))/pulleySpacing; 
+  velB = -b_len*(Vx*sqrt(-pow(pulleySpacing,4.0f)+(2.0f*a_len*a_len+2.0f*b_len*b_len)*pulleySpacing*pulleySpacing-pow((a_len-b_len),2.0f)*pow((a_len+b_len),2.0f))-Vy*(a_len*a_len-b_len*b_len+pulleySpacing*pulleySpacing))*pow(-pow(pulleySpacing,4.0f)+(2.0f*a_len*a_len+2.0f*b_len*b_len)*pulleySpacing*pulleySpacing-pow((a_len-b_len),2.0f)*pow((a_len+b_len),2.0f),-0.5f)/pulleySpacing;
 }
 
 // ------------------- Forward Declarations -----------------------
@@ -625,9 +629,9 @@ void loadCommandsFromFile(const char *path) {
       if (eqIndex >= 0) {
         String val = line.substring(eqIndex + 1);
         val.trim();
-        pulleySpacingGlobal = val.toFloat();
+        pulleySpacing = val.toFloat();
         Serial.print("Parsed pulley spacing: ");
-        Serial.println(pulleySpacingGlobal);
+        Serial.println(pulleySpacing);
       }
       continue;
     }
