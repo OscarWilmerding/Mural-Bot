@@ -465,18 +465,70 @@ void startNextCommand() {
       runMode = false; 
       currentCommandIndex++;
     }
+/******************************************************/
+/*   Snippet for the STRIPE portion in startNextCommand()   */
+/******************************************************/
+
     else if (cmd.type == Command::STRIPE) {
+      // Print which stripe command we're on
       Serial.print("Executing STRIPE command #");
       Serial.println(currentCommandIndex + 1);
 
-      // Zero out acceleration for stripes
-      stepper1.setAcceleration(0);
-      stepper2.setAcceleration(0);
+      // Demonstrate referencing all relevant fields for this stripe
+      Serial.print("  Stripe Name: ");
+      Serial.println(cmd.stripeName);
 
-      // 1) Determine actual pulley positions for this stripe
+      Serial.print("  Drop Value: ");
+      Serial.println(cmd.drop);
+
+      Serial.print("  Starting Position of Pulley A for stripe: ");
+      Serial.println(cmd.startPulleyA);
+
+      Serial.print("  Starting Position of Pulley B for stripe: ");
+      Serial.println(cmd.startPulleyB);
+
+      Serial.print("  Pattern String: ");
+      Serial.println(cmd.pattern);
+
+      move_to_position(float position1, float position2) //moves the chassis to the starting position of the stripe and has it wait there for a sec
+      delay(1000);
+
+      // Zero out acceleration for indefinite-speed stripe motion, I dont think this is necissary for what I have planned
+      // stepper1.setAcceleration(0);
+      // stepper2.setAcceleration(0);
+
+      float timeForMovement = cmd.drop / stripeVelocity;
+
+      unsigned long startTime = millis();
+      unsigned long lastCallTime = millis();
+
+      while (millis() - startTime < timeForMovement) {
+        unsigned long currentTime = millis();
+
+        // Check if it's time to call velocity alter function
+        if (currentTime - lastCallTime >= velocityCalcDelay) {  //this is the code that asynchrounously is setting the velocities of the motors during movement
+
+          float posA = stepper1.currentPosition() / (stepsPerMeter * motor1Direction); //get positions, for the first movement this is redundant but for the rest the velocities required are dependent on position
+          float posB = stepper2.currentPosition() / (stepsPerMeter * motor2Direction);
+
+          float velocityA, velocityB;
+          determineStripeVelocities(posA, posB, velocityA, velocityB);
+
+          float speedA = velocityA * stepsPerMeter * motor1Direction;
+          float speedB = velocityB * stepsPerMeter * motor2Direction;
+
+          stepper1.setSpeed(speedA); //set the steppers to the velocity needed
+          stepper2.setSpeed(speedB);
+
+          lastCallTime = currentTime; // Update the last call time, necissary for anync loop
+        }
+      }
+
+      // 1) Determine the current pully positions ()
       float posA = stepper1.currentPosition() / (stepsPerMeter * motor1Direction);
       float posB = stepper2.currentPosition() / (stepsPerMeter * motor2Direction);
-      // 2) Compute velocities from those positions
+
+      // 2) Compute velocities from those positions (placeholder func)
       float velocityA, velocityB;
       determineStripeVelocities(posA, posB, velocityA, velocityB);
 
@@ -484,19 +536,20 @@ void startNextCommand() {
       float speedA = velocityA * stepsPerMeter * motor1Direction;
       float speedB = velocityB * stepsPerMeter * motor2Direction;
 
-      // Indefinite movement
-      Serial.println("ERROR: This STRIPE runs indefinitely (no automatic stop).");
+      // Indefinite movement warning
+      Serial.println("WARNING: This STRIPE runs indefinitely (no automatic stop).");
 
-      // Set speed but not moveTo()
+      // Set speed but do not call moveTo(), so it spins continuously
       stepper1.setSpeed(speedA);
       stepper2.setSpeed(speedB);
 
-      // No movementInProgress for indefinite spinning
+      // Not using movementInProgress for indefinite spins
       movementInProgress = false;
 
-      // Proceed to next command
+      // Move on to the next command in the sequence
       currentCommandIndex++;
     }
+
   }
   else {
     Serial.println("All Commands Complete");
