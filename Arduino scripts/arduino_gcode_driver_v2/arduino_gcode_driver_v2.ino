@@ -121,8 +121,8 @@ int     currentCommandIndex = 0;
 void determineStripeVelocities(float posA, float posB, float &velA, float &velB) {
   // TODO: Replace with your equation that ensures a certain chassis velocity, etc.
   // For demonstration, set both to half the global stripeVelocity
-  velA = stripeVelocity / 2.0;
-  velB = stripeVelocity / 2.0;
+  velA = 
+  velB = 
 }
 
 // ------------------- Forward Declarations -----------------------
