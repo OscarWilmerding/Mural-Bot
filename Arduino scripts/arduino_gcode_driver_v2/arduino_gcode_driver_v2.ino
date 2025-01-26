@@ -108,7 +108,7 @@ struct Command {
 };
 
 // Array for storing commands
-const int MAX_COMMANDS = 8000;
+const int MAX_COMMANDS = 1500;
 Command commands[MAX_COMMANDS];
 int     commandCount        = 0;
 int     currentCommandIndex = 0;
@@ -125,8 +125,8 @@ void determineStripeVelocities(float posA, float posB, float &velA, float &velB)
   float Vy = 1; //this means the velocity in y direction is positive, which is moving down the wall.
 
   //these equations were extracted from 'new velocity math' 
-  velA = pow(-pow(pulleySpacing,4.0f)+(2.0f*a_len*a_len+2.0f*b_len*b_len)*pulleySpacing*pulleySpacing-pow((a_len-b_len),2.0f)*pow((a_len+b_len),2.0f),-0.5f)*a_len*(Vx*sqrt(-pow(pulleySpacing,4.0f)+(2.0f*a_len*a_len+2.0f*b_len*b_len)*pulleySpacing*pulleySpacing-pow((a_len-b_len),2.0f)*pow((a_len+b_len),2.0f))-Vy*(a_len*a_len-b_len*b_len-pulleySpacing*pulleySpacing))/pulleySpacing; 
-  velB = -b_len*(Vx*sqrt(-pow(pulleySpacing,4.0f)+(2.0f*a_len*a_len+2.0f*b_len*b_len)*pulleySpacing*pulleySpacing-pow((a_len-b_len),2.0f)*pow((a_len+b_len),2.0f))-Vy*(a_len*a_len-b_len*b_len+pulleySpacing*pulleySpacing))*pow(-pow(pulleySpacing,4.0f)+(2.0f*a_len*a_len+2.0f*b_len*b_len)*pulleySpacing*pulleySpacing-pow((a_len-b_len),2.0f)*pow((a_len+b_len),2.0f),-0.5f)/pulleySpacing;
+  velA = pow(-pow(pulleySpacing,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacing*pulleySpacing-pow((posA-posB),2.0f)*pow((posA+posB),2.0f),-0.5f)*posA*(Vx*sqrt(-pow(pulleySpacing,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacing*pulleySpacing-pow((posA-posB),2.0f)*pow((posA+posB),2.0f))-Vy*(posA*posA-posB*posB-pulleySpacing*pulleySpacing))/pulleySpacing; 
+  velB = -posB*(Vx*sqrt(-pow(pulleySpacing,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacing*pulleySpacing-pow((posA-posB),2.0f)*pow((posA+posB),2.0f))-Vy*(posA*posA-posB*posB+pulleySpacing*pulleySpacing))*pow(-pow(pulleySpacing,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacing*pulleySpacing-pow((posA-posB),2.0f)*pow((posA+posB),2.0f),-0.5f)/pulleySpacing;
 }
 
 // ------------------- Forward Declarations -----------------------
@@ -494,7 +494,7 @@ void startNextCommand() {
       Serial.print("  Pattern String: ");
       Serial.println(cmd.pattern);
 
-      move_to_position(float position1, float position2) //moves the chassis to the starting position of the stripe and has it wait there for a sec
+      move_to_position(cmd.startPulleyA, cmd.startPulleyB); //moves the chassis to the starting position of the stripe and has it wait there for a sec
       delay(1000);
 
       // Zero out acceleration for indefinite-speed stripe motion, I dont think this is necissary for what I have planned
@@ -697,12 +697,14 @@ void loadCommandsFromFile(const char *path) {
 
     // 4) If not a stripe block or recognized global line, fallback
     if (line.startsWith("change color to:")) {
-      Command cmd;
-      cmd.type     = Command::COLOR_CHANGE;
-      cmd.colorHex = line.substring(16).trim();
-      cmd.colorHex.toUpperCase();
-      commands[commandCount++] = cmd;
+        Command cmd;
+        cmd.type = Command::COLOR_CHANGE;
+        cmd.colorHex = line.substring(16);
+        cmd.colorHex.trim();
+        cmd.colorHex.toUpperCase();
+        commands[commandCount++] = cmd;
     }
+
     else {
       // Assume (x,y) move
       int start = line.indexOf('(');
