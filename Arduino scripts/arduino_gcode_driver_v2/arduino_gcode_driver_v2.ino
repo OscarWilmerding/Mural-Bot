@@ -20,12 +20,12 @@
 #define motorInterfaceType 1  // Using a driver that requires step and direction pins
 
 // Define pins for Motor 1
-const int stepPin1 = 7;
-const int dirPin1  = 8; 
+const int stepPin1 = 5;
+const int dirPin1  = 4; 
 
 // Define pins for Motor 2
-const int stepPin2 = 5;
-const int dirPin2  = 4;  
+const int stepPin2 = 7;
+const int dirPin2  = 8;  
 
 // Create instances of the AccelStepper class
 AccelStepper stepper1(motorInterfaceType, stepPin1, dirPin1);
@@ -509,6 +509,10 @@ void startNextCommand() {
 
           float posA = stepper1.currentPosition() / (stepsPerMeter * motor1Direction); //get positions, for the first movement this is redundant but for the rest the velocities required are dependent on position
           float posB = stepper2.currentPosition() / (stepsPerMeter * motor2Direction);
+
+          if (posA < 0 || posB < 0) {
+            Serial.println("CRITICAL - one value going into velocity func is negative");
+          }
 
           float velocityA, velocityB;
           determineStripeVelocities(posA, posB, velocityA, velocityB);
