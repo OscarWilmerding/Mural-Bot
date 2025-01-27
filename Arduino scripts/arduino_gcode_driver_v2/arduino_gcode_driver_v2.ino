@@ -108,16 +108,11 @@ struct Command {
 };
 
 // Array for storing commands
-const int MAX_COMMANDS = 1500;
+const int MAX_COMMANDS = 1500; //NOTE this number is important, if there is a memory overflow lower this number because the esp32 can only manage so many global variables at a time
 Command commands[MAX_COMMANDS];
 int     commandCount        = 0;
 int     currentCommandIndex = 0;
 
-/***************************************************************/
-/*        Placeholder Functions for Stripe Motion Logic        */
-/***************************************************************/
-
-// 2) Determine velocities based on those positions (fill out with your equation)
 void determineStripeVelocities(float posA, float posB, float &velA, float &velB) {
   // TODO: Replace with your equation that ensures a certain chassis velocity, etc.
   // For demonstration, set both to half the global stripeVelocity
