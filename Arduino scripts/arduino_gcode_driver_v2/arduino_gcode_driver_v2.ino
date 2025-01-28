@@ -128,6 +128,7 @@ void determineStripeVelocities(float posA, float posB, float &velA, float &velB)
 void onDataSent(const uint8_t *macAddr, esp_now_send_status_t status);
 void onDataRecv(const esp_now_recv_info *info, const uint8_t *incomingData, int len);
 void move_to_position(float position1, float position2);
+void move_to_position_blocking(float position1, float position2);
 void processSerialCommand(String command);
 void startNextCommand();
 void listAvailableCommands();
@@ -252,12 +253,15 @@ void onDataRecv(const esp_now_recv_info *info, const uint8_t *incomingData, int 
 }
 
 // ------------------ Movement Helper Function ----------------------
+//this function needs a .run command to be called frequently after this is ran
 void move_to_position(float position1, float position2) {
   long targetPosition1 = position1 * stepsPerMeter * motor1Direction;
   long targetPosition2 = position2 * stepsPerMeter * motor2Direction;
 
-  stepper1.setMaxSpeed(baseMaxSpeed); //dont remove this gets messed with in velocity calc
-  stepper2.setMaxSpeed(baseMaxSpeed);
+  stepper1.setAcceleration(baseAcceleration * accelerationMultiplier);
+  stepper2.setAcceleration(baseAcceleration * accelerationMultiplier);
+  stepper1.setMaxSpeed(baseMaxSpeed * maxSpeedMultiplier); //dont remove this gets messed with in velocity calc
+  stepper2.setMaxSpeed(baseMaxSpeed * maxSpeedMultiplier);
 
   stepper1.moveTo(targetPosition1);
   stepper2.moveTo(targetPosition2);
@@ -269,6 +273,39 @@ void move_to_position(float position1, float position2) {
 
   movementInProgress = true;
 }
+
+//this function is similar but will run until the pullys get to the right position
+void move_to_position_blocking(float position1, float position2) {
+  // Convert meters to steps, applying direction
+  long targetPosition1 = position1 * stepsPerMeter * motor1Direction;
+  long targetPosition2 = position2 * stepsPerMeter * motor2Direction;
+
+  // Optionally override accel/speed here if desired
+  stepper1.setAcceleration(baseAcceleration * accelerationMultiplier);
+  stepper2.setAcceleration(baseAcceleration * accelerationMultiplier);
+  stepper1.setMaxSpeed(baseMaxSpeed * maxSpeedMultiplier);
+  stepper2.setMaxSpeed(baseMaxSpeed * maxSpeedMultiplier);
+
+  // Set the new targets
+  stepper1.moveTo(targetPosition1);
+  stepper2.moveTo(targetPosition2);
+
+  // Print for debugging
+  Serial.print("Blocking move to (m):  A=");
+  Serial.print(position1);
+  Serial.print("  B=");
+  Serial.println(position2);
+
+  // Run until both steppers reach their targets
+  while ((stepper1.distanceToGo() != 0) || (stepper2.distanceToGo() != 0)) {
+    stepper1.run();
+    stepper2.run();
+    // If using runSpeed() for indefinite speed, you'd call runSpeed() here instead
+  }
+
+  Serial.println("Blocking move complete.");
+}
+
 
 // ------------------ Process Serial Commands -----------------------
 void processSerialCommand(String command) {
@@ -492,29 +529,17 @@ void startNextCommand() {
       Serial.print("  Pattern String: ");
       Serial.println(cmd.pattern);
 
-      // ----------------------------------------------------------------
-      // (1) Ensure zero acceleration and sufficiently high max speed
-      // ----------------------------------------------------------------
-      stepper1.setAcceleration(0);
-      stepper2.setAcceleration(0);
-      stepper1.setMaxSpeed(8000);  // or any value above your expected speed
-      stepper2.setMaxSpeed(8000);
-
       // Move to initial position (blocking move)
       Serial.println("Moving to initial stripe position...");
-      move_to_position(cmd.startPulleyA, cmd.startPulleyB);
+      move_to_position_blocking(cmd.startPulleyA, cmd.startPulleyB);
 
-      // ----------------------------------------------------------------
-      // (2) Replace the fixed delay with a short loop that keeps motors running
-      // ----------------------------------------------------------------
-      unsigned long waitStart = millis();
-      while (millis() - waitStart < 1000) {  
-        // If you want them to hold or maintain final speed, call run() or runSpeed() here:
-        stepper1.run();
-        stepper2.run();
-      }
+      stepper1.setAcceleration(0); //it is important that these values are set after the move to position function is called
+      stepper2.setAcceleration(0);
+      stepper1.setMaxSpeed(8000);  
+      stepper2.setMaxSpeed(8000);
+
       Serial.println("Done moving to initial position.");
-
+      delay(2000);
       // Calculate total time for movement (in milliseconds)
       float timeForMovementSeconds = cmd.drop / stripeVelocity;  // seconds
       float timeForMovementMs      = timeForMovementSeconds * 1000.0; // ms
