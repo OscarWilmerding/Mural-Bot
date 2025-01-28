@@ -75,10 +75,10 @@ unsigned long chassisWaitTime = 2500;
 // Additional data from G-code
 float pulleySpacing   = 0.0;  
 int   numberOfDrawnColumns  = 0;    
-float stripeVelocity        = 1.0;  // default to 1 m/s for stripes
+float stripeVelocity        = 0.2;  // default to 1 m/s for stripes
 
 // New global for controlling how often (ms) you recalc velocities
-unsigned long velocityCalcDelay = 500; // default 500 ms
+unsigned long velocityCalcDelay = 100; // default 500 ms
 
 // ------------------ Command and Stripe Structures --------------
 struct Position {
@@ -117,7 +117,7 @@ void determineStripeVelocities(float posA, float posB, float &velA, float &velB)
   // TODO: Replace with your equation that ensures a certain chassis velocity, etc.
   // For demonstration, set both to half the global stripeVelocity
   float Vx = 0; //no movement in x direction.
-  float Vy = 1; //this means the velocity in y direction is positive, which is moving down the wall.
+  float Vy = stripeVelocity; //this means the velocity in y direction is positive, which is moving down the wall.
 
   //these equations were extracted from 'new velocity math' 
   velA = pow(-pow(pulleySpacing,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacing*pulleySpacing-pow((posA-posB),2.0f)*pow((posA+posB),2.0f),-0.5f)*posA*(Vx*sqrt(-pow(pulleySpacing,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacing*pulleySpacing-pow((posA-posB),2.0f)*pow((posA+posB),2.0f))-Vy*(posA*posA-posB*posB-pulleySpacing*pulleySpacing))/pulleySpacing; 
@@ -255,6 +255,9 @@ void onDataRecv(const esp_now_recv_info *info, const uint8_t *incomingData, int 
 void move_to_position(float position1, float position2) {
   long targetPosition1 = position1 * stepsPerMeter * motor1Direction;
   long targetPosition2 = position2 * stepsPerMeter * motor2Direction;
+
+  stepper1.setMaxSpeed(baseMaxSpeed); //dont remove this gets messed with in velocity calc
+  stepper2.setMaxSpeed(baseMaxSpeed);
 
   stepper1.moveTo(targetPosition1);
   stepper2.moveTo(targetPosition2);
@@ -473,7 +476,7 @@ void startNextCommand() {
       Serial.print("Executing STRIPE command #");
       Serial.println(currentCommandIndex + 1);
 
-      // Demonstrate referencing all relevant fields for this stripe
+      // Print all relevant fields for this stripe
       Serial.print("  Stripe Name: ");
       Serial.println(cmd.stripeName);
 
@@ -489,69 +492,108 @@ void startNextCommand() {
       Serial.print("  Pattern String: ");
       Serial.println(cmd.pattern);
 
-      move_to_position(cmd.startPulleyA, cmd.startPulleyB); //moves the chassis to the starting position of the stripe and has it wait there for a sec
-      delay(1000);
+      // ----------------------------------------------------------------
+      // (1) Ensure zero acceleration and sufficiently high max speed
+      // ----------------------------------------------------------------
+      stepper1.setAcceleration(0);
+      stepper2.setAcceleration(0);
+      stepper1.setMaxSpeed(8000);  // or any value above your expected speed
+      stepper2.setMaxSpeed(8000);
 
-      // Zero out acceleration for indefinite-speed stripe motion, I dont think this is necissary for what I have planned
-      // stepper1.setAcceleration(0);
-      // stepper2.setAcceleration(0);
+      // Move to initial position (blocking move)
+      Serial.println("Moving to initial stripe position...");
+      move_to_position(cmd.startPulleyA, cmd.startPulleyB);
 
-      float timeForMovement = cmd.drop / stripeVelocity;
+      // ----------------------------------------------------------------
+      // (2) Replace the fixed delay with a short loop that keeps motors running
+      // ----------------------------------------------------------------
+      unsigned long waitStart = millis();
+      while (millis() - waitStart < 1000) {  
+        // If you want them to hold or maintain final speed, call run() or runSpeed() here:
+        stepper1.run();
+        stepper2.run();
+      }
+      Serial.println("Done moving to initial position.");
 
-      unsigned long startTime = millis();
+      // Calculate total time for movement (in milliseconds)
+      float timeForMovementSeconds = cmd.drop / stripeVelocity;  // seconds
+      float timeForMovementMs      = timeForMovementSeconds * 1000.0; // ms
+
+      Serial.print("timeForMovementSeconds: ");
+      Serial.println(timeForMovementSeconds);
+      Serial.print("timeForMovementMs: ");
+      Serial.println(timeForMovementMs);
+
+      unsigned long startTime    = millis();
       unsigned long lastCallTime = millis();
 
-      while (millis() - startTime < timeForMovement) {
+      Serial.println("Entering stripe movement while loop...");
+      while (millis() - startTime < timeForMovementMs) {
         unsigned long currentTime = millis();
 
-        // Check if it's time to call velocity alter function
-        if (currentTime - lastCallTime >= velocityCalcDelay) {  //this is the code that asynchrounously is setting the velocities of the motors during movement
+        // Always run the steppers each iteration
+        stepper1.runSpeed();
+        stepper2.runSpeed();
 
-          float posA = stepper1.currentPosition() / (stepsPerMeter * motor1Direction); //get positions, for the first movement this is redundant but for the rest the velocities required are dependent on position
+        // Recalculate velocity at intervals
+        if (currentTime - lastCallTime >= velocityCalcDelay) {
+          Serial.print("   Velocity update. Last call was ");
+          Serial.print(currentTime - lastCallTime);
+          Serial.println(" ms ago.");
+
+          // Get positions in meters
+          float posA = stepper1.currentPosition() / (stepsPerMeter * motor1Direction);
           float posB = stepper2.currentPosition() / (stepsPerMeter * motor2Direction);
+
+          Serial.print("   Current posA: ");
+          Serial.println(posA);
+          Serial.print("   Current posB: ");
+          Serial.println(posB);
 
           if (posA < 0 || posB < 0) {
             Serial.println("CRITICAL - one value going into velocity func is negative");
           }
 
+          // Determine velocities
           float velocityA, velocityB;
           determineStripeVelocities(posA, posB, velocityA, velocityB);
 
+          Serial.print("   velocityA: ");
+          Serial.println(velocityA);
+          Serial.print("   velocityB: ");
+          Serial.println(velocityB);
+
+          // Convert to steps/sec
           float speedA = velocityA * stepsPerMeter * motor1Direction;
           float speedB = velocityB * stepsPerMeter * motor2Direction;
 
-          stepper1.setSpeed(speedA); //set the steppers to the velocity needed
+          Serial.print("   SpeedA (steps/s): ");
+          Serial.println(speedA);
+          Serial.print("   SpeedB (steps/s): ");
+          Serial.println(speedB);
+
+          // Set speeds
+          stepper1.setSpeed(speedA);
           stepper2.setSpeed(speedB);
 
-          lastCallTime = currentTime; // Update the last call time, necissary for anync loop
+          // Immediately run them after setting speed
+          stepper1.runSpeed();
+          stepper2.runSpeed();
+
+          lastCallTime = currentTime;
         }
       }
 
-      // 1) Determine the current pully positions ()
-      float posA = stepper1.currentPosition() / (stepsPerMeter * motor1Direction);
-      float posB = stepper2.currentPosition() / (stepsPerMeter * motor2Direction);
-
-      // 2) Compute velocities from those positions (placeholder func)
-      float velocityA, velocityB;
-      determineStripeVelocities(posA, posB, velocityA, velocityB);
-
-      // Convert m/s -> steps/s
-      float speedA = velocityA * stepsPerMeter * motor1Direction;
-      float speedB = velocityB * stepsPerMeter * motor2Direction;
-
-      // Indefinite movement warning
-      Serial.println("WARNING: This STRIPE runs indefinitely (no automatic stop).");
-
-      // Set speed but do not call moveTo(), so it spins continuously
-      stepper1.setSpeed(speedA);
-      stepper2.setSpeed(speedB);
-
-      // Not using movementInProgress for indefinite spins
+      Serial.println("Finished stripe movement loop.");
       movementInProgress = false;
-
-      // Move on to the next command in the sequence
       currentCommandIndex++;
+
+      stepper1.setCurrentPosition(stepper1.currentPosition());//this line sets new position to wherever the velocity movements landed
+      stepper2.setCurrentPosition(stepper2.currentPosition());
+
     }
+
+
 
   }
   else {
