@@ -1,159 +1,109 @@
 //this is the start of the gcode
 
 
-number of drawn columns = 15
-pulley spacing = 1.31
-change color to:#3b3a39
+number of drawn columns = 10
+pulley spacing = 1.265
+change color to:#3e3d3c
 STRIPE - column #0
-starting/ending position pixel values:  (-2,60),(-2,0)
-['xxxx', 'xxxx', 'xxxo', 'xxxx', 'xxxo', 'xxoo', 'xoox', 'xxxo', 'xxxx', 'xxox', 'xxoo', 'xxoo', 'xxxx', 'xxoo', 'xoxx', 'xxxo', 'xxxo', 'xoox', 'xxxx', 'xxxo', 'xxoo', 'xxox', 'xxxo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxo', 'ooox', 'xxxx', 'ooxx', 'xxoo', 'xxxo', 'xxox', 'ooox', 'ooox', 'ooox', 'ooox', 'oooo', 'oooo', 'oxoo', 'xooo', 'xooo', 'xooo', 'xxxo', 'xxxo', 'xxxo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx']
-drop: 0.24
-starting pulley values:  0.92484,1.270074
+starting/ending position pixel values:  (-2,40),(-2,0)
+['xxxx', 'xxxx', 'xxxo', 'xooo', 'xoox', 'xxxo', 'xooo', 'xooo', 'xxoo', 'xooo', 'xxoo', 'xooo', 'xxoo', 'xoox', 'xxxx', 'xxox', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xoxx', 'ooxo', 'oxoo', 'xxoo', 'xxoo', 'ooxo', 'ooxo', 'ooox', 'ooox', 'xooo', 'oooo', 'xooo', 'xxoo', 'xxxo', 'xxxo', 'xxxx', 'xxxx']
+drop: 0.52
+starting pulley values:  0.591999,1.03636
 STRIPE - column #1
-starting/ending position pixel values:  (2,60),(2,0)
-['xxoo', 'xoxo', 'xxxo', 'oooo', 'ooox', 'xoxo', 'oxoo', 'xoox', 'xoxo', 'oooo', 'oooo', 'xooo', 'oooo', 'ooox', 'ooox', 'oooo', 'oooo', 'ooox', 'ooxx', 'xoxx', 'xxxx', 'xxxo', 'oxxx', 'xxxx', 'xxxx', 'xxxx', 'oxxx', 'xxxx', 'xxxo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxo', 'xoxx', 'ooxx', 'oxxx', 'oxxx', 'ooxx', 'ooox', 'ooox', 'ooox', 'xxoo', 'xxoo', 'oxxo', 'xxxo', 'ooxx', 'ooox', 'oooo', 'oooo', 'oooo', 'oooo', 'xooo', 'xooo', 'xxoo', 'xxox', 'xxxx', 'xxxx']
-drop: 0.24
-starting pulley values:  0.93405,1.260273
+starting/ending position pixel values:  (2,40),(2,0)
+['oooo', 'oooo', 'oooo', 'xooo', 'ooxx', 'ooxo', 'oooo', 'oooo', 'oxoo', 'ooox', 'ooox', 'ooxx', 'xxxx', 'xxxx', 'xxxx', 'xxxo', 'xxox', 'xxxx', 'xxxx', 'xxxx', 'xxxo', 'xxxo', 'xxxo', 'xxxo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'oxox', 'oxxo', 'ooxx', 'xoox', 'xxoo', 'oxxo', 'ooxx', 'ooox', 'oooo', 'oooo', 'xxxo', 'xxxx']
+drop: 0.52
+starting pulley values:  0.623861,0.990567
 STRIPE - column #2
-starting/ending position pixel values:  (6,60),(6,0)
-['oooo', 'oooo', 'oxoo', 'xoox', 'oxoo', 'xoox', 'ooxo', 'oxxo', 'oxxo', 'ooox', 'ooox', 'oooo', 'oooo', 'xoox', 'ooxx', 'oooo', 'ooox', 'ooxx', 'oxxx', 'xxxx', 'oxxx', 'xxxx', 'xxxx', 'xxxo', 'xoox', 'xoxo', 'xxxx', 'oxxx', 'xxxx', 'xxxo', 'xxxo', 'xxox', 'xxxo', 'xxoo', 'xxxo', 'xxxo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'oxxx', 'xoxx', 'xoxx', 'xxox', 'xxxo', 'oxxo', 'oxxx', 'ooxx', 'oooo', 'xooo', 'xxxx', 'oxxx', 'ooox', 'oooo', 'oooo', 'oooo', 'oooo', 'oxoo', 'xxxo', 'xxxx']
-drop: 0.24
-starting pulley values:  0.943441,1.2506
+starting/ending position pixel values:  (6,40),(6,0)
+['oooo', 'oooo', 'oooo', 'ooox', 'xoxo', 'ooox', 'oooo', 'oooo', 'ooox', 'oxxx', 'xxxx', 'xxxx', 'xxxo', 'xoox', 'xoxx', 'xxxx', 'xxxx', 'xxxo', 'xxoo', 'xxxx', 'oxxx', 'oxxo', 'ooxx', 'oooo', 'xooo', 'xooo', 'xxoo', 'xxxo', 'xxxx', 'oxxx', 'xxox', 'xxxx', 'oxxx', 'oxxo', 'oooo', 'xxxx', 'oxxx', 'oooo', 'oooo', 'xooo']
+drop: 0.52
+starting pulley values:  0.658293,0.945415
 STRIPE - column #3
-starting/ending position pixel values:  (10,60),(10,0)
-['oooo', 'oooo', 'xooo', 'oooo', 'ooxo', 'oxoo', 'xxox', 'xoxx', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'ooox', 'oxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxox', 'xxoo', 'xoox', 'xoxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxo', 'xxxx', 'oxxx', 'oxxx', 'ooxx', 'ooox', 'oooo', 'oooo', 'xxoo', 'xxoo', 'xxxx', 'xxoo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'oxxx', 'ooox', 'xxxo', 'ooxx', 'xxoo', 'oxxx', 'oooo', 'oooo', 'xxxx', 'xxxx', 'ooxx', 'ooox', 'oooo', 'oooo', 'ooox', 'xxoo']
-drop: 0.24
-starting pulley values:  0.953008,1.241058
+starting/ending position pixel values:  (10,40),(10,0)
+['oooo', 'oooo', 'oooo', 'xoxo', 'xxox', 'xoxx', 'oxxx', 'xxxx', 'xxxx', 'xxxx', 'xxoo', 'oooo', 'ooox', 'xxxx', 'xxxx', 'xxxx', 'oxxx', 'oxxo', 'ooxx', 'ooxx', 'ooxx', 'ooox', 'xooo', 'xxoo', 'oooo', 'oooo', 'oooo', 'xxxo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xooo', 'xxxx', 'xxxx', 'oxxx', 'oooo']
+drop: 0.52
+starting pulley values:  0.694915,0.901003
 STRIPE - column #4
-starting/ending position pixel values:  (14,60),(14,0)
-['oooo', 'oooo', 'oooo', 'oooo', 'xoxx', 'oxxo', 'xxox', 'ooxx', 'oxxx', 'ooxo', 'oooo', 'ooxx', 'oxxx', 'xxxx', 'ooxx', 'xxxx', 'xxxx', 'xxox', 'xooo', 'xooo', 'oxxx', 'xxxx', 'oxxx', 'xxxo', 'xxoo', 'xooo', 'xooo', 'oooo', 'oooo', 'xxoo', 'xxoo', 'oooo', 'xooo', 'xxoo', 'oxxo', 'ooxx', 'oooo', 'oooo', 'oooo', 'oooo', 'ooxx', 'xoxo', 'xxxo', 'xxxx', 'xxxx', 'xxxx', 'oxox', 'xxxx', 'xxxx', 'oooo', 'oooo', 'oooo', 'xooo', 'xxxx', 'xxxx', 'xxxx', 'ooox', 'ooxx', 'oooo', 'oooo']
-drop: 0.24
-starting pulley values:  0.962747,1.23165
+starting/ending position pixel values:  (14,40),(14,0)
+['oooo', 'oooo', 'oooo', 'oooo', 'xoox', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxoo', 'oooo', 'oooo', 'xxxx', 'xxxx', 'xxxx', 'ooxx', 'oxxx', 'oxxx', 'ooxx', 'ooxx', 'xooo', 'xxxo', 'xxxx', 'ooxx', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxx', 'xxxx', 'xooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'oooo', 'xxxx', 'xxxx', 'xxxo', 'oooo']
+drop: 0.52
+starting pulley values:  0.733396,0.857444
 STRIPE - column #5
-starting/ending position pixel values:  (18,60),(18,0)
-['oooo', 'oooo', 'oooo', 'xooo', 'oooo', 'xxoo', 'xooo', 'ooxx', 'oxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xooo', 'oooo', 'oooo', 'ooxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxo', 'xxxo', 'xxxo', 'xxxx', 'oxxo', 'oxxo', 'ooxx', 'ooxx', 'ooox', 'oooo', 'xooo', 'oxxo', 'oooo', 'oxoo', 'oooo', 'oooo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxoo', 'xxxx', 'xxxx', 'oxxx', 'xxxo', 'oooo', 'oooo', 'xxoo', 'xxxo', 'xxxx', 'xxxx', 'xxxx', 'oooo', 'oooo']
-drop: 0.24
-starting pulley values:  0.972651,1.222378
+starting/ending position pixel values:  (18,40),(18,0)
+['ooxo', 'ooox', 'oooo', 'oooo', 'xoxo', 'xxoo', 'xxxx', 'xxxx', 'xxxx', 'ooox', 'oooo', 'oooo', 'xxxx', 'xxxx', 'ooxx', 'ooox', 'xxoo', 'xxxo', 'xxoo', 'xooo', 'ooox', 'ooox', 'xxxx', 'xxoo', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxx', 'xooo', 'oooo', 'xxxx', 'xxxo', 'oooo', 'oooo', 'oxxx', 'xxxx', 'xxoo', 'oooo', 'oooo']
+drop: 0.52
+starting pulley values:  0.773461,0.814876
 STRIPE - column #6
-starting/ending position pixel values:  (22,60),(22,0)
-['ooxx', 'oooo', 'oooo', 'oooo', 'oooo', 'oxoo', 'xooo', 'ooox', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxo', 'xxoo', 'oooo', 'ooxo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxox', 'ooox', 'ooxx', 'ooxx', 'ooxx', 'ooxx', 'ooox', 'oooo', 'xooo', 'xxxo', 'xoxx', 'xxxx', 'oxxx', 'ooox', 'oooo', 'oxxx', 'oooo', 'xooo', 'oooo', 'oooo', 'xxxo', 'xxxx', 'xxxx', 'xoxo', 'ooox', 'xxxx', 'xxxx', 'xxxo', 'oooo', 'oooo', 'oooo', 'oooo', 'xoxx', 'xxxx', 'xxxx', 'xxxx', 'oooo', 'oooo']
-drop: 0.24
-starting pulley values:  0.982715,1.213247
+starting/ending position pixel values:  (22,40),(22,0)
+['oxxx', 'oooo', 'oooo', 'oooo', 'oooo', 'oxxo', 'xxox', 'xxxx', 'xxxx', 'xxxx', 'ooox', 'oooo', 'xooo', 'xxxo', 'xxxx', 'xxox', 'xxoo', 'oxoo', 'oxoo', 'xxoo', 'xooo', 'xooo', 'oooo', 'oxxo', 'oooo', 'oooo', 'ooox', 'oooo', 'ooox', 'ooxx', 'xxxo', 'xooo', 'ooox', 'ooxx', 'oxxo', 'xxoo', 'oooo', 'oooo', 'ooxx', 'oxxo']
+drop: 0.52
+starting pulley values:  0.814876,0.773461
 STRIPE - column #7
-starting/ending position pixel values:  (26,60),(26,0)
-['oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooox', 'oxxo', 'xxoo', 'oxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxx', 'xxxx', 'xxxx', 'xxoo', 'xxoo', 'xxoo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xooo', 'xxxx', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'oooo', 'oxoo', 'oooo', 'oooo', 'xxxx', 'xxxo', 'xxxo', 'oooo', 'oxxx', 'xxxx', 'xxxx', 'xxxx', 'oooo', 'oooo', 'oooo', 'ooxx', 'xxxx', 'xxxx', 'xxxx', 'xooo', 'oooo', 'xoxo']
-drop: 0.24
-starting pulley values:  0.992936,1.20426
+starting/ending position pixel values:  (26,40),(26,0)
+['xxoo', 'oxxo', 'ooxo', 'oooo', 'oooo', 'oooo', 'xoox', 'xoxx', 'xxxx', 'xxxx', 'xxxx', 'oxxx', 'oxxx', 'ooxx', 'ooox', 'xxoo', 'xxxo', 'oxxx', 'ooxx', 'ooox', 'oxxx', 'oxxx', 'xxxx', 'oooo', 'oooo', 'ooxx', 'xxxo', 'xxxo', 'xooo', 'oooo', 'ooxo', 'xxoo', 'xooo', 'oooo', 'oooo', 'ooxo', 'oxoo', 'xooo', 'oooo', 'ooxx']
+drop: 0.52
+starting pulley values:  0.857444,0.733396
 STRIPE - column #8
-starting/ending position pixel values:  (30,60),(30,0)
-['oxoo', 'ooxo', 'ooox', 'oooo', 'oooo', 'xoxx', 'oooo', 'xxxo', 'xooo', 'xoxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'ooox', 'oooo', 'oooo', 'oooo', 'xxxx', 'xxxx', 'xxxx', 'oxxx', 'ooxx', 'oxox', 'xooo', 'xxoo', 'xxoo', 'xooo', 'xooo', 'oooo', 'ooxx', 'ooxx', 'ooxx', 'xxxx', 'xxoo', 'oooo', 'ooxx', 'xooo', 'ooxo', 'xooo', 'oooo', 'oooo', 'oooo', 'xxxo', 'oooo', 'oooo', 'xxxx', 'xxxx', 'xxxx', 'xooo', 'oooo', 'oooo', 'ooxx', 'xxxx', 'xxxx', 'xxxo', 'oooo', 'oooo', 'oooo', 'oooo']
-drop: 0.24
-starting pulley values:  1.003307,1.195418
+starting/ending position pixel values:  (30,40),(30,0)
+['ooxx', 'ooox', 'oooo', 'oooo', 'oooo', 'oooo', 'xxoo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'ooxx', 'ooxx', 'xooo', 'xxoo', 'xxxx', 'xxxx', 'ooox', 'ooxo', 'oxxo', 'xxoo', 'xooo', 'ooox', 'ooox', 'ooxo', 'xxxo', 'oxox', 'ooox', 'oxxx', 'oxxx', 'oxxx', 'oxxo', 'oxxo', 'xxxo']
+drop: 0.52
+starting pulley values:  0.901003,0.694915
 STRIPE - column #9
-starting/ending position pixel values:  (34,60),(34,0)
-['ooxx', 'ooox', 'xooo', 'oooo', 'oooo', 'oooo', 'oooo', 'ooox', 'oxxx', 'xxxo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'ooox', 'oooo', 'oooo', 'xooo', 'xxxo', 'xxxx', 'xxxx', 'xxxx', 'xxxo', 'xxxo', 'oxxo', 'oxxo', 'oxxo', 'oxxo', 'xxxo', 'xxoo', 'xxoo', 'xooo', 'oooo', 'oooo', 'ooxx', 'xooo', 'oooo', 'xooo', 'oooo', 'ooox', 'oxoo', 'oooo', 'ooox', 'ooxx', 'xxxx', 'xxxx', 'xxoo', 'oooo', 'oooo', 'ooox', 'oxxx', 'xxxx', 'xxoo', 'oooo', 'ooox', 'oooo', 'oooo', 'ooxx', 'oxxo']
-drop: 0.24
-starting pulley values:  1.013825,1.186727
-STRIPE - column #10
-starting/ending position pixel values:  (38,60),(38,0)
-['xxxx', 'oxxx', 'ooox', 'oooo', 'oooo', 'oooo', 'oooo', 'xooo', 'ooox', 'ooxx', 'xxxx', 'xxxo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'oxxx', 'ooox', 'oxoo', 'oooo', 'oooo', 'xxoo', 'xxxo', 'oxxx', 'ooxx', 'ooox', 'ooox', 'oooo', 'oooo', 'oooo', 'ooox', 'oooo', 'oooo', 'ooxx', 'oxxx', 'oooo', 'oooo', 'oooo', 'oooo', 'ooox', 'xxxx', 'ooxx', 'oxxx', 'xxxo', 'xxoo', 'xooo', 'oooo', 'ooxx', 'ooxx', 'xxxo', 'xxoo', 'xooo', 'oooo', 'oooo', 'ooox', 'ooox', 'ooxo', 'xxoo', 'xooo', 'oooo']
-drop: 0.24
-starting pulley values:  1.024485,1.178189
-STRIPE - column #11
-starting/ending position pixel values:  (42,60),(42,0)
-['oooo', 'xooo', 'xxoo', 'oxxo', 'ooxo', 'oooo', 'oooo', 'oooo', 'oooo', 'xoox', 'ooxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'oxxx', 'ooxx', 'ooxx', 'oooo', 'xooo', 'xxoo', 'xxxo', 'xxxx', 'ooxx', 'ooxx', 'ooxx', 'xoxx', 'xxxx', 'oxxx', 'xxxx', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxx', 'xooo', 'xxox', 'xooo', 'oxoo', 'ooox', 'ooxo', 'oxoo', 'xxoo', 'xoox', 'oooo', 'ooxo', 'oooo', 'oooo', 'oxoo', 'xxoo', 'xooo', 'oxoo', 'ooox', 'oooo', 'ooxo', 'oxxx']
-drop: 0.24
-starting pulley values:  1.035282,1.169807
-STRIPE - column #12
-starting/ending position pixel values:  (46,60),(46,0)
-['ooox', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xooo', 'oooo', 'oxoo', 'oxoo', 'xxxo', 'xxxo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'oxxx', 'oxxx', 'ooxx', 'ooox', 'ooxx', 'xooo', 'xxoo', 'xxxo', 'xxxx', 'xxox', 'xxxx', 'xxxx', 'oooo', 'ooox', 'ooxx', 'xxxo', 'xxox', 'xxoo', 'xoox', 'xooo', 'xooo', 'oooo', 'ooox', 'xoxx', 'xoxx', 'oxxo', 'oooo', 'oooo', 'ooxx', 'oxxx', 'oxxx', 'ooxx', 'oxxx', 'oxxx', 'oxxx', 'xxxx', 'xxxx']
-drop: 0.24
-starting pulley values:  1.046213,1.161586
-STRIPE - column #13
-starting/ending position pixel values:  (50,60),(50,0)
-['xooo', 'xxoo', 'oxoo', 'ooxo', 'ooxx', 'ooox', 'oooo', 'oooo', 'oooo', 'xooo', 'xooo', 'xxox', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxo', 'xxxx', 'oxxx', 'ooxx', 'ooox', 'oooo', 'xooo', 'xxoo', 'xxxo', 'ooxx', 'oooo', 'oxox', 'xoox', 'oooo', 'ooxo', 'ooxo', 'oxoo', 'xxoo', 'xxoo', 'xooo', 'oooo', 'oooo', 'oxxo', 'oxxo', 'xxoo', 'xxoo', 'xxxx', 'xxox', 'xooo', 'xoxo', 'oooo', 'oooo', 'ooxo', 'oxxx']
-drop: 0.24
-starting pulley values:  1.057272,1.153527
-STRIPE - column #14
-starting/ending position pixel values:  (54,60),(54,0)
-['ooox', 'ooox', 'ooox', 'oooo', 'ooxx', 'ooxx', 'xoxx', 'xoox', 'xoox', 'xxox', 'xxox', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'oxxx', 'xoxx', 'xxox', 'xxox', 'xoox', 'xoox', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'ooox', 'ooox', 'ooxx', 'ooox', 'ooox', 'ooox', 'ooox', 'ooox', 'ooox', 'oxxx', 'oxxx', 'ooxx', 'ooxx', 'oxxx', 'xxxx']
-drop: 0.24
-starting pulley values:  1.068457,1.145636
-number of drawn columns = 15
-pulley spacing = 1.31
-change color to:#a1a09e
+starting/ending position pixel values:  (34,40),(34,0)
+['ooox', 'oooo', 'xooo', 'ooox', 'oxox', 'oxox', 'oxoo', 'oxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'oxxx', 'ooxx', 'ooxx', 'xxox', 'oxoo', 'oxoo', 'xooo', 'xooo', 'oooo', 'oooo', 'oooo', 'ooox', 'xoox', 'oooo', 'xoox', 'xoox', 'xoox', 'ooxx', 'ooox', 'xoxx']
+drop: 0.52
+starting pulley values:  0.945415,0.658293
+number of drawn columns = 10
+pulley spacing = 1.265
+change color to:#9d9d9b
 STRIPE - column #0
-starting/ending position pixel values:  (-2,60),(-2,0)
-['oooo', 'oooo', 'ooox', 'oooo', 'ooox', 'ooxx', 'oxxo', 'ooox', 'oooo', 'ooxo', 'ooxx', 'ooxx', 'oooo', 'ooxx', 'oxoo', 'ooox', 'ooox', 'oxxo', 'oooo', 'ooox', 'ooxx', 'ooxo', 'ooox', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'ooox', 'xxxo', 'oooo', 'xxoo', 'ooxx', 'ooox', 'ooxo', 'xxxo', 'xxxo', 'xxxo', 'xxxo', 'xxxx', 'xxxx', 'xoxx', 'oxxx', 'oxxx', 'oxxx', 'ooox', 'ooox', 'ooox', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo']
-drop: 0.24
-starting pulley values:  0.92484,1.270074
+starting/ending position pixel values:  (-2,40),(-2,0)
+['oooo', 'oooo', 'ooox', 'oxxx', 'oxxo', 'ooox', 'oxxx', 'oxxx', 'ooxx', 'oxxx', 'ooxx', 'oxxx', 'ooxx', 'oxxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oxoo', 'xxox', 'xoxx', 'ooxx', 'ooxx', 'xxox', 'xxox', 'xxxo', 'xxxo', 'oxxx', 'xxxx', 'oxxx', 'ooxx', 'ooox', 'ooox', 'oooo', 'oooo']
+drop: 0.52
+starting pulley values:  0.591999,1.03636
 STRIPE - column #1
-starting/ending position pixel values:  (2,60),(2,0)
-['ooxx', 'oxox', 'ooox', 'xxxx', 'xxxo', 'oxox', 'xoxx', 'oxxo', 'oxox', 'xxxx', 'xxxx', 'oxxx', 'xxxx', 'xxxo', 'xxxo', 'xxxx', 'xxxx', 'xxxo', 'xxoo', 'oxoo', 'oooo', 'ooox', 'xooo', 'oooo', 'oooo', 'oooo', 'xooo', 'oooo', 'ooox', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'ooox', 'oxoo', 'xxoo', 'xooo', 'xooo', 'xxoo', 'xxxo', 'xxxo', 'xxxo', 'ooxx', 'ooxx', 'xoox', 'ooox', 'xxoo', 'xxxo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'oxxx', 'oxxx', 'ooxx', 'ooxo', 'oooo', 'oooo']
-drop: 0.24
-starting pulley values:  0.93405,1.260273
+starting/ending position pixel values:  (2,40),(2,0)
+['xxxx', 'xxxx', 'xxxx', 'oxxx', 'xxoo', 'xxox', 'xxxx', 'xxxx', 'xoxx', 'xxxo', 'xxxo', 'xxoo', 'oooo', 'oooo', 'oooo', 'ooox', 'ooxo', 'oooo', 'oooo', 'oooo', 'ooox', 'ooox', 'ooox', 'ooox', 'oooo', 'oooo', 'oooo', 'oooo', 'xoxo', 'xoox', 'xxoo', 'oxxo', 'ooxx', 'xoox', 'xxoo', 'xxxo', 'xxxx', 'xxxx', 'ooox', 'oooo']
+drop: 0.52
+starting pulley values:  0.623861,0.990567
 STRIPE - column #2
-starting/ending position pixel values:  (6,60),(6,0)
-['xxxx', 'xxxx', 'xoxx', 'oxxo', 'xoxx', 'oxxo', 'xxox', 'xoox', 'xoox', 'xxxo', 'xxxo', 'xxxx', 'xxxx', 'oxxo', 'xxoo', 'xxxx', 'xxxo', 'xxoo', 'xooo', 'oooo', 'xooo', 'oooo', 'oooo', 'ooox', 'oxxo', 'oxox', 'oooo', 'xooo', 'oooo', 'ooox', 'ooox', 'ooxo', 'ooox', 'ooxx', 'ooox', 'ooox', 'oooo', 'oooo', 'oooo', 'oooo', 'xooo', 'oxoo', 'oxoo', 'ooxo', 'ooox', 'xoox', 'xooo', 'xxoo', 'xxxx', 'oxxx', 'oooo', 'xooo', 'xxxo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xoxx', 'ooox', 'oooo']
-drop: 0.24
-starting pulley values:  0.943441,1.2506
+starting/ending position pixel values:  (6,40),(6,0)
+['xxxx', 'xxxx', 'xxxx', 'xxxo', 'oxox', 'xxxo', 'xxxx', 'xxxx', 'xxxo', 'xooo', 'oooo', 'oooo', 'ooox', 'oxxo', 'oxoo', 'oooo', 'oooo', 'ooox', 'ooxx', 'oooo', 'xooo', 'xoox', 'xxoo', 'xxxx', 'oxxx', 'oxxx', 'ooxx', 'ooox', 'oooo', 'xooo', 'ooxo', 'oooo', 'xooo', 'xoox', 'xxxx', 'oooo', 'xooo', 'xxxx', 'xxxx', 'oxxx']
+drop: 0.52
+starting pulley values:  0.658293,0.945415
 STRIPE - column #3
-starting/ending position pixel values:  (10,60),(10,0)
-['xxxx', 'xxxx', 'oxxx', 'xxxx', 'xxox', 'xoxx', 'ooxo', 'oxoo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxo', 'xooo', 'oooo', 'oooo', 'oooo', 'oooo', 'ooxo', 'ooxx', 'oxxo', 'oxoo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'ooox', 'oooo', 'xooo', 'xooo', 'xxoo', 'xxxo', 'xxxx', 'xxxx', 'ooxx', 'ooxx', 'oooo', 'ooxx', 'oooo', 'oooo', 'oooo', 'oooo', 'xooo', 'xxxo', 'ooox', 'xxoo', 'ooxx', 'xooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxoo', 'xxxo', 'xxxx', 'xxxx', 'xxxo', 'ooxx']
-drop: 0.24
-starting pulley values:  0.953008,1.241058
+starting/ending position pixel values:  (10,40),(10,0)
+['xxxx', 'xxxx', 'xxxx', 'oxox', 'ooxo', 'oxoo', 'xooo', 'oooo', 'oooo', 'oooo', 'ooxx', 'xxxx', 'xxxo', 'oooo', 'oooo', 'oooo', 'xooo', 'xoox', 'xxoo', 'xxoo', 'xxoo', 'xxxo', 'oxxx', 'ooxx', 'xxxx', 'xxxx', 'xxxx', 'ooox', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxx', 'xxxx', 'oxxx', 'oooo', 'oooo', 'xooo', 'xxxx']
+drop: 0.52
+starting pulley values:  0.694915,0.901003
 STRIPE - column #4
-starting/ending position pixel values:  (14,60),(14,0)
-['xxxx', 'xxxx', 'xxxx', 'xxxx', 'oxoo', 'xoox', 'ooxo', 'xxoo', 'xooo', 'xxox', 'xxxx', 'xxoo', 'xooo', 'oooo', 'xxoo', 'oooo', 'oooo', 'ooxo', 'oxxx', 'oxxx', 'xooo', 'oooo', 'xooo', 'ooox', 'ooxx', 'oxxx', 'oxxx', 'xxxx', 'xxxx', 'ooxx', 'ooxx', 'xxxx', 'oxxx', 'ooxx', 'xoox', 'xxoo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxoo', 'oxox', 'ooox', 'oooo', 'oooo', 'oooo', 'xoxo', 'oooo', 'oooo', 'xxxx', 'xxxx', 'xxxx', 'oxxx', 'oooo', 'oooo', 'oooo', 'xxxo', 'xxoo', 'xxxx', 'xxxx']
-drop: 0.24
-starting pulley values:  0.962747,1.23165
+starting/ending position pixel values:  (14,40),(14,0)
+['xxxx', 'xxxx', 'xxxx', 'xxxx', 'oxxo', 'oooo', 'oooo', 'oooo', 'oooo', 'ooxx', 'xxxx', 'xxxx', 'oooo', 'oooo', 'oooo', 'xxoo', 'xooo', 'xooo', 'xxoo', 'xxoo', 'oxxx', 'ooox', 'oooo', 'xxoo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'oooo', 'oooo', 'oxxx', 'oooo', 'oooo', 'xxxx', 'xxxx', 'xxxx', 'oooo', 'oooo', 'ooox', 'xxxx']
+drop: 0.52
+starting pulley values:  0.733396,0.857444
 STRIPE - column #5
-starting/ending position pixel values:  (18,60),(18,0)
-['xxxx', 'xxxx', 'xxxx', 'oxxx', 'xxxx', 'ooxx', 'oxxx', 'xxoo', 'xooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oxxx', 'xxxx', 'xxxx', 'xxoo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'ooox', 'ooox', 'ooox', 'oooo', 'xoox', 'xoox', 'xxoo', 'xxoo', 'xxxo', 'xxxx', 'oxxx', 'xoox', 'xxxx', 'xoxx', 'xxxx', 'xxxx', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'ooxx', 'oooo', 'oooo', 'xooo', 'ooox', 'xxxx', 'xxxx', 'ooxx', 'ooox', 'oooo', 'oooo', 'oooo', 'xxxx', 'xxxx']
-drop: 0.24
-starting pulley values:  0.972651,1.222378
+starting/ending position pixel values:  (18,40),(18,0)
+['xxox', 'xxxo', 'xxxx', 'xxxx', 'oxox', 'ooxx', 'oooo', 'oooo', 'oooo', 'xxxo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxoo', 'xxxo', 'ooxx', 'ooox', 'ooxx', 'oxxx', 'xxxo', 'xxxo', 'oooo', 'ooxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'oooo', 'oxxx', 'xxxx', 'oooo', 'ooox', 'xxxx', 'xxxx', 'xooo', 'oooo', 'ooxx', 'xxxx', 'xxxx']
+drop: 0.52
+starting pulley values:  0.773461,0.814876
 STRIPE - column #6
-starting/ending position pixel values:  (22,60),(22,0)
-['xxoo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xoxx', 'oxxx', 'xxxo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'ooox', 'ooxx', 'xxxx', 'xxox', 'oooo', 'oooo', 'oooo', 'oooo', 'ooxo', 'xxxo', 'xxoo', 'xxoo', 'xxoo', 'xxoo', 'xxxo', 'xxxx', 'oxxx', 'ooox', 'oxoo', 'oooo', 'xooo', 'xxxo', 'xxxx', 'xooo', 'xxxx', 'oxxx', 'xxxx', 'xxxx', 'ooox', 'oooo', 'oooo', 'oxox', 'xxxo', 'oooo', 'oooo', 'ooox', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'oxoo', 'oooo', 'oooo', 'oooo', 'xxxx', 'xxxx']
-drop: 0.24
-starting pulley values:  0.982715,1.213247
+starting/ending position pixel values:  (22,40),(22,0)
+['xooo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xoox', 'ooxo', 'oooo', 'oooo', 'oooo', 'xxxo', 'xxxx', 'oxxx', 'ooox', 'oooo', 'ooxo', 'ooxx', 'xoxx', 'xoxx', 'ooxx', 'oxxx', 'oxxx', 'xxxx', 'xoox', 'xxxx', 'xxxx', 'xxxo', 'xxxx', 'xxxo', 'xxoo', 'ooox', 'oxxx', 'xxxo', 'xxoo', 'xoox', 'ooxx', 'xxxx', 'xxxx', 'xxoo', 'xoox']
+drop: 0.52
+starting pulley values:  0.814876,0.773461
 STRIPE - column #7
-starting/ending position pixel values:  (26,60),(26,0)
-['xxxx', 'xxxx', 'xxox', 'xxxx', 'xxxx', 'xxxo', 'xoox', 'ooxx', 'xooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'oooo', 'oooo', 'oooo', 'ooxx', 'ooxx', 'ooxx', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxx', 'xxxx', 'oxxx', 'oooo', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xoxx', 'xxxx', 'xxxx', 'oooo', 'ooox', 'ooox', 'xxxx', 'xooo', 'oooo', 'oooo', 'oooo', 'xxxx', 'xxxx', 'xxxx', 'xxoo', 'oooo', 'oooo', 'oooo', 'oxxx', 'xxxx', 'oxox']
-drop: 0.24
-starting pulley values:  0.992936,1.20426
+starting/ending position pixel values:  (26,40),(26,0)
+['ooxx', 'xoox', 'xxox', 'xxxx', 'xxxx', 'xxxx', 'oxxo', 'oxoo', 'oooo', 'oooo', 'oooo', 'xooo', 'xooo', 'xxoo', 'xxxo', 'ooxx', 'ooox', 'xooo', 'xxoo', 'xxxo', 'xooo', 'xooo', 'oooo', 'xxxx', 'xxxx', 'xxoo', 'ooox', 'ooox', 'oxxx', 'xxxx', 'xxox', 'ooxx', 'oxxx', 'xxxx', 'xxxx', 'xxox', 'xoxx', 'oxxx', 'xxxx', 'xxoo']
+drop: 0.52
+starting pulley values:  0.857444,0.733396
 STRIPE - column #8
-starting/ending position pixel values:  (30,60),(30,0)
-['xoxx', 'xxox', 'xxxo', 'xxxx', 'xxxx', 'oxoo', 'xxxx', 'ooox', 'oxxx', 'oxoo', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxo', 'xxxx', 'xxxx', 'xxxx', 'oooo', 'oooo', 'oooo', 'xooo', 'xxoo', 'xoxo', 'oxxx', 'ooxx', 'ooxx', 'oxxx', 'oxxx', 'xxxx', 'xxoo', 'xxoo', 'xxoo', 'oooo', 'ooxx', 'xxxx', 'xxoo', 'oxxx', 'xxox', 'oxxx', 'xxxx', 'xxxx', 'xxxx', 'ooox', 'xxxx', 'xxxx', 'oooo', 'oooo', 'oooo', 'oxxx', 'xxxx', 'xxxx', 'xxoo', 'oooo', 'oooo', 'ooox', 'xxxx', 'xxxx', 'xxxx', 'xxxx']
-drop: 0.24
-starting pulley values:  1.003307,1.195418
+starting/ending position pixel values:  (30,40),(30,0)
+['xxoo', 'xxxo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'ooxx', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xxoo', 'xxoo', 'oxxx', 'ooxx', 'oooo', 'oooo', 'xxxo', 'xxox', 'xoox', 'ooxx', 'oxxx', 'xxxo', 'xxxo', 'xxox', 'ooox', 'xoxo', 'xxxo', 'xooo', 'xooo', 'xooo', 'xoox', 'xoox', 'ooox']
+drop: 0.52
+starting pulley values:  0.901003,0.694915
 STRIPE - column #9
-starting/ending position pixel values:  (34,60),(34,0)
-['xxoo', 'xxxo', 'oxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxo', 'xooo', 'ooox', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxo', 'xxxx', 'xxxx', 'oxxx', 'ooox', 'oooo', 'oooo', 'oooo', 'ooox', 'ooox', 'xoox', 'xoox', 'xoox', 'xoox', 'ooox', 'ooxx', 'ooxx', 'oxxx', 'xxxx', 'xxxx', 'xxoo', 'oxxx', 'xxxx', 'oxxx', 'xxxx', 'xxxo', 'xoxx', 'xxxx', 'xxxo', 'xxoo', 'oooo', 'oooo', 'ooxx', 'xxxx', 'xxxx', 'xxxo', 'xooo', 'oooo', 'ooxx', 'xxxx', 'xxxo', 'xxxx', 'xxxx', 'xxoo', 'xoox']
-drop: 0.24
-starting pulley values:  1.013825,1.186727
-STRIPE - column #10
-starting/ending position pixel values:  (38,60),(38,0)
-['oooo', 'xooo', 'xxxo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'oxxx', 'xxxo', 'xxoo', 'oooo', 'ooox', 'oooo', 'oooo', 'oooo', 'oooo', 'xooo', 'xxxo', 'xoxx', 'xxxx', 'xxxx', 'ooxx', 'ooox', 'xooo', 'xxoo', 'xxxo', 'xxxo', 'xxxx', 'xxxx', 'xxxx', 'xxxo', 'xxxx', 'xxxx', 'xxoo', 'xooo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxo', 'oooo', 'xxoo', 'xooo', 'ooox', 'ooxx', 'oxxx', 'xxxx', 'xxoo', 'xxoo', 'ooox', 'ooxx', 'oxxx', 'xxxx', 'xxxx', 'xxxo', 'xxxo', 'xxox', 'ooxx', 'oxxx', 'xxxx']
-drop: 0.24
-starting pulley values:  1.024485,1.178189
-STRIPE - column #11
-starting/ending position pixel values:  (42,60),(42,0)
-['xxxx', 'oxxx', 'ooxx', 'xoox', 'xxox', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'oxxo', 'xxoo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xooo', 'xxoo', 'xxoo', 'xxxx', 'oxxx', 'ooxx', 'ooox', 'oooo', 'xxoo', 'xxoo', 'xxoo', 'oxoo', 'oooo', 'xooo', 'oooo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'oooo', 'oxxx', 'ooxo', 'oxxx', 'xoxx', 'xxxo', 'xxox', 'xoxx', 'ooxx', 'oxxo', 'xxxx', 'xxox', 'xxxx', 'xxxx', 'xoxx', 'ooxx', 'oxxx', 'xoxx', 'xxxo', 'xxxx', 'xxox', 'xooo']
-drop: 0.24
-starting pulley values:  1.035282,1.169807
-STRIPE - column #12
-starting/ending position pixel values:  (46,60),(46,0)
-['xxxo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'oxxx', 'xxxx', 'xoxx', 'xoxx', 'ooox', 'ooox', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xooo', 'xooo', 'xxoo', 'xxxo', 'xxoo', 'oxxx', 'ooxx', 'ooox', 'oooo', 'ooxo', 'oooo', 'oooo', 'xxxx', 'xxxo', 'xxoo', 'ooox', 'ooxo', 'ooxx', 'oxxo', 'oxxx', 'oxxx', 'xxxx', 'xxxo', 'oxoo', 'oxoo', 'xoox', 'xxxx', 'xxxx', 'xxoo', 'xooo', 'xooo', 'xxoo', 'xooo', 'xooo', 'xooo', 'oooo', 'oooo']
-drop: 0.24
-starting pulley values:  1.046213,1.161586
-STRIPE - column #13
-starting/ending position pixel values:  (50,60),(50,0)
-['oxxx', 'ooxx', 'xoxx', 'xxox', 'xxoo', 'xxxo', 'xxxx', 'xxxx', 'xxxx', 'oxxx', 'oxxx', 'ooxo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'ooox', 'oooo', 'xooo', 'xxoo', 'xxxo', 'xxxx', 'oxxx', 'ooxx', 'ooox', 'xxoo', 'xxxx', 'xoxo', 'oxxo', 'xxxx', 'xxox', 'xxox', 'xoxx', 'ooxx', 'ooxx', 'oxxx', 'xxxx', 'xxxx', 'xoox', 'xoox', 'ooxx', 'ooxx', 'oooo', 'ooxo', 'oxxx', 'oxox', 'xxxx', 'xxxx', 'xxox', 'xooo']
-drop: 0.24
-starting pulley values:  1.057272,1.153527
-STRIPE - column #14
-starting/ending position pixel values:  (54,60),(54,0)
-['xxxo', 'xxxo', 'xxxo', 'xxxx', 'xxoo', 'xxoo', 'oxoo', 'oxxo', 'oxxo', 'ooxo', 'ooxo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xooo', 'oxoo', 'ooxo', 'ooxo', 'oxxo', 'oxxo', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxo', 'xxxo', 'xxoo', 'xxxo', 'xxxo', 'xxxo', 'xxxo', 'xxxo', 'xxxo', 'xooo', 'xooo', 'xxoo', 'xxoo', 'xooo', 'oooo']
-drop: 0.24
-starting pulley values:  1.068457,1.145636
+starting/ending position pixel values:  (34,40),(34,0)
+['xxxo', 'xxxx', 'oxxx', 'xxxo', 'xoxo', 'xoxo', 'xoxx', 'xooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xooo', 'xxoo', 'xxoo', 'ooxo', 'xoxx', 'xoxx', 'oxxx', 'oxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxo', 'oxxo', 'xxxx', 'oxxo', 'oxxo', 'oxxo', 'xxoo', 'xxxo', 'oxoo']
+drop: 0.52
+starting pulley values:  0.945415,0.658293
