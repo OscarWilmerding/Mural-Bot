@@ -117,9 +117,49 @@ void determineStripeVelocities(float posA, float posB, float &velA, float &velB)
   // For demonstration, set both to half the global stripeVelocity
   float Vx = 0; //no movement in x direction.
   float Vy = stripeVelocity*stepsPerMeter; //this means the velocity in y direction is positive, which is moving down the wall.
-
   float pulleySpacingSteps = pulleySpacing*stepsPerMeter;
 
+  float xPositionSteps = (posA * posA - posB * posB + pulleySpacingSteps * pulleySpacingSteps) / pulleySpacingSteps / 2.0;
+  float yPositionSteps = sqrt((4.0 * posA * posA - pow((posA * posA - posB * posB + pulleySpacingSteps * pulleySpacingSteps), 2) *  pow( pulleySpacingSteps,  (-2)))) / 2.0;
+
+  float desiredXPositionSteps = stepsPerMeter * Vx * velocityCalcDelay + xPositionSteps;   //this is calculating where the chassis should be using known velocity in x and y direction, and how long it would be going in that direction (calc delay)
+  float desiredYPositionSteps = stepsPerMeter * stripeVelocity * velocityCalcDelay + yPositionSteps;
+
+  float aLengthDesired = sqrt(desiredXPositionSteps * desiredXPositionSteps + desiredYPositionSteps * desiredYPositionSteps);
+  float bLengthDesired = sqrt(pow(desiredXPositionSteps - pulleySpacingSteps, 2) + desiredYPositionSteps * desiredYPositionSteps);
+
+  float VelA = (posA - aLengthDesired)/velocityCalcDelay;
+  float VelB = (posB - bLengthDesired)/velocityCalcDelay;
+
+  // After all calculations, print out results:
+
+  Serial.println("--------------------calc details----------------------");
+
+  Serial.print("xPositionSteps = ");
+  Serial.println(xPositionSteps);
+
+  Serial.print("yPositionSteps = ");
+  Serial.println(yPositionSteps);
+
+  Serial.print("desiredXPositionSteps = ");
+  Serial.println(desiredXPositionSteps);
+
+  Serial.print("desiredYPositionSteps = ");
+  Serial.println(desiredYPositionSteps);
+
+  Serial.print("aLengthDesired = ");
+  Serial.println(aLengthDesired);
+
+  Serial.print("bLengthDesired = ");
+  Serial.println(bLengthDesired);
+
+  Serial.print("VelA = ");
+  Serial.println(VelA);
+
+  Serial.print("VelB = ");
+  Serial.println(VelB);
+
+/* old method for calculation
   Serial.println("=== Velocity Calculation Debug ===");
   Serial.print("posA (steps): "); Serial.println(posA);
   Serial.print("posB (steps): "); Serial.println(posB);
@@ -130,6 +170,8 @@ void determineStripeVelocities(float posA, float posB, float &velA, float &velB)
   //these equations were extracted from 'new velocity math' 
   velA = pow(-pow(pulleySpacingSteps,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacingSteps*pulleySpacingSteps-pow((posA-posB),2.0f)*pow((posA+posB),2.0f),-0.5f)*posA*(Vx*sqrt(-pow(pulleySpacingSteps,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacingSteps*pulleySpacingSteps-pow((posA-posB),2.0f)*pow((posA+posB),2.0f))-Vy*(posA*posA-posB*posB-pulleySpacingSteps*pulleySpacingSteps))/pulleySpacingSteps; 
   velB = -posB*(Vx*sqrt(-pow(pulleySpacingSteps,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacingSteps*pulleySpacingSteps-pow((posA-posB),2.0f)*pow((posA+posB),2.0f))-Vy*(posA*posA-posB*posB+pulleySpacingSteps*pulleySpacingSteps))*pow(-pow(pulleySpacingSteps,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacingSteps*pulleySpacingSteps-pow((posA-posB),2.0f)*pow((posA+posB),2.0f),-0.5f)/pulleySpacingSteps;
+*/
+
 }
 
 
