@@ -118,9 +118,18 @@ void determineStripeVelocities(float posA, float posB, float &velA, float &velB)
   float Vx = 0; //no movement in x direction.
   float Vy = stripeVelocity*stepsPerMeter; //this means the velocity in y direction is positive, which is moving down the wall.
 
+  float pulleySpacingSteps = pulleySpacing*stepsPerMeter;
+
+  Serial.println("=== Velocity Calculation Debug ===");
+  Serial.print("posA (steps): "); Serial.println(posA);
+  Serial.print("posB (steps): "); Serial.println(posB);
+  Serial.print("Vx (steps/s): "); Serial.println(Vx);
+  Serial.print("Vy (steps/s): "); Serial.println(Vy);
+  Serial.print("pulleySpacingSteps (steps): "); Serial.println(pulleySpacingSteps);
+
   //these equations were extracted from 'new velocity math' 
-  velA = pow(-pow(pulleySpacing,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacing*pulleySpacing-pow((posA-posB),2.0f)*pow((posA+posB),2.0f),-0.5f)*posA*(Vx*sqrt(-pow(pulleySpacing,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacing*pulleySpacing-pow((posA-posB),2.0f)*pow((posA+posB),2.0f))-Vy*(posA*posA-posB*posB-pulleySpacing*pulleySpacing))/pulleySpacing; 
-  velB = -posB*(Vx*sqrt(-pow(pulleySpacing,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacing*pulleySpacing-pow((posA-posB),2.0f)*pow((posA+posB),2.0f))-Vy*(posA*posA-posB*posB+pulleySpacing*pulleySpacing))*pow(-pow(pulleySpacing,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacing*pulleySpacing-pow((posA-posB),2.0f)*pow((posA+posB),2.0f),-0.5f)/pulleySpacing;
+  velA = pow(-pow(pulleySpacingSteps,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacingSteps*pulleySpacingSteps-pow((posA-posB),2.0f)*pow((posA+posB),2.0f),-0.5f)*posA*(Vx*sqrt(-pow(pulleySpacingSteps,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacingSteps*pulleySpacingSteps-pow((posA-posB),2.0f)*pow((posA+posB),2.0f))-Vy*(posA*posA-posB*posB-pulleySpacingSteps*pulleySpacingSteps))/pulleySpacingSteps; 
+  velB = -posB*(Vx*sqrt(-pow(pulleySpacingSteps,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacingSteps*pulleySpacingSteps-pow((posA-posB),2.0f)*pow((posA+posB),2.0f))-Vy*(posA*posA-posB*posB+pulleySpacingSteps*pulleySpacingSteps))*pow(-pow(pulleySpacingSteps,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacingSteps*pulleySpacingSteps-pow((posA-posB),2.0f)*pow((posA+posB),2.0f),-0.5f)/pulleySpacingSteps;
 }
 
 
@@ -574,8 +583,8 @@ void startNextCommand() {
           printCurrentPositions();
 
           // Get positions in meters above func just prints them out and im lazy so this is a little inefficient
-          float posA = stepper1.currentPosition() * motor1Direction);
-          float posB = stepper2.currentPosition() * motor2Direction);
+          float posA = stepper1.currentPosition() * motor1Direction;
+          float posB = stepper2.currentPosition() * motor2Direction;
 
           if (posA < 0 || posB < 0) {
             Serial.println("CRITICAL - one value going into velocity func is negative");
@@ -593,8 +602,8 @@ void startNextCommand() {
           Serial.println(velocityB);
 
           // Set speeds
-          stepper1.setSpeed(velocityA);
-          stepper2.setSpeed(velocityB);
+          stepper1.setSpeed(-1*velocityA); // -1 is a crapshoot fix just works
+          stepper2.setSpeed(-1*velocityB);
 
           // Immediately run them after setting speed
           stepper1.runSpeed();
