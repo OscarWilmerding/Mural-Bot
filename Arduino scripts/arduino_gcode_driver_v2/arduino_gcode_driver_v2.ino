@@ -19,13 +19,12 @@
 // --------------------- Pin and Motor Setup ----------------------
 #define motorInterfaceType 1  // Using a driver that requires step and direction pins
 
-// Define pins for Motor 1
-const int stepPin1 = 5;
-const int dirPin1  = 4; 
-
-// Define pins for Motor 2
-const int stepPin2 = 7;
-const int dirPin2  = 8;  
+// Define pins for Motors
+// IF YOU ARE GOING TO CHANGE THESE YOU PROBABLY WIRED IT WRONG
+const int stepPin1 = 7;
+const int dirPin1  = 8; 
+const int stepPin2 = 5;
+const int dirPin2  = 4;  
 
 // Create instances of the AccelStepper class
 AccelStepper stepper1(motorInterfaceType, stepPin1, dirPin1);
@@ -58,7 +57,7 @@ unsigned long confirmationStartTime   = 0;
 unsigned long confirmationTimeout     = 5000;  // Default 5s timeout waiting for response
 
 // Conversion factor (meters -> steps)
-const float stepsPerMeter = 10494.55 * 2.0;
+const float stepsPerMeter = 20308; //this number has had many calibration constants applied to it which is what makes it ugly. changing microstepping means dividing this by appropriate number
 
 // Direction control variables
 int motor1Direction = -1;
@@ -75,7 +74,7 @@ unsigned long chassisWaitTime = 2500;
 // Additional data from G-code
 float pulleySpacing   = 0.0;  
 int   numberOfDrawnColumns  = 0;    
-float stripeVelocity        = 0.2;  // default to 1 m/s for stripes
+float stripeVelocity        = 0.05;  // default to 1 m/s for stripes
 
 // New global for controlling how often (ms) you recalc velocities
 unsigned long velocityCalcDelay = 100; // default 500 ms
@@ -185,13 +184,21 @@ void loop() {
   // Check Serial for user commands
   if (Serial.available() > 0) {
     String command = Serial.readStringUntil('\n');
+    command.trim(); // Ensure no extra spaces or newlines
+
+    Serial.print("USER COMMAND: ");
+    Serial.println(command); // Print the command entered before processing
+
     if (runMode) {
-      runMode = false;
-      Serial.println("Run Mode Interrupted by User Input");
+        runMode = false;
+        Serial.println("Run Mode Interrupted by User Input");
     }
+    
     processSerialCommand(command);
     Serial.println();
   }
+
+
 
   // Always call stepper run methods
   stepper1.run();
@@ -562,18 +569,12 @@ void startNextCommand() {
 
         // Recalculate velocity at intervals
         if (currentTime - lastCallTime >= velocityCalcDelay) {
-          Serial.print("   Velocity update. Last call was ");
-          Serial.print(currentTime - lastCallTime);
-          Serial.println(" ms ago.");
+          Serial.println("   Velocity update   ");
+          printCurrentPositions();
 
-          // Get positions in meters
+          // Get positions in meters above func just prints them out and im lazy so this is a little inefficient
           float posA = stepper1.currentPosition() / (stepsPerMeter * motor1Direction);
           float posB = stepper2.currentPosition() / (stepsPerMeter * motor2Direction);
-
-          Serial.print("   Current posA: ");
-          Serial.println(posA);
-          Serial.print("   Current posB: ");
-          Serial.println(posB);
 
           if (posA < 0 || posB < 0) {
             Serial.println("CRITICAL - one value going into velocity func is negative");
@@ -582,11 +583,6 @@ void startNextCommand() {
           // Determine velocities
           float velocityA, velocityB;
           determineStripeVelocities(posA, posB, velocityA, velocityB);
-
-          Serial.print("   velocityA: ");
-          Serial.println(velocityA);
-          Serial.print("   velocityB: ");
-          Serial.println(velocityB);
 
           // Convert to steps/sec
           float speedA = velocityA * stepsPerMeter * motor1Direction;
@@ -841,10 +837,18 @@ void handleSendTriggerCommand() {
 
 // ------------------ printCurrentPositions --------------------------
 void printCurrentPositions() {
-  float position1 = stepper1.currentPosition() / (stepsPerMeter * motor1Direction);
-  float position2 = stepper2.currentPosition() / (stepsPerMeter * motor2Direction);
-  Serial.print("Current Positions (m) - Motor 1: ");
+  long steps1 = stepper1.currentPosition();
+  long steps2 = stepper2.currentPosition();
+  float position1 = steps1 / (stepsPerMeter * motor1Direction);
+  float position2 = steps2 / (stepsPerMeter * motor2Direction);
+
+  Serial.print("Current Positions (m, steps) - Motor 1: ");
   Serial.print(position1);
+  Serial.print(", ");
+  Serial.print(steps1);
   Serial.print("  Motor 2: ");
-  Serial.println(position2);
+  Serial.print(position2);
+  Serial.print(", ");
+  Serial.println(steps2);
 }
+
