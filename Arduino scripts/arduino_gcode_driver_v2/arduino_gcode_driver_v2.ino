@@ -116,12 +116,13 @@ void determineStripeVelocities(float posA, float posB, float &velA, float &velB)
   // TODO: Replace with your equation that ensures a certain chassis velocity, etc.
   // For demonstration, set both to half the global stripeVelocity
   float Vx = 0; //no movement in x direction.
-  float Vy = stripeVelocity; //this means the velocity in y direction is positive, which is moving down the wall.
+  float Vy = stripeVelocity*stepsPerMeter; //this means the velocity in y direction is positive, which is moving down the wall.
 
   //these equations were extracted from 'new velocity math' 
   velA = pow(-pow(pulleySpacing,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacing*pulleySpacing-pow((posA-posB),2.0f)*pow((posA+posB),2.0f),-0.5f)*posA*(Vx*sqrt(-pow(pulleySpacing,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacing*pulleySpacing-pow((posA-posB),2.0f)*pow((posA+posB),2.0f))-Vy*(posA*posA-posB*posB-pulleySpacing*pulleySpacing))/pulleySpacing; 
   velB = -posB*(Vx*sqrt(-pow(pulleySpacing,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacing*pulleySpacing-pow((posA-posB),2.0f)*pow((posA+posB),2.0f))-Vy*(posA*posA-posB*posB+pulleySpacing*pulleySpacing))*pow(-pow(pulleySpacing,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacing*pulleySpacing-pow((posA-posB),2.0f)*pow((posA+posB),2.0f),-0.5f)/pulleySpacing;
 }
+
 
 // ------------------- Forward Declarations -----------------------
 void onDataSent(const uint8_t *macAddr, esp_now_send_status_t status);
@@ -573,8 +574,8 @@ void startNextCommand() {
           printCurrentPositions();
 
           // Get positions in meters above func just prints them out and im lazy so this is a little inefficient
-          float posA = stepper1.currentPosition() / (stepsPerMeter * motor1Direction);
-          float posB = stepper2.currentPosition() / (stepsPerMeter * motor2Direction);
+          float posA = stepper1.currentPosition() * motor1Direction);
+          float posB = stepper2.currentPosition() * motor2Direction);
 
           if (posA < 0 || posB < 0) {
             Serial.println("CRITICAL - one value going into velocity func is negative");
@@ -585,17 +586,15 @@ void startNextCommand() {
           determineStripeVelocities(posA, posB, velocityA, velocityB);
 
           // Convert to steps/sec
-          float speedA = velocityA * stepsPerMeter * motor1Direction;
-          float speedB = velocityB * stepsPerMeter * motor2Direction;
 
-          Serial.print("   SpeedA (steps/s): ");
-          Serial.println(speedA);
-          Serial.print("   SpeedB (steps/s): ");
-          Serial.println(speedB);
+          Serial.print("   velocityA (steps/s): ");
+          Serial.println(velocityA);
+          Serial.print("   velocityB (steps/s): ");
+          Serial.println(velocityB);
 
           // Set speeds
-          stepper1.setSpeed(speedA);
-          stepper2.setSpeed(speedB);
+          stepper1.setSpeed(velocityA);
+          stepper2.setSpeed(velocityB);
 
           // Immediately run them after setting speed
           stepper1.runSpeed();
