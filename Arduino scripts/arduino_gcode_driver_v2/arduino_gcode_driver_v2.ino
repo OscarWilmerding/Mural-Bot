@@ -1,41 +1,38 @@
-
-/*
-  NOTE: 
-  1) We have re-introduced the struct-based approach for storing commands.
-  2) There are two placeholder functions:
-       - determinePulleyPositionsStripe(...)
-       - determineStripeVelocities(...)
-     You will fill in the internal logic for those.
-  3) We have added a new global variable "velocityCalcDelay" and a serial command
-     "set velocity calc delay X" for adjusting how often you might recalculate velocities.
-  4) Stripes are still run at indefinite speed (they do not automatically stop).
-*/
-
+/************************************************************/
+/*                   INCLUDE & DEPENDENCIES                 */
+/************************************************************/
 #include <AccelStepper.h>
 #include "LittleFS.h"
 #include <esp_now.h>
 #include <WiFi.h>
 
-// --------------------- Pin and Motor Setup ----------------------
-#define motorInterfaceType 1  // Using a driver that requires step and direction pins
+
+/************************************************************/
+/*                   MOTOR & PIN DEFINITIONS                */
+/************************************************************/
+// Using a driver that requires step and direction pins
+#define motorInterfaceType 1
 
 // Define pins for Motors
 // IF YOU ARE GOING TO CHANGE THESE YOU PROBABLY WIRED IT WRONG
 const int stepPin1 = 7;
-const int dirPin1  = 8; 
+const int dirPin1  = 8;
 const int stepPin2 = 5;
-const int dirPin2  = 4;  
+const int dirPin2  = 4;
 
 // Create instances of the AccelStepper class
 AccelStepper stepper1(motorInterfaceType, stepPin1, dirPin1);
 AccelStepper stepper2(motorInterfaceType, stepPin2, dirPin2);
 
-// --------------------- Global Variables -------------------------
-bool  sendTriggerAfterMovement  = false;
-bool  runMode                   = false;
-bool  movementInProgress        = false;
-bool  motor1Done                = false;
-bool  motor2Done                = false;
+
+/************************************************************/
+/*                       GLOBAL VARIABLES                   */
+/************************************************************/ 
+bool sendTriggerAfterMovement   = false;
+bool runMode                    = false;
+bool movementInProgress         = false;
+bool motor1Done                 = false;
+bool motor2Done                 = false;
 
 // For acceleration and max velocity
 float baseAcceleration          = 2000.0 * 2.0;
@@ -45,11 +42,13 @@ float maxSpeedMultiplier        = 1.0;
 
 // ESP-NOW variables
 uint8_t chassisAddress[]        = { 0x48, 0x27, 0xE2, 0xE6, 0xE8, 0x34 };
-bool    commandConfirmed        = false;
-const   uint8_t COMMAND_RUN     = 0x01;
+bool commandConfirmed           = false;
+const uint8_t COMMAND_RUN       = 0x01;
+
 typedef struct struct_message {
   uint8_t command;
 } struct_message;
+
 struct_message outgoingMessage;
 
 bool          waitingForConfirmation = false;
@@ -57,29 +56,34 @@ unsigned long confirmationStartTime   = 0;
 unsigned long confirmationTimeout     = 5000;  // Default 5s timeout waiting for response
 
 // Conversion factor (meters -> steps)
-const float stepsPerMeter = 20308; //this number has had many calibration constants applied to it which is what makes it ugly. changing microstepping means dividing this by appropriate number
+// this number has had many calibration constants applied to it which is what makes it ugly.
+// changing microstepping means dividing this by appropriate number
+const float stepsPerMeter       = 20308;  
 
 // Direction control variables
-int motor1Direction = -1;
-int motor2Direction = -1;
+int motor1Direction             = -1;
+int motor2Direction             = -1;
 
 // Store motor positions in meters
-float motor1Position = 0.0;
-float motor2Position = 0.0;
+float motor1Position            = 0.0;
+float motor2Position            = 0.0;
 
 // Pre/post movement timing
-unsigned long prePokePause   = 0;
-unsigned long chassisWaitTime = 2500;
+unsigned long prePokePause      = 0;
+unsigned long chassisWaitTime   = 2500;
 
 // Additional data from G-code
-float pulleySpacing   = 0.0;  
-int   numberOfDrawnColumns  = 0;    
-float stripeVelocity        = 0.05;  // default to 1 m/s for stripes
+float pulleySpacing             = 0.0;
+int   numberOfDrawnColumns      = 0;
+float stripeVelocity            = 0.05;  // default to 1 m/s for stripes
 
 // New global for controlling how often (ms) you recalc velocities
-unsigned long velocityCalcDelay = 100; // default 500 ms
+unsigned long velocityCalcDelay = 100; 
 
-// ------------------ Command and Stripe Structures --------------
+
+/************************************************************/
+/*                       DATA STRUCTURES                    */
+/************************************************************/
 struct Position {
   float x;
   float y;
@@ -96,7 +100,7 @@ struct Command {
   Position pos;     
 
   // For COLOR_CHANGE
-  String colorHex;  
+  String colorHex;
 
   // For STRIPE
   String stripeName;      
@@ -106,91 +110,22 @@ struct Command {
   String pattern;         
 };
 
-// Array for storing commands
-const int MAX_COMMANDS = 1500; //NOTE this number is important, if there is a memory overflow lower this number because the esp32 can only manage so many global variables at a time
+
+/************************************************************/
+/*                COMMAND STORAGE & MANAGEMENT              */
+/************************************************************/
+// NOTE: This number is important. If there is a memory overflow,
+// lower this number because the ESP32 can only manage so many 
+// global variables at once.
+const int MAX_COMMANDS      = 1500; 
 Command commands[MAX_COMMANDS];
 int     commandCount        = 0;
 int     currentCommandIndex = 0;
 
-void determineStripeVelocities(float posA, float posB, float &velA, float &velB) {
-  // TODO: Replace with your equation that ensures a certain chassis velocity, etc.
-  // For demonstration, set both to half the global stripeVelocity
-  float Vx = 0; //no movement in x direction.
-  float Vy = stripeVelocity*stepsPerMeter; //this means the velocity in y direction is positive, which is moving down the wall.
-  float pulleySpacingSteps = pulleySpacing*stepsPerMeter;
 
-  //posA = -posA;
-  //posB = -posB;
-
-  float xPositionSteps = (posA * posA - posB * posB + pulleySpacingSteps * pulleySpacingSteps) / pulleySpacingSteps / 2.0;
-  float yPositionSteps = sqrt((4.0 * posA * posA - pow((posA * posA - posB * posB + pulleySpacingSteps * pulleySpacingSteps), 2) *  pow( pulleySpacingSteps,  (-2)))) / 2.0;
-
-  float desiredXPositionSteps = stepsPerMeter * Vx * ((float)velocityCalcDelay / 1000) + xPositionSteps;   //this is calculating where the chassis should be using known velocity in x and y direction, and how long it would be going in that direction (calc delay)
-  float desiredYPositionSteps = stepsPerMeter * stripeVelocity * ((float)velocityCalcDelay / 1000) + yPositionSteps;
-
-  float aLengthDesired = sqrt(desiredXPositionSteps * desiredXPositionSteps + desiredYPositionSteps * desiredYPositionSteps);
-  float bLengthDesired = sqrt(pow(desiredXPositionSteps - pulleySpacingSteps, 2) + desiredYPositionSteps * desiredYPositionSteps);
-
-  velA = (aLengthDesired - posA)/((float)velocityCalcDelay / 1000);//makes a ms to s conversion to get steps per sec val
-  velB = (bLengthDesired - posB)/((float)velocityCalcDelay / 1000);
-
-  // After all calculations, print out results:
-
-  Serial.println("--------------------calc details----------------------");
-
-  Serial.print("aLength = ");
-  Serial.println(posA);
-
-  Serial.print("bLength = ");
-  Serial.println(posB);
-
-  Serial.print("xPositionSteps = ");
-  Serial.println(xPositionSteps);
-
-  Serial.print("yPositionSteps = ");
-  Serial.println(yPositionSteps);
-
-  Serial.print("desiredXPositionSteps = ");
-  Serial.println(desiredXPositionSteps);
-
-  Serial.print("desiredYPositionSteps = ");
-  Serial.println(desiredYPositionSteps);
-
-  Serial.print("aLengthDesired = ");
-  Serial.println(aLengthDesired);
-
-  Serial.print("bLengthDesired = ");
-  Serial.println(bLengthDesired);
-
-  Serial.print("a diff = ");
-  Serial.println(aLengthDesired-posA);
-
-  Serial.print("b diff = ");
-  Serial.println(bLengthDesired-posB);
-
-  Serial.print("velA = ");
-  Serial.println(velA);
-
-  Serial.print("velB = ");
-  Serial.println(velB);
-
-/* old method for calculation
-  Serial.println("=== Velocity Calculation Debug ===");
-  Serial.print("posA (steps): "); Serial.println(posA);
-  Serial.print("posB (steps): "); Serial.println(posB);
-  Serial.print("Vx (steps/s): "); Serial.println(Vx);
-  Serial.print("Vy (steps/s): "); Serial.println(Vy);
-  Serial.print("pulleySpacingSteps (steps): "); Serial.println(pulleySpacingSteps);
-
-  //these equations were extracted from 'new velocity math' 
-  velA = pow(-pow(pulleySpacingSteps,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacingSteps*pulleySpacingSteps-pow((posA-posB),2.0f)*pow((posA+posB),2.0f),-0.5f)*posA*(Vx*sqrt(-pow(pulleySpacingSteps,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacingSteps*pulleySpacingSteps-pow((posA-posB),2.0f)*pow((posA+posB),2.0f))-Vy*(posA*posA-posB*posB-pulleySpacingSteps*pulleySpacingSteps))/pulleySpacingSteps; 
-  velB = -posB*(Vx*sqrt(-pow(pulleySpacingSteps,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacingSteps*pulleySpacingSteps-pow((posA-posB),2.0f)*pow((posA+posB),2.0f))-Vy*(posA*posA-posB*posB+pulleySpacingSteps*pulleySpacingSteps))*pow(-pow(pulleySpacingSteps,4.0f)+(2.0f*posA*posA+2.0f*posB*posB)*pulleySpacingSteps*pulleySpacingSteps-pow((posA-posB),2.0f)*pow((posA+posB),2.0f),-0.5f)/pulleySpacingSteps;
-*/
-
-}
-
-
-// ------------------- Forward Declarations -----------------------
+/************************************************************/
+/*                  FUNCTION DECLARATIONS                   */
+/************************************************************/
 void onDataSent(const uint8_t *macAddr, esp_now_send_status_t status);
 void onDataRecv(const esp_now_recv_info *info, const uint8_t *incomingData, int len);
 void move_to_position(float position1, float position2);
@@ -202,8 +137,12 @@ void loadCommandsFromFile(const char *path);
 void sendTriggerCommand();
 void handleSendTriggerCommand();
 void printCurrentPositions();
+void determineStripeVelocities(float posA, float posB, float &velA, float &velB);
 
-// ------------------------ Setup Function -------------------------
+
+/************************************************************/
+/*                   SETUP FUNCTION                         */
+/************************************************************/
 void setup() {
   Serial.begin(115200);
   Serial.println("Stepper Motor Control Initialized");
@@ -246,7 +185,10 @@ void setup() {
   }
 }
 
-// ------------------------ Main Loop -----------------------------
+
+/************************************************************/
+/*                     MAIN LOOP                            */
+/************************************************************/
 void loop() {
   // Check Serial for user commands
   if (Serial.available() > 0) {
@@ -257,15 +199,13 @@ void loop() {
     Serial.println(command); // Print the command entered before processing
 
     if (runMode) {
-        runMode = false;
-        Serial.println("Run Mode Interrupted by User Input");
+      runMode = false;
+      Serial.println("Run Mode Interrupted by User Input");
     }
     
     processSerialCommand(command);
     Serial.println();
   }
-
-
 
   // Always call stepper run methods
   stepper1.run();
@@ -313,28 +253,34 @@ void loop() {
   handleSendTriggerCommand();
 }
 
-// ------------------ Callback: Data Sent --------------------------
+
+/************************************************************/
+/*             CALLBACKS: ESP-NOW DATA SENT/RECV            */
+/************************************************************/
 void onDataSent(const uint8_t *macAddr, esp_now_send_status_t status) {
   Serial.print("Send Status: ");
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Success" : "Fail");
   delay(50);
 }
 
-// ------------------ Callback: Data Received -----------------------
 void onDataRecv(const esp_now_recv_info *info, const uint8_t *incomingData, int len) {
   Serial.println("Confirmation received from Chassis");
   commandConfirmed = true;
 }
 
-// ------------------ Movement Helper Function ----------------------
-//this function needs a .run command to be called frequently after this is ran
+
+/************************************************************/
+/*                  MOVEMENT HELPER FUNCTIONS               */
+/************************************************************/
+// this function needs a .run command to be called frequently after this is ran
 void move_to_position(float position1, float position2) {
   long targetPosition1 = position1 * stepsPerMeter * motor1Direction;
   long targetPosition2 = position2 * stepsPerMeter * motor2Direction;
 
   stepper1.setAcceleration(baseAcceleration * accelerationMultiplier);
   stepper2.setAcceleration(baseAcceleration * accelerationMultiplier);
-  stepper1.setMaxSpeed(baseMaxSpeed * maxSpeedMultiplier); //dont remove this gets messed with in velocity calc
+  // don't remove this -- it gets messed with in velocity calc
+  stepper1.setMaxSpeed(baseMaxSpeed * maxSpeedMultiplier); 
   stepper2.setMaxSpeed(baseMaxSpeed * maxSpeedMultiplier);
 
   stepper1.moveTo(targetPosition1);
@@ -348,7 +294,7 @@ void move_to_position(float position1, float position2) {
   movementInProgress = true;
 }
 
-//this function is similar but will run until the pullys get to the right position
+// this function is similar but does not require .run to be called constantly
 void move_to_position_blocking(float position1, float position2) {
   // Convert meters to steps, applying direction
   long targetPosition1 = position1 * stepsPerMeter * motor1Direction;
@@ -381,9 +327,12 @@ void move_to_position_blocking(float position1, float position2) {
 }
 
 
-// ------------------ Process Serial Commands -----------------------
+/************************************************************/
+/*            SERIAL COMMAND PROCESSING FUNCTION            */
+/************************************************************/
 void processSerialCommand(String command) {
   command.trim();
+
   if (command == "?") {
     listAvailableCommands();
   }
@@ -561,7 +510,10 @@ void processSerialCommand(String command) {
   }
 }
 
-// ------------------ startNextCommand -----------------------------
+
+/************************************************************/
+/*        FUNCTION: START NEXT COMMAND IN COMMAND LIST      */
+/************************************************************/
 void startNextCommand() {
   if (currentCommandIndex < commandCount) {
     Command &cmd = commands[currentCommandIndex];
@@ -578,10 +530,9 @@ void startNextCommand() {
       runMode = false; 
       currentCommandIndex++;
     }
-/******************************************************/
-/*   Snippet for the STRIPE portion in startNextCommand()   */
-/******************************************************/
-
+    /******************************************************/
+    /*   Snippet for the STRIPE portion in startNextCommand()   */
+    /******************************************************/
     else if (cmd.type == Command::STRIPE) {
       // Print which stripe command we're on
       Serial.print("Executing STRIPE command #");
@@ -607,13 +558,14 @@ void startNextCommand() {
       Serial.println("Moving to initial stripe position...");
       move_to_position_blocking(cmd.startPulleyA, cmd.startPulleyB);
 
-      stepper1.setAcceleration(0); //it is important that these values are set after the move to position function is called
+      stepper1.setAcceleration(0); // it is important that these values are set after the move_to_position function is called
       stepper2.setAcceleration(0);
       stepper1.setMaxSpeed(8000);  
       stepper2.setMaxSpeed(8000);
 
       Serial.println("Done moving to initial position.");
       delay(2000);
+
       // Calculate total time for movement (in milliseconds)
       float timeForMovementSeconds = cmd.drop / stripeVelocity;  // seconds
       float timeForMovementMs      = timeForMovementSeconds * 1000.0; // ms
@@ -639,7 +591,7 @@ void startNextCommand() {
           Serial.println("   Velocity update   ");
           printCurrentPositions();
 
-          // Get positions in meters above func just prints them out and im lazy so this is a little inefficient
+          // Get positions in meters 
           float posA = stepper1.currentPosition() * motor1Direction;
           float posB = stepper2.currentPosition() * motor2Direction;
 
@@ -652,15 +604,14 @@ void startNextCommand() {
           determineStripeVelocities(posA, posB, velocityA, velocityB);
 
           // Convert to steps/sec
-
           Serial.print("   velocityA (steps/s): ");
           Serial.println(velocityA);
           Serial.print("   velocityB (steps/s): ");
           Serial.println(velocityB);
 
           // Set speeds
-          stepper1.setSpeed(-1*velocityA); // -1 is a crapshoot fix just works
-          stepper2.setSpeed(-1*velocityB);
+          stepper1.setSpeed(-1 * velocityA); // -1 is a crapshoot fix just works
+          stepper2.setSpeed(-1 * velocityB);
 
           // Immediately run them after setting speed
           stepper1.runSpeed();
@@ -674,13 +625,10 @@ void startNextCommand() {
       movementInProgress = false;
       currentCommandIndex++;
 
-      stepper1.setCurrentPosition(stepper1.currentPosition());//this line sets new position to wherever the velocity movements landed
+      // Set new position to wherever the velocity movements landed
+      stepper1.setCurrentPosition(stepper1.currentPosition());
       stepper2.setCurrentPosition(stepper2.currentPosition());
-
     }
-
-
-
   }
   else {
     Serial.println("All Commands Complete");
@@ -690,7 +638,10 @@ void startNextCommand() {
   }
 }
 
-// ------------------ listAvailableCommands -------------------------
+
+/************************************************************/
+/*        LIST AVAILABLE SERIAL CONSOLE COMMANDS            */
+/************************************************************/
 void listAvailableCommands() {
   Serial.println("Available Commands:");
   Serial.println("  go                          - Start the next command in sequence");
@@ -718,7 +669,10 @@ void listAvailableCommands() {
   Serial.println("  ?                           - Show this help list");
 }
 
-// ------------------ loadCommandsFromFile --------------------------
+
+/************************************************************/
+/*          LOAD COMMANDS FROM FILE (LittleFS)              */
+/************************************************************/
 void loadCommandsFromFile(const char *path) {
   File file = LittleFS.open(path, "r");
   if (!file) {
@@ -727,7 +681,7 @@ void loadCommandsFromFile(const char *path) {
   }
 
   bool readingStripeBlock = false;
-  Command tempCmd; 
+  Command tempCmd;
 
   Serial.println("Loading Commands from File:");
   while (file.available()) {
@@ -767,7 +721,7 @@ void loadCommandsFromFile(const char *path) {
     if (line.startsWith("STRIPE - column #")) {
       readingStripeBlock = true;
       tempCmd.type        = Command::STRIPE;
-      tempCmd.stripeName  = line; 
+      tempCmd.stripeName  = line;
       tempCmd.drop        = 0.0;
       tempCmd.startPulleyA= 0.0;
       tempCmd.startPulleyB= 0.0;
@@ -824,14 +778,13 @@ void loadCommandsFromFile(const char *path) {
 
     // 4) If not a stripe block or recognized global line, fallback
     if (line.startsWith("change color to:")) {
-        Command cmd;
-        cmd.type = Command::COLOR_CHANGE;
-        cmd.colorHex = line.substring(16);
-        cmd.colorHex.trim();
-        cmd.colorHex.toUpperCase();
-        commands[commandCount++] = cmd;
+      Command cmd;
+      cmd.type = Command::COLOR_CHANGE;
+      cmd.colorHex = line.substring(16);
+      cmd.colorHex.trim();
+      cmd.colorHex.toUpperCase();
+      commands[commandCount++] = cmd;
     }
-
     else {
       // Assume (x,y) move
       int start = line.indexOf('(');
@@ -855,7 +808,10 @@ void loadCommandsFromFile(const char *path) {
   Serial.println(commandCount);
 }
 
-// ------------------ sendTriggerCommand ----------------------------
+
+/************************************************************/
+/*          SEND TRIGGER COMMAND TO CHASSIS (ESP-NOW)       */
+/************************************************************/
 void sendTriggerCommand() {
   if (!waitingForConfirmation) {
     commandConfirmed = false;
@@ -879,7 +835,10 @@ void sendTriggerCommand() {
   }
 }
 
-// ------------------ handleSendTriggerCommand -----------------------
+
+/************************************************************/
+/*      HANDLE TRIGGER COMMAND CONFIRMATION/TIMEOUT         */
+/************************************************************/
 void handleSendTriggerCommand() {
   if (waitingForConfirmation) {
     if (commandConfirmed) {
@@ -900,7 +859,10 @@ void handleSendTriggerCommand() {
   }
 }
 
-// ------------------ printCurrentPositions --------------------------
+
+/************************************************************/
+/*  PRINT CURRENT POSITION (METERS & STEPS) FOR DEBUGGING   */
+/************************************************************/
 void printCurrentPositions() {
   long steps1 = stepper1.currentPosition();
   long steps2 = stepper2.currentPosition();
@@ -917,3 +879,68 @@ void printCurrentPositions() {
   Serial.println(steps2);
 }
 
+
+/************************************************************/
+/*   DETERMINE STRIPE VELOCITIES (CUSTOM CALC FOR STRIPES)  */
+/************************************************************/
+// TODO: Replace with your equation that ensures a certain chassis velocity, etc.
+// For demonstration, set both to half the global stripeVelocity
+void determineStripeVelocities(float posA, float posB, float &velA, float &velB) {
+  float Vx = 0; // no movement in x direction.
+  float Vy = stripeVelocity * stepsPerMeter; 
+             // this means the velocity in y direction is positive, 
+             // which is moving down the wall.
+
+  float pulleySpacingSteps = pulleySpacing * stepsPerMeter;
+
+  float xPositionSteps = (posA * posA - posB * posB + 
+                         pulleySpacingSteps * pulleySpacingSteps) / 
+                         pulleySpacingSteps / 2.0;
+
+  float yPositionSteps = sqrt((4.0 * posA * posA - 
+                         pow((posA * posA - posB * posB + 
+                         pulleySpacingSteps * pulleySpacingSteps), 2) *  
+                         pow(pulleySpacingSteps,  (-2)))) / 2.0;
+
+  float desiredXPositionSteps = stepsPerMeter * Vx * ((float)velocityCalcDelay / 1000) 
+                              + xPositionSteps; 
+  float desiredYPositionSteps = stepsPerMeter * stripeVelocity * ((float)velocityCalcDelay / 1000) 
+                              + yPositionSteps;
+
+  float aLengthDesired = sqrt(desiredXPositionSteps * desiredXPositionSteps 
+                            + desiredYPositionSteps * desiredYPositionSteps);
+
+  float bLengthDesired = sqrt(pow(desiredXPositionSteps - pulleySpacingSteps, 2) 
+                            + desiredYPositionSteps * desiredYPositionSteps);
+
+  velA = (aLengthDesired - posA) / ((float)velocityCalcDelay / 1000); 
+  velB = (bLengthDesired - posB) / ((float)velocityCalcDelay / 1000);
+
+/*
+  Serial.println("--------------------velocity debug information----------------------");
+  Serial.print("aLength = ");
+  Serial.println(posA);
+  Serial.print("bLength = ");
+  Serial.println(posB);
+  Serial.print("xPositionSteps = ");
+  Serial.println(xPositionSteps);
+  Serial.print("yPositionSteps = ");
+  Serial.println(yPositionSteps);
+  Serial.print("desiredXPositionSteps = ");
+  Serial.println(desiredXPositionSteps);
+  Serial.print("desiredYPositionSteps = ");
+  Serial.println(desiredYPositionSteps);
+  Serial.print("aLengthDesired = ");
+  Serial.println(aLengthDesired);
+  Serial.print("bLengthDesired = ");
+  Serial.println(bLengthDesired);
+  Serial.print("a diff = ");
+  Serial.println(aLengthDesired-posA);
+  Serial.print("b diff = ");
+  Serial.println(bLengthDesired-posB);
+  Serial.print("velA = ");
+  Serial.println(velA);
+  Serial.print("velB = ");
+  Serial.println(velB);
+*/
+}
