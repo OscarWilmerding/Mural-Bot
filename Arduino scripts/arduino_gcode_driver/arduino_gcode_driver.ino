@@ -378,6 +378,26 @@ void onDataRecv(const esp_now_recv_info *info, const uint8_t *incomingData, int 
   commandConfirmed = true;
 }
 
+void onDataRecv(const esp_now_recv_info *info, const uint8_t *incomingData, int len) {
+  if (len == sizeof(struct_message)) {
+    // existing logic
+    memcpy(&incomingMessage, incomingData, sizeof(incomingMessage));
+    if (incomingMessage.command == 0x02) {
+      Serial.println("Confirmation received from Chassis");
+      commandConfirmed = true;
+    }
+    else if (incomingMessage.command == 0x12) {
+      // 0x12 = "Large string fully received" (from new code on receiver)
+      Serial.println("Large string ACK received from Chassis!");
+      largeStringAckReceived = true;
+      largeStringInProgress  = false;
+      // Possibly do something with that knowledge...
+    }
+  }
+  else {
+    // any other data you handle
+  }
+}
 
 /************************************************************/
 /*                  MOVEMENT HELPER FUNCTIONS               */
