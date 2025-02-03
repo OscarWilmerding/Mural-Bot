@@ -554,6 +554,9 @@ void startNextCommand() {
       Serial.print("  Pattern String: ");
       Serial.println(cmd.pattern);
 
+      
+
+
       // Move to initial position (blocking move)
       Serial.println("Moving to initial stripe position...");
       move_to_position_blocking(cmd.startPulleyA, cmd.startPulleyB);
