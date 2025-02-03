@@ -30,21 +30,84 @@ int delayAtBottom = 200;       // Delay at the bottom of the movement in ms
 // Track last button state
 int lastButtonState = HIGH;
 
-// Callback when data is received (updated to match new signature)
+static bool largeStringActive = false;
+static int  expectedChunks    = 0;
+static int  receivedChunks    = 0;
+static String largeStringBuffer = "";
+
+void handleLargeStringPacket(const uint8_t *data, int len) {
+  // For simplicity, assume the first byte (data[0]) is a "type" indicator
+  // 0x10 = "First Packet" (contains total chunks)
+  // 0x11 = "Chunk Data"   (contains the actual chunk)
+  
+  uint8_t packetType = data[0];
+
+  if (packetType == 0x10) {
+    // This is the "first" packet telling us how many chunks to expect
+    // For example, data[1..2] might store the total chunk count
+    expectedChunks  = data[1] << 8 | data[2];  // read 2 bytes as int
+    receivedChunks  = 0;
+    largeStringBuffer = "";
+    largeStringActive  = true;
+
+    Serial.print("Large string incoming; total chunks: ");
+    Serial.println(expectedChunks);
+
+  } else if (packetType == 0x11 && largeStringActive) {
+    // This is a chunk of the large string
+    // data[1] could be chunkIndex, data[2..end] is chunk content
+    int chunkIndex = data[1];
+
+    // Copy the chunk content (starting at data[2])
+    const char* chunkContent = (const char*)&data[2];
+    largeStringBuffer += String(chunkContent);
+
+    receivedChunks++;
+    Serial.print("Received chunk #");
+    Serial.print(chunkIndex);
+    Serial.print(" (");
+    Serial.print(receivedChunks);
+    Serial.print("/");
+    Serial.print(expectedChunks);
+    Serial.println(")");
+
+    // If we've got them all, confirm to the sender
+    if (receivedChunks >= expectedChunks) {
+      Serial.println("All chunks received! Reconstructed large string:");
+      Serial.println(largeStringBuffer);
+
+      // Send a "large string confirmation" packet
+      struct_message confirmMsg;
+      confirmMsg.command = 0x12; // 0x12 means "large string received"
+      esp_now_send(hubAddress, (uint8_t *)&confirmMsg, sizeof(confirmMsg));
+
+      Serial.println("Large string confirmation sent to Hub.");
+      largeStringActive = false; // reset
+    }
+  }
+}
+
 void onDataRecv(const esp_now_recv_info *info, const uint8_t *incomingData, int len) {
-  memcpy(&incomingMessage, incomingData, sizeof(incomingMessage));
+  // If the packet is our original simple command size, process as before
+  if (len == sizeof(struct_message)) {
+    memcpy(&incomingMessage, incomingData, sizeof(incomingMessage));
 
-  // Act based on command received (assuming 0x01 is the command to trigger servo movement)
-  if (incomingMessage.command == 0x01) {
-    Serial.println("Received command to execute servo movement");
+    // Handle your normal "servo command" etc.
+    if (incomingMessage.command == 0x01) {
+      Serial.println("Received command to execute servo movement");
 
-    // Execute the servo movement
-    servoMovement();
+      // Execute the servo movement
+      servoMovement();
 
-    // Send confirmation back to Hub
-    confirmationMessage.command = 0x02;  // 0x02 represents "action completed"
-    esp_now_send(hubAddress, (uint8_t *) &confirmationMessage, sizeof(confirmationMessage));
-    Serial.println("Confirmation sent to Hub");
+      // Send confirmation back to Hub
+      confirmationMessage.command = 0x02;  // 0x02 represents "action completed"
+      esp_now_send(hubAddress, (uint8_t *) &confirmationMessage, sizeof(confirmationMessage));
+      Serial.println("Confirmation sent to Hub");
+    }
+  }
+  // Otherwise, check if it’s a large string packet
+  else {
+    handleLargeStringPacket(incomingData, len);
   }
 }
 

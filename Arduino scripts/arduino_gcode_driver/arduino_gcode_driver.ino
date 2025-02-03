@@ -80,6 +80,16 @@ float stripeVelocity            = 0.05;  // default to 1 m/s for stripes
 // New global for controlling how often (ms) you recalc velocities
 unsigned long velocityCalcDelay = 100; 
 
+//below vars relating to long string sending
+static const int CHUNK_PAYLOAD_SIZE = 200; 
+static bool     largeStringInProgress = false;
+static String   largeStringToSend     = "";
+static int      totalChunks           = 0;
+static int      currentChunkIndex     = 0;
+// Retry logic
+static bool     largeStringAckReceived = false;
+static unsigned long lastSendAttempt   = 0;
+static unsigned long resendDelay       = 5000; 
 
 /************************************************************/
 /*                       DATA STRUCTURES                    */
@@ -211,6 +221,28 @@ void loop() {
   stepper1.run();
   stepper2.run();
 
+  if (largeStringInProgress && !largeStringAckReceived) {
+    // Check if we still have chunks left to send
+    // (We might drip them out one at a time, or all at once, as you prefer.)
+    static unsigned long chunkSendInterval = 50; // e.g., 50ms between chunk sends
+    static unsigned long lastChunkSendTime = 0;
+
+    if (millis() - lastChunkSendTime > chunkSendInterval && currentChunkIndex < totalChunks) {
+      sendNextChunk();
+      lastChunkSendTime = millis();
+    }
+
+    // Check for confirmation timeout
+    if (millis() - lastSendAttempt > resendDelay && currentChunkIndex >= totalChunks) {
+      // If we haven't received confirmation for 5s after sending all chunks, retry
+      Serial.println("No confirmation received. Retrying large string transmission...");
+      // Reset index, re-send everything
+      currentChunkIndex = 0;
+      lastSendAttempt   = millis();
+      sendNextChunk();
+    }
+  }
+
   // Check if movement is complete
   if (movementInProgress) {
     bool motor1Running = (stepper1.distanceToGo() != 0);
@@ -251,6 +283,84 @@ void loop() {
 
   // Handle sendTriggerCommand timeouts/confirmation
   handleSendTriggerCommand();
+}
+
+/*****************************************************************************/
+/*                   2) startLargeStringSend() Function                      */
+/*****************************************************************************/
+void startLargeStringSend(const String &strToSend) {
+  largeStringToSend      = strToSend;
+  int len                = largeStringToSend.length();
+
+  totalChunks            = (len + CHUNK_PAYLOAD_SIZE - 1) / CHUNK_PAYLOAD_SIZE; 
+  currentChunkIndex      = 0;
+  largeStringInProgress  = true;
+  largeStringAckReceived = false;
+
+  Serial.println("Initiating large string send...");
+  
+  // First, send a "start" packet containing total chunk count
+  // Packet format: [0x10, highByte(totalChunks), lowByte(totalChunks)]
+  uint8_t startPacket[3];
+  startPacket[0] = 0x10;
+  startPacket[1] = (uint8_t)((totalChunks >> 8) & 0xFF);
+  startPacket[2] = (uint8_t)(totalChunks & 0xFF);
+  esp_err_t result = esp_now_send(chassisAddress, startPacket, sizeof(startPacket));
+  
+  if (result == ESP_OK) {
+    Serial.println("Sent initial chunk-count packet.");
+  } else {
+    Serial.println("Failed to send initial chunk-count packet.");
+  }
+
+  // Immediately try sending the first chunk
+  lastSendAttempt = millis();
+  sendNextChunk();
+}
+
+/*****************************************************************************/
+/*                        3) sendNextChunk() Function                        */
+/*****************************************************************************/
+void sendNextChunk() {
+  if (!largeStringInProgress) return;  // guard
+
+  // If we've sent them all, do nothing. We'll wait for confirmation instead.
+  if (currentChunkIndex >= totalChunks) {
+    Serial.println("All chunks sent. Waiting for confirmation...");
+    return;
+  }
+
+  // Prepare chunk
+  int startIdx = currentChunkIndex * CHUNK_PAYLOAD_SIZE;
+  String chunkData = largeStringToSend.substring(startIdx, startIdx + CHUNK_PAYLOAD_SIZE);
+
+  // Packet format:
+  //  [0x11, chunkIndex, chunkContent...]
+  // chunkIndex must fit in a byte if totalChunks < 256 (otherwise adjust logic)
+  // The chunk content is appended after data[2].
+  size_t packetSize = 2 + chunkData.length() + 1; // +1 for null terminator
+  uint8_t *packet   = (uint8_t *) malloc(packetSize);
+
+  packet[0] = 0x11;
+  packet[1] = (uint8_t) currentChunkIndex;
+  memcpy(&packet[2], chunkData.c_str(), chunkData.length() + 1);
+
+  // Send
+  esp_err_t result = esp_now_send(chassisAddress, packet, packetSize);
+  free(packet);
+
+  if (result == ESP_OK) {
+    Serial.print("Sent chunk #");
+    Serial.print(currentChunkIndex);
+    Serial.print(" of ");
+    Serial.println(totalChunks);
+  } else {
+    Serial.print("Failed to send chunk #");
+    Serial.println(currentChunkIndex);
+  }
+
+  currentChunkIndex++;
+  lastSendAttempt = millis();
 }
 
 
