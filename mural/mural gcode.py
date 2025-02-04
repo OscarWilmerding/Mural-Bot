@@ -8,7 +8,7 @@ import math
 import random
 from sklearn.cluster import KMeans
 import sys
-
+import webcolors
 # BEFORE RUNNING:
 # 1) Run the command 'pip install tkinter pillow numpy matplotlib sklearn' in your terminal to install all necessary libraries.
 # 2) Ensure that the folder the script will save files to exists or provide a new path for 'root_folder' below.
@@ -41,6 +41,10 @@ n_value = 3  # default N value for NxN methods
 peak_velocity = 0.5  # in meters per sec
 slicing_option = '--'  # default slicing option
 
+
+HAS_PRINTED_COLOR_MAPPING = False
+
+
 # Ensure root_folder exists
 if not os.path.exists(root_folder):
     os.makedirs(root_folder)
@@ -51,6 +55,7 @@ gcode_dir = os.path.dirname(gcode_filepath)
 if not os.path.exists(gcode_dir):
     os.makedirs(gcode_dir)
     print(f"Created directory: {gcode_dir}")
+
 
 def initial_popup():
     """
@@ -169,7 +174,9 @@ def initial_popup():
     # Slicing Options Dropdown
     slicing_option_var = tk.StringVar(value=slicing_option)  # default value
     tk.Label(root, text="Slicing Options:").grid(row=9, column=0, padx=10, pady=10)
-    slicing_options = ['position slicing', 'velocity slicing']
+
+    # UPDATED slicing_options: 'mono color velocity slicing' (old velocity) + new 'multi color velocity slicing'
+    slicing_options = ['position slicing', 'mono color velocity slicing', 'multi color velocity slicing']
     slicing_dropdown = tk.OptionMenu(root, slicing_option_var, *slicing_options)
     slicing_dropdown.grid(row=9, column=1, padx=10, pady=10)
 
@@ -186,6 +193,7 @@ def validate_image(file_path):
     except (IOError, SyntaxError) as e:
         print(f"Invalid image file: {file_path} - {e}")
         return False
+
 
 def resize_image(file_path, new_width):
     """
@@ -216,6 +224,7 @@ def resize_image(file_path, new_width):
     except Exception as e:
         print(f"Error resizing image: {e}")
 
+
 def simplify_image_pillow(reduced_image_path, num_colors):
     """
     Simplifies the image by reducing it to a specified number of colors using the Pillow library.
@@ -230,15 +239,18 @@ def simplify_image_pillow(reduced_image_path, num_colors):
             image = image.convert('RGB')
         else:
             alpha = None
+
         # Convert image to use a palette with the specified number of colors
         simplified_image = image.convert(mode='P', palette=Image.ADAPTIVE, colors=num_colors)
         if has_alpha:
             simplified_image.putalpha(alpha)
+
         # Save the new image
         simplified_image.save(processed_image_path)
         print(f'Simplified image saved as {processed_image_path}')
     except Exception as e:
         print(f"Error simplifying image: {e}")
+
 
 def process_image_rgb_scatter_nxn(image_path, n):
     print(f'Processing RGB Scatter {n}x{n}')
@@ -326,6 +338,7 @@ def process_image_rgb_scatter_nxn(image_path, n):
         new_img.save(processed_image_path)
     except Exception as e:
         print(f"Error in RGB Scatter NxN processing: {e}")
+
 
 def process_image_with_dynamic_base_colors_nxn(image_path, n_base_colors, n):
     print(f'Processing Dynamic Scatter {n}x{n}')
@@ -421,6 +434,7 @@ def process_image_with_dynamic_base_colors_nxn(image_path, n_base_colors, n):
     except Exception as e:
         print(f"Error in Dynamic Scatter NxN processing: {e}")
 
+
 def process_image_rgb(image_path):
     try:
         # Open the input image and preserve alpha channel if present
@@ -485,12 +499,12 @@ def process_image_rgb(image_path):
                 # Stack blue pixels in the third column from bottom to top
                 for i in range(b_value):
                     new_pixels[block_x + 2, block_y + i] = (0, 0, 255, 255) if has_alpha else (0, 0, 255)
-                # Unused pixels remain transparent or black by default
 
         # Save the new image
         new_img.save(processed_image_path)
     except Exception as e:
         print(f"Error processing image in RGB mode: {e}")
+
 
 def process_image_cmy(image_path):
     try:
@@ -564,12 +578,12 @@ def process_image_cmy(image_path):
                 # Stack yellow pixels in the third column from bottom to top
                 for i in range(y_value):
                     new_pixels[block_x + 2, block_y + i] = (255, 255, 0, a) if has_alpha else (255, 255, 0)
-                # Unused pixels remain transparent or black by default
 
         # Save the new image
         new_img.save(processed_image_path)
     except Exception as e:
         print(f"Error processing image in CMYK mode: {e}")
+
 
 def count_unique_hex_colors(image_path):
     """
@@ -609,13 +623,11 @@ def count_unique_hex_colors(image_path):
             color_frame = tk.Frame(frame, borderwidth=1, relief="solid")
             color_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
-            # Create and pack the checkbox
             var = tk.BooleanVar(value=True)  # Default to checked
             checkbox_vars[hex_code] = var
             checkbox = tk.Checkbutton(color_frame, variable=var)
             checkbox.pack(side=tk.LEFT)
 
-            # Create and pack the color label
             color_label = tk.Label(
                 color_frame,
                 text=hex_code,
@@ -635,6 +647,7 @@ def count_unique_hex_colors(image_path):
     except Exception as e:
         print(f"Error counting unique colors: {e}")
         return []
+
 
 def extract_color(image_path, hex_color):
     """
@@ -667,6 +680,7 @@ def extract_color(image_path, hex_color):
     except Exception as e:
         print(f"Error extracting color {hex_color}: {e}")
 
+
 def create_text_file(file_path):
     """
     Creates a new text file for storing G-code instructions and writes the starting lines.
@@ -678,6 +692,7 @@ def create_text_file(file_path):
             file.write(line + '\n')
     print(f"File created and written to {file_path}")
 
+
 def append_to_text_file(line):
     """
     Appends a line of text to the G-code file.
@@ -686,37 +701,21 @@ def append_to_text_file(line):
         file.write(line + '\n')
     print(f"Line appended to {gcode_filepath}")
 
+
 def generate_preview_image(selected_hex_codes):
     """
-    Generates a preview image by overlaying all the selected color layers and displays it.
+    Displays the processed image.
     """
     try:
-        # Get the size of the first image (assuming all images are the same size)
-        first_hex_code = selected_hex_codes[0].lstrip('#')
-        first_image_path = os.path.join(temp_images_folder, first_hex_code + '.png')
-        with Image.open(first_image_path) as img:
-            width, height = img.size
-
-        # Create a new blank image with a transparent background
-        preview_image = Image.new('RGBA', (width, height), (255, 255, 255, 0))
-
-        # Overlay each selected color image
-        for hex_code in selected_hex_codes:
-            hex_code_stripped = hex_code.lstrip('#')
-            image_path = os.path.join(temp_images_folder, hex_code_stripped + '.png')
-            with Image.open(image_path) as img:
-                preview_image = Image.alpha_composite(preview_image, img)
-
-        # Save the preview image
-        preview_image.save(preview_image_path)
-        print(f"Preview image saved as {preview_image_path}")
-
-        # Display the preview image using Matplotlib
-        plt.imshow(preview_image)
-        plt.axis('off')  # Hide the axis
-        plt.show()
+        # Open the processed image
+        with Image.open(processed_image_path) as img:
+            # Display the image using Matplotlib
+            plt.imshow(img)
+            plt.axis('off')  # Hide the axis
+            plt.show()
     except Exception as e:
-        print(f"Error generating preview image: {e}")
+        print(f"Error displaying processed image: {e}")
+
 
 def length_a(x, y):
     length_A = math.sqrt(
@@ -728,6 +727,7 @@ def length_a(x, y):
     )
     return length_A
 
+
 def length_b(x, y):
     length_B = math.sqrt(
         (dist_from_pulley - y * pixel_size) ** 2 +
@@ -738,11 +738,12 @@ def length_b(x, y):
     )
     return length_B
 
+
 def generate_column_pattern(img, column_index):
     """
     Given:
       - img: a PIL image in RGBA mode
-      - column_index: which column you are refering to 
+      - column_index: which column you are referring to 
     Returns:
       - A list of strings, each representing a row:
           'x' means pixel is present (alpha > 0),
@@ -751,7 +752,7 @@ def generate_column_pattern(img, column_index):
     width, height = img.size
     
     # Calculate the leftmost column for this 'column_index'
-    col_start = 4 * column_index  # columns are 1-based per your specification
+    col_start = 4 * column_index  # columns are 1-based in logic, but zero-based index here
 
     patterns = []
     
@@ -762,7 +763,6 @@ def generate_column_pattern(img, column_index):
         # Check the 4 pixels that make up this logical "column"
         for offset in range(4):
             x_coord = col_start + offset
-            
             # Safeguard in case x_coord goes beyond image width
             if x_coord < 0 or x_coord >= width:
                 row_pattern += "o"
@@ -770,13 +770,13 @@ def generate_column_pattern(img, column_index):
             
             # Get pixel (RGBA)
             r, g, b, a = img.getpixel((x_coord, y))
-            
             # Mark 'x' if alpha > 0, else 'o'
             row_pattern += "x" if a > 0 else "o"
         
         patterns.append(row_pattern)
     
     return patterns
+
 
 def generate_position_data(hex_path, hex_code):
     """
@@ -803,7 +803,7 @@ def generate_position_data(hex_path, hex_code):
                         # Flip the y-coordinate to match coordinate system
                         y_flipped = height - 1 - y
 
-                        # Calculate length_a and length_b using your functions
+                        # Calculate length_a and length_b
                         length_a_value = length_a(x, y_flipped)
                         length_b_value = length_b(x, y_flipped)
 
@@ -814,7 +814,11 @@ def generate_position_data(hex_path, hex_code):
     except Exception as e:
         print(f"Error generating position data: {e}")
 
-def generate_position_data_velocity_sequential_colors(hex_path, hex_code):
+
+def generate_position_data_mono_velocity_sequential_colors(hex_path, hex_code):
+    """
+    Generates position data for the painting robot in a 'mono color velocity slicing' manner.
+    """
     try:
         print("flag 1")
         # Open the image
@@ -835,8 +839,7 @@ def generate_position_data_velocity_sequential_colors(hex_path, hex_code):
                 )
                 f.write(str(generate_column_pattern(img, c)) + "\n")
                 f.write(
-                    f"drop: "
-                    f"{pixel_size*height}\n"
+                    f"drop: {pixel_size*height}\n"
                     f"starting pulley values:  "
                     f"{round(length_a((c*4)-2, height), 6)},"
                     f"{round(length_b((c*4)-2, height), 6)}\n"
@@ -844,6 +847,183 @@ def generate_position_data_velocity_sequential_colors(hex_path, hex_code):
                 
     except Exception as e:
         print(f"Error generating position data: {e}")
+
+
+def get_color_name(hex_code):
+    try:
+        return webcolors.hex_to_name(hex_code)
+    except ValueError:
+        min_diff = float("inf")
+        closest_name = None
+        for name, code in webcolors.CSS3_HEX_TO_NAMES.items():
+            r1, g1, b1 = webcolors.hex_to_rgb(hex_code)
+            r2, g2, b2 = webcolors.hex_to_rgb(code)
+            diff = (r1 - r2) ** 2 + (g1 - g2) ** 2 + (b1 - b2) ** 2
+            if diff < min_diff:
+                min_diff = diff
+                closest_name = name
+        return closest_nam
+
+def generate_column_pattern_multi(img, column_index, color_index_map, output_file):
+    """
+    Similar to generate_column_pattern, but:
+    - If alpha=0 => 'x' (and print a console message).
+    - Otherwise => the color index (as a digit/char).
+    
+    Writes the pattern and corresponding color names to a file.
+    """
+    width, height = img.size
+    col_start = 4 * column_index  # same logic as the mono version
+    
+    with open(output_file, 'w') as f:
+        for y in range(height):
+            row_pattern = ""
+            color_comments = []  # Stores color names for each row
+
+            for offset in range(4):
+                x_coord = col_start + offset
+
+                # If x_coord is out of range, consider that pixel 'x' (no color).
+                if x_coord < 0 or x_coord >= width:
+                    row_pattern += "x"
+                    continue
+
+                r, g, b, a = img.getpixel((x_coord, y))
+                if a == 0:
+                    # Transparent
+                    print(f"[DEBUG] Transparent pixel detected at (x={x_coord}, y={y})")
+                    row_pattern += "x"
+                else:
+                    # Convert the pixel color to a hex code so we can look up its index
+                    hex_code = "#{:02x}{:02x}{:02x}".format(r, g, b)
+
+                    # If for some reason the color is not in the map (e.g. user unselected it),
+                    # treat it as transparent or handle it differently. 
+                    if hex_code not in color_index_map:
+                        print(f"[DEBUG] Pixel color {hex_code} not in color_index_map—treating as transparent.")
+                        row_pattern += "x"
+                    else:
+                        row_pattern += str(color_index_map[hex_code])
+
+                    # Get the closest color name and store it
+                    color_comments.append(get_color_name(hex_code))
+
+            # Write the row pattern to the file
+            f.write(f"{y}: {row_pattern}\n")
+
+            # Write the color names underneath
+            if color_comments:
+                f.write(f"// {', '.join(color_comments)}\n")
+
+def generate_position_data_multi_color_velocity_once(
+    simplified_image_path, 
+    all_selected_hex_codes
+):
+    """
+    Perform multi-color velocity slicing in a single pass.
+    - Scans the entire 'simplified_image_path' (which is your processed_image_path).
+    - Breaks columns in 4-pixel increments (same as the mono function).
+    - For each pixel:
+        * If alpha=0 => prints 'x' and also prints a debug message about transparency.
+        * Otherwise => prints the digit that corresponds to that color in 'all_selected_hex_codes'.
+    - Prints color mapping exactly once.
+    """
+    import math
+
+    global HAS_PRINTED_COLOR_MAPPING
+
+    # Open the simplified image
+    try:
+        img = Image.open(simplified_image_path).convert('RGBA')
+        w, h = img.size
+
+        # Build a color → index map. 
+        # e.g. Index 1 => the first color in all_selected_hex_codes, 2 => second, etc.
+        color_index_map = {}
+        for i, hex_col in enumerate(all_selected_hex_codes, start=1):
+            color_index_map[hex_col.lower()] = i  # store keys in lowercase to match pixel hex
+
+        # Print the color mapping in gcode.txt once only
+        if not HAS_PRINTED_COLOR_MAPPING:
+            with open(gcode_filepath, 'a') as f:
+                f.write("\n-- MULTI-COLOR INDEX MAPPING --\n")
+                for i, hex_col in enumerate(all_selected_hex_codes, start=1):
+                    f.write(f"Index {i} => {hex_col}\n")
+                f.write("-- END OF COLOR MAPPING --\n\n")
+            HAS_PRINTED_COLOR_MAPPING = True
+
+        # Write the main multi-color velocity slicing data
+        with open(gcode_filepath, 'a') as f:
+            number_of_drawn_columns = w // 4
+            f.write(f"number of drawn columns = {number_of_drawn_columns}\n")
+            f.write(f"pulley spacing = {cable_sepperation}\n")
+            f.write("BEGIN MULTI-COLOR VELOCITY SLICING\n")
+
+            # Iterate columns in groups of 4
+            for c in range(number_of_drawn_columns):
+                f.write(f"STRIPE - column #{c}\n")
+                f.write(
+                    f"starting/ending position pixel values:  ({(c*4)-2},{h}),"
+                    f"({(c*4)-2},{0})\n"
+                )
+
+                # Build the list of row-patterns for this column
+                patterns = []
+                col_start = 4 * c
+
+                # Loop over rows top-to-bottom or bottom-to-top
+                #   The existing code (mono) apparently goes top->bottom in the array
+                #   but its Y coordinate is reversed physically. We'll just replicate the logic.
+                for y in range(h):
+                    row_pattern = ""
+                    for offset in range(4):
+                        x_coord = col_start + offset
+                        # If out of range, treat as 'x'
+                        if x_coord < 0 or x_coord >= w:
+                            row_pattern += "x"
+                            continue
+
+                        r, g, b, a = img.getpixel((x_coord, y))
+                        if a == 0:
+                            # Transparent
+                            print(f"[DEBUG] Transparent pixel at (x={x_coord}, y={y})")
+                            row_pattern += "x"
+                        else:
+                            # Convert pixel to lowercase hex
+                            px_hex = "#{:02x}{:02x}{:02x}".format(r, g, b)
+                            px_hex = px_hex.lower()
+
+                            # Lookup the color in our map
+                            if px_hex in color_index_map:
+                                row_pattern += str(color_index_map[px_hex])
+                            else:
+                                # If somehow it's not found, treat as 'x'
+                                print(f"[DEBUG] Unrecognized color {px_hex}; treating as transparent.")
+                                row_pattern += "x"
+
+                    patterns.append(row_pattern)
+
+                # Write out the list of row patterns
+                f.write(str(patterns) + "\n")
+
+                # Same "drop" and "starting pulley values" as the mono slicing approach
+                # (We assume these methods are already defined in your code: length_a, length_b, etc.)
+                drop_val = pixel_size * h
+                f.write(f"drop: {drop_val}\n")
+
+                # The code in mono slicing calls length_a((c*4)-2, height), etc.
+                # We'll keep that consistent:
+                #   length_a(x, yFlipped?), or maybe the code doesn't flip? We'll match the original.
+                la = round(length_a((c*4)-2, h), 6)
+                lb = round(length_b((c*4)-2, h), 6)
+                f.write(f"starting pulley values:  {la},{lb}\n")
+
+            f.write("END MULTI-COLOR VELOCITY SLICING\n")
+
+        print("Multi-color velocity slicing complete.")
+
+    except Exception as e:
+        print(f"Error generating multi-color velocity slicing: {e}")
 
 # Initiate the GUI at the beginning
 initial_popup()
@@ -876,14 +1056,21 @@ except Exception as e:
 selected_hex_codes = count_unique_hex_colors(processed_image_path)
 create_text_file(gcode_filepath)
 
-for hex_code in selected_hex_codes:
-    extract_color(processed_image_path, hex_code)
-    hex_code_stripped = hex_code.lstrip('#')
-    hex_path = os.path.join(temp_images_folder, hex_code_stripped + '.png')
-    if slicing_option == 'position slicing':
-        generate_position_data(hex_path, hex_code)
-    elif slicing_option == 'velocity slicing':
-        generate_position_data_velocity_sequential_colors(hex_path, hex_code)
+if slicing_option == 'multi color velocity slicing':
+    # We only need one pass on the entire simplified image.
+    # We'll pass in `processed_image_path` plus the entire list of `selected_hex_codes`.
+    generate_position_data_multi_color_velocity_once(processed_image_path, selected_hex_codes)
+else:
+    # Existing logic for 'position slicing' or 'mono color velocity slicing' 
+    # that loops over each color layer, if that’s still needed
+    for hex_code in selected_hex_codes:
+        hex_code_stripped = hex_code.lstrip('#')
+        hex_path = os.path.join(temp_images_folder, hex_code_stripped + '.png')
+
+        if slicing_option == 'position slicing':
+            generate_position_data(hex_path, hex_code)
+        elif slicing_option == 'mono color velocity slicing':
+            generate_position_data_mono_velocity_sequential_colors(hex_path, hex_code)
 
 # Print the global variables to verify the input data
 print("File Path:", file_path)
