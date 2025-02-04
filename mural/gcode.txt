@@ -1,0 +1,455 @@
+//this is the start of the gcode
+
+
+number of drawn columns = 22
+pulley spacing = 1.265
+change color to:#000000
+STRIPE - column #0
+starting/ending position pixel values:  (-2,90),(-2,0)
+['oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxo', 'xxxx', 'oooo', 'xxxo', 'xxxx', 'oooo', 'xxxo', 'xxxx', 'oooo', 'xxxo', 'xxxx', 'oooo', 'xxxo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxo', 'xxxx', 'oooo', 'xxxo', 'xxxx', 'oooo', 'xxxo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'ooox', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxo', 'oooo', 'oooo', 'xxxo', 'oooo', 'xxxo', 'xxxx', 'oooo', 'xxxo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx']
+drop: 0.18
+starting pulley values:  1.015186,1.056703
+STRIPE - column #1
+starting/ending position pixel values:  (2,90),(2,0)
+['oooo', 'xxoo', 'xxxx', 'oooo', 'xxoo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'ooxx', 'xxxx', 'oooo', 'ooxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'ooxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'ooxx', 'xxxx', 'oooo', 'ooxx', 'ooxx', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xxoo', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxoo', 'xxxx', 'oooo', 'xxxx', 'xxxx']
+drop: 0.18
+starting pulley values:  1.019923,1.051676
+STRIPE - column #2
+starting/ending position pixel values:  (6,90),(6,0)
+['oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xooo', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oxxx', 'xxxx', 'oooo', 'oxxx', 'xxxx', 'oooo', 'oxxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xooo', 'xxxx', 'oooo', 'xooo', 'xxxx', 'oooo', 'oooo', 'oxxx', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xooo', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx']
+drop: 0.18
+starting pulley values:  1.0247,1.046685
+STRIPE - column #3
+starting/ending position pixel values:  (10,90),(10,0)
+['oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'ooox', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'ooox', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxo', 'xxxx', 'oooo', 'oxxo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxo', 'xxxx', 'oooo', 'xxxo', 'xxxx', 'oooo', 'xxxo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'ooox', 'xxxx', 'oooo', 'xxxo', 'xxxx', 'oooo', 'xxxo', 'xxxx', 'oooo', 'ooox', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'ooox', 'xxxx', 'oooo', 'oooo', 'ooox', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxo', 'xxxx']
+drop: 0.18
+starting pulley values:  1.029517,1.041732
+STRIPE - column #4
+starting/ending position pixel values:  (14,90),(14,0)
+['oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxoo', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'ooxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxoo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'ooxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxoo', 'oooo', 'oooo', 'xxoo', 'oooo', 'xxoo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'ooxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxoo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxoo', 'xxxx', 'oooo', 'ooxx', 'xxxx', 'oooo', 'oooo', 'ooxx', 'oooo', 'oooo', 'xxoo', 'oooo', 'oooo', 'xxxx']
+drop: 0.18
+starting pulley values:  1.034374,1.036817
+STRIPE - column #5
+starting/ending position pixel values:  (18,90),(18,0)
+['oooo', 'oooo', 'xooo', 'oooo', 'oooo', 'oxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'ooxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oxxx', 'xxxx', 'oooo', 'oooo', 'oxxx', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxx', 'oooo', 'xooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'ooox', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oxxx', 'xxxx', 'oooo', 'oooo', 'oxxx', 'oooo', 'oooo', 'xxxx']
+drop: 0.18
+starting pulley values:  1.03927,1.031941
+STRIPE - column #6
+starting/ending position pixel values:  (22,90),(22,0)
+['oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'ooox', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'ooox', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'ooox', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxo', 'xxxo', 'oooo', 'oooo', 'xxxo', 'oooo', 'oooo', 'xxxo', 'oooo', 'oooo', 'xxxo', 'oooo', 'xxxo', 'xxxx', 'oooo', 'ooox', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxo', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'ooox', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx']
+drop: 0.18
+starting pulley values:  1.044204,1.027104
+STRIPE - column #7
+starting/ending position pixel values:  (26,90),(26,0)
+['oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'ooxx', 'ooxx', 'oooo', 'ooxx', 'ooxx', 'oooo', 'ooxx', 'ooxx', 'oooo', 'oooo', 'ooxx', 'oooo', 'oooo', 'xxoo', 'oooo', 'xxoo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'ooxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'ooxx', 'xxxx', 'oooo', 'oooo', 'ooxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'ooxx', 'xxxx', 'oooo', 'oooo', 'xxxx']
+drop: 0.18
+starting pulley values:  1.049176,1.022306
+STRIPE - column #8
+starting/ending position pixel values:  (30,90),(30,0)
+['oooo', 'oooo', 'oxxx', 'oooo', 'oooo', 'xooo', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oxxx', 'xxxx', 'oooo', 'oxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xooo', 'xxxx', 'oooo', 'xooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oxxx', 'xxxx', 'oooo', 'oooo', 'oxxx', 'oooo', 'oooo', 'xooo', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xooo', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxxx']
+drop: 0.18
+starting pulley values:  1.054185,1.017549
+STRIPE - column #9
+starting/ending position pixel values:  (34,90),(34,0)
+['oooo', 'oooo', 'ooox', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'ooox', 'ooox', 'oooo', 'ooox', 'ooox', 'oooo', 'oooo', 'ooox', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxo', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxo', 'xxxx', 'oooo', 'xxxo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxxx']
+drop: 0.18
+starting pulley values:  1.059231,1.012833
+STRIPE - column #10
+starting/ending position pixel values:  (38,90),(38,0)
+['oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'ooxx', 'oooo', 'oooo', 'xxoo', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'ooxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'ooxx', 'xxxx', 'oooo', 'oooo', 'xxoo', 'oooo', 'xxoo', 'xxxx', 'oooo', 'ooxx', 'xxxx', 'oooo', 'oooo', 'ooxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'ooxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'ooxx', 'oooo', 'oooo', 'xxoo', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxxx']
+drop: 0.18
+starting pulley values:  1.064313,1.008158
+STRIPE - column #11
+starting/ending position pixel values:  (42,90),(42,0)
+['oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'oxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xooo', 'xxxx', 'oooo', 'xooo', 'xooo', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xooo', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xooo', 'xxxx', 'oooo', 'oooo', 'xxxx']
+drop: 0.18
+starting pulley values:  1.069431,1.003525
+STRIPE - column #12
+starting/ending position pixel values:  (46,90),(46,0)
+['oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxo', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'ooox', 'ooox', 'oooo', 'xxxo', 'xxxo', 'oooo', 'xxxo', 'xxxo', 'oooo', 'oooo', 'xxxo', 'oooo', 'oooo', 'ooox', 'oooo', 'ooxx', 'xxxx', 'oooo', 'oooo', 'xxxo', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'oooo', 'oooo', 'ooox', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxxo', 'oooo', 'oooo', 'oooo']
+drop: 0.18
+starting pulley values:  1.074584,0.998935
+STRIPE - column #13
+starting/ending position pixel values:  (50,90),(50,0)
+['oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxoo', 'oooo', 'oooo', 'xxoo', 'oooo', 'ooxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'ooxx', 'oooo', 'xxoo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'ooox', 'ooxx', 'oooo', 'oooo', 'oxxx', 'oooo', 'ooxx', 'ooxx', 'oooo', 'ooxx', 'xxxx', 'oooo', 'xxoo', 'xxxx', 'oooo', 'oooo', 'ooxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxoo', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'ooxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxoo', 'xxxx', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'ooxx']
+drop: 0.18
+starting pulley values:  1.079771,0.994387
+STRIPE - column #14
+starting/ending position pixel values:  (54,90),(54,0)
+['oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oxxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xooo', 'xxxx', 'oooo', 'xooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xooo', 'xxxx', 'oooo', 'xooo', 'xooo', 'oooo', 'oooo', 'xooo', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oxxx', 'xxxx', 'oooo', 'xooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oxxx', 'xxxx', 'oooo', 'xooo', 'xxxx', 'oooo', 'oooo', 'xxox', 'oooo', 'oooo', 'oxxx', 'oooo', 'oooo', 'xxxx']
+drop: 0.18
+starting pulley values:  1.084993,0.989884
+STRIPE - column #15
+starting/ending position pixel values:  (58,90),(58,0)
+['oooo', 'ooox', 'xxxx', 'oooo', 'oooo', 'ooox', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxo', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'ooox', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'ooox', 'ooox', 'oooo', 'oooo', 'ooox', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'ooox', 'oooo', 'oooo', 'ooox', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxx', 'oooo', 'ooox', 'xxxx', 'oooo', 'ooox', 'xxxx', 'oooo', 'xxxo', 'xxxx', 'oooo', 'oooo', 'ooox', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxxo', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'ooox', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx']
+drop: 0.18
+starting pulley values:  1.090249,0.985425
+STRIPE - column #16
+starting/ending position pixel values:  (62,90),(62,0)
+['oooo', 'xxoo', 'xxxx', 'oooo', 'ooxx', 'xxxx', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxoo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'ooxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxoo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'ooxx', 'xxxx', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxx', 'oooo', 'ooxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxoo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxoo', 'xxoo', 'oooo', 'oooo', 'ooxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxoo', 'oooo', 'oooo', 'xxxx']
+drop: 0.18
+starting pulley values:  1.095537,0.981011
+STRIPE - column #17
+starting/ending position pixel values:  (66,90),(66,0)
+['oooo', 'oooo', 'xooo', 'oooo', 'xooo', 'xxxx', 'oooo', 'oooo', 'oxxx', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'xxxx', 'oooo', 'oxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'ooox', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oxxx', 'oxxx', 'oooo', 'oxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'oxxx', 'oooo', 'xooo', 'xxxx', 'oooo', 'xooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xooo', 'oooo', 'oooo', 'oxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xooo', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'oxxx', 'oooo', 'oooo', 'xxxx']
+drop: 0.18
+starting pulley values:  1.100859,0.976642
+STRIPE - column #18
+starting/ending position pixel values:  (70,90),(70,0)
+['oooo', 'oooo', 'ooox', 'oooo', 'oooo', 'oooo', 'oooo', 'oooo', 'ooox', 'oooo', 'oooo', 'xxxo', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'ooox', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'ooox', 'oooo', 'xxxo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxo', 'oooo', 'oooo', 'ooox', 'oooo', 'ooox', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'ooox', 'oooo', 'ooox', 'xxxx', 'oooo', 'ooox', 'xxxx', 'oooo', 'ooox', 'xxxx', 'oooo', 'oooo', 'xxxx']
+drop: 0.18
+starting pulley values:  1.106213,0.97232
+STRIPE - column #19
+starting/ending position pixel values:  (74,90),(74,0)
+['oooo', 'ooxx', 'xxxx', 'oooo', 'oooo', 'ooxx', 'oooo', 'oooo', 'xxoo', 'oooo', 'oooo', 'ooxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxoo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'ooxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxoo', 'xxoo', 'oooo', 'xxxx', 'xxxx', 'oooo', 'ooxx', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'ooxx', 'ooxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxoo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxoo', 'xxxx', 'oooo', 'xxoo', 'xxxx', 'oooo', 'xxoo', 'xxxx', 'oooo', 'oooo', 'xxxx']
+drop: 0.18
+starting pulley values:  1.111598,0.968045
+STRIPE - column #20
+starting/ending position pixel values:  (78,90),(78,0)
+['oooo', 'xooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'oxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'oxxx', 'xxxx', 'oooo', 'oooo', 'oxxx', 'oooo', 'xooo', 'xxxx', 'oooo', 'xooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xooo', 'xxxx', 'oooo', 'oooo', 'xooo', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xooo', 'oooo', 'oooo', 'xxxx']
+drop: 0.18
+starting pulley values:  1.117015,0.963817
+STRIPE - column #21
+starting/ending position pixel values:  (82,90),(82,0)
+['oooo', 'oooo', 'ooox', 'oooo', 'oooo', 'ooox', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'xxxo', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'xxxx', 'xxxx', 'oooo', 'ooox', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'xxxx', 'oooo', 'oooo', 'ooox', 'oooo', 'oooo', 'ooox', 'oooo', 'oooo', 'ooox', 'oooo', 'ooox', 'xxxx', 'oooo', 'oooo', 'ooox', 'oooo', 'oooo', 'ooox', 'oooo', 'oooo', 'xxxx', 'oooo', 'ooox', 'xxxx', 'oooo', 'ooox', 'xxxx', 'oooo', 'ooox', 'xxxx']
+drop: 0.18
+starting pulley values:  1.122463,0.959637
+number of drawn columns = 22
+pulley spacing = 1.265
+change color to:#00ff00
+STRIPE - column #0
+starting/ending position pixel values:  (-2,90),(-2,0)
+['oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo']
+drop: 0.18
+starting pulley values:  1.015186,1.056703
+STRIPE - column #1
+starting/ending position pixel values:  (2,90),(2,0)
+['xoox', 'ooox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xooo', 'xooo', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'oooo', 'oooo']
+drop: 0.18
+starting pulley values:  1.019923,1.051676
+STRIPE - column #2
+starting/ending position pixel values:  (6,90),(6,0)
+['ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo']
+drop: 0.18
+starting pulley values:  1.0247,1.046685
+STRIPE - column #3
+starting/ending position pixel values:  (10,90),(10,0)
+['oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo']
+drop: 0.18
+starting pulley values:  1.029517,1.041732
+STRIPE - column #4
+starting/ending position pixel values:  (14,90),(14,0)
+['xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'ooox', 'xoox', 'ooox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'oooo']
+drop: 0.18
+starting pulley values:  1.034374,1.036817
+STRIPE - column #5
+starting/ending position pixel values:  (18,90),(18,0)
+['ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo']
+drop: 0.18
+starting pulley values:  1.03927,1.031941
+STRIPE - column #6
+starting/ending position pixel values:  (22,90),(22,0)
+['oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo']
+drop: 0.18
+starting pulley values:  1.044204,1.027104
+STRIPE - column #7
+starting/ending position pixel values:  (26,90),(26,0)
+['xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'xooo', 'xoox', 'xooo', 'xooo', 'xoox', 'xooo', 'xooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'ooox', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'oooo']
+drop: 0.18
+starting pulley values:  1.049176,1.022306
+STRIPE - column #8
+starting/ending position pixel values:  (30,90),(30,0)
+['ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo']
+drop: 0.18
+starting pulley values:  1.054185,1.017549
+STRIPE - column #9
+starting/ending position pixel values:  (34,90),(34,0)
+['oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo']
+drop: 0.18
+starting pulley values:  1.059231,1.012833
+STRIPE - column #10
+starting/ending position pixel values:  (38,90),(38,0)
+['xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'ooox', 'xoox', 'ooox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'ooox', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'oooo']
+drop: 0.18
+starting pulley values:  1.064313,1.008158
+STRIPE - column #11
+starting/ending position pixel values:  (42,90),(42,0)
+['ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo']
+drop: 0.18
+starting pulley values:  1.069431,1.003525
+STRIPE - column #12
+starting/ending position pixel values:  (46,90),(46,0)
+['oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo']
+drop: 0.18
+starting pulley values:  1.074584,0.998935
+STRIPE - column #13
+starting/ending position pixel values:  (50,90),(50,0)
+['xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'ooox', 'xoox', 'xooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'ooox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'xooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xooo', 'xooo', 'xoox', 'xooo', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'oooo', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'xooo']
+drop: 0.18
+starting pulley values:  1.079771,0.994387
+STRIPE - column #14
+starting/ending position pixel values:  (54,90),(54,0)
+['ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo']
+drop: 0.18
+starting pulley values:  1.084993,0.989884
+STRIPE - column #15
+starting/ending position pixel values:  (58,90),(58,0)
+['oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo']
+drop: 0.18
+starting pulley values:  1.090249,0.985425
+STRIPE - column #16
+starting/ending position pixel values:  (62,90),(62,0)
+['xoox', 'ooox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'ooox', 'ooox', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'oooo']
+drop: 0.18
+starting pulley values:  1.095537,0.981011
+STRIPE - column #17
+starting/ending position pixel values:  (66,90),(66,0)
+['ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo']
+drop: 0.18
+starting pulley values:  1.100859,0.976642
+STRIPE - column #18
+starting/ending position pixel values:  (70,90),(70,0)
+['oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo']
+drop: 0.18
+starting pulley values:  1.106213,0.97232
+STRIPE - column #19
+starting/ending position pixel values:  (74,90),(74,0)
+['xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'ooox', 'ooox', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xooo', 'xooo', 'xoox', 'xoox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'oooo']
+drop: 0.18
+starting pulley values:  1.111598,0.968045
+STRIPE - column #20
+starting/ending position pixel values:  (78,90),(78,0)
+['ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo']
+drop: 0.18
+starting pulley values:  1.117015,0.963817
+STRIPE - column #21
+starting/ending position pixel values:  (82,90),(82,0)
+['oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo']
+drop: 0.18
+starting pulley values:  1.122463,0.959637
+number of drawn columns = 22
+pulley spacing = 1.265
+change color to:#ff0000
+STRIPE - column #0
+starting/ending position pixel values:  (-2,90),(-2,0)
+['xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'ooox', 'xoox', 'ooox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo']
+drop: 0.18
+starting pulley values:  1.015186,1.056703
+STRIPE - column #1
+starting/ending position pixel values:  (2,90),(2,0)
+['ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo']
+drop: 0.18
+starting pulley values:  1.019923,1.051676
+STRIPE - column #2
+starting/ending position pixel values:  (6,90),(6,0)
+['oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo']
+drop: 0.18
+starting pulley values:  1.0247,1.046685
+STRIPE - column #3
+starting/ending position pixel values:  (10,90),(10,0)
+['xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'oooo', 'xoox', 'ooox', 'oooo']
+drop: 0.18
+starting pulley values:  1.029517,1.041732
+STRIPE - column #4
+starting/ending position pixel values:  (14,90),(14,0)
+['ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo']
+drop: 0.18
+starting pulley values:  1.034374,1.036817
+STRIPE - column #5
+starting/ending position pixel values:  (18,90),(18,0)
+['oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo']
+drop: 0.18
+starting pulley values:  1.03927,1.031941
+STRIPE - column #6
+starting/ending position pixel values:  (22,90),(22,0)
+['xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'ooox', 'ooox', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'ooox', 'xoox', 'ooox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo']
+drop: 0.18
+starting pulley values:  1.044204,1.027104
+STRIPE - column #7
+starting/ending position pixel values:  (26,90),(26,0)
+['ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo']
+drop: 0.18
+starting pulley values:  1.049176,1.022306
+STRIPE - column #8
+starting/ending position pixel values:  (30,90),(30,0)
+['oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo']
+drop: 0.18
+starting pulley values:  1.054185,1.017549
+STRIPE - column #9
+starting/ending position pixel values:  (34,90),(34,0)
+['xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xooo', 'xooo', 'xoox', 'xooo', 'xooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'oooo']
+drop: 0.18
+starting pulley values:  1.059231,1.012833
+STRIPE - column #10
+starting/ending position pixel values:  (38,90),(38,0)
+['ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo']
+drop: 0.18
+starting pulley values:  1.064313,1.008158
+STRIPE - column #11
+starting/ending position pixel values:  (42,90),(42,0)
+['oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo']
+drop: 0.18
+starting pulley values:  1.069431,1.003525
+STRIPE - column #12
+starting/ending position pixel values:  (46,90),(46,0)
+['xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'ooox', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'xooo', 'xoox', 'ooox', 'ooox', 'xoox', 'ooox', 'ooox', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'xooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'xoox', 'xoox', 'xooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'xoox']
+drop: 0.18
+starting pulley values:  1.074584,0.998935
+STRIPE - column #13
+starting/ending position pixel values:  (50,90),(50,0)
+['ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo']
+drop: 0.18
+starting pulley values:  1.079771,0.994387
+STRIPE - column #14
+starting/ending position pixel values:  (54,90),(54,0)
+['oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo']
+drop: 0.18
+starting pulley values:  1.084993,0.989884
+STRIPE - column #15
+starting/ending position pixel values:  (58,90),(58,0)
+['xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'xooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo']
+drop: 0.18
+starting pulley values:  1.090249,0.985425
+STRIPE - column #16
+starting/ending position pixel values:  (62,90),(62,0)
+['ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo']
+drop: 0.18
+starting pulley values:  1.095537,0.981011
+STRIPE - column #17
+starting/ending position pixel values:  (66,90),(66,0)
+['oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo']
+drop: 0.18
+starting pulley values:  1.100859,0.976642
+STRIPE - column #18
+starting/ending position pixel values:  (70,90),(70,0)
+['xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'xooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'oooo']
+drop: 0.18
+starting pulley values:  1.106213,0.97232
+STRIPE - column #19
+starting/ending position pixel values:  (74,90),(74,0)
+['ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo']
+drop: 0.18
+starting pulley values:  1.111598,0.968045
+STRIPE - column #20
+starting/ending position pixel values:  (78,90),(78,0)
+['oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo']
+drop: 0.18
+starting pulley values:  1.117015,0.963817
+STRIPE - column #21
+starting/ending position pixel values:  (82,90),(82,0)
+['xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xooo', 'oooo']
+drop: 0.18
+starting pulley values:  1.122463,0.959637
+number of drawn columns = 22
+pulley spacing = 1.265
+change color to:#0000ff
+STRIPE - column #0
+starting/ending position pixel values:  (-2,90),(-2,0)
+['ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo']
+drop: 0.18
+starting pulley values:  1.015186,1.056703
+STRIPE - column #1
+starting/ending position pixel values:  (2,90),(2,0)
+['oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo']
+drop: 0.18
+starting pulley values:  1.019923,1.051676
+STRIPE - column #2
+starting/ending position pixel values:  (6,90),(6,0)
+['xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo']
+drop: 0.18
+starting pulley values:  1.0247,1.046685
+STRIPE - column #3
+starting/ending position pixel values:  (10,90),(10,0)
+['ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo']
+drop: 0.18
+starting pulley values:  1.029517,1.041732
+STRIPE - column #4
+starting/ending position pixel values:  (14,90),(14,0)
+['oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo']
+drop: 0.18
+starting pulley values:  1.034374,1.036817
+STRIPE - column #5
+starting/ending position pixel values:  (18,90),(18,0)
+['xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'oooo']
+drop: 0.18
+starting pulley values:  1.03927,1.031941
+STRIPE - column #6
+starting/ending position pixel values:  (22,90),(22,0)
+['ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo']
+drop: 0.18
+starting pulley values:  1.044204,1.027104
+STRIPE - column #7
+starting/ending position pixel values:  (26,90),(26,0)
+['oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo']
+drop: 0.18
+starting pulley values:  1.049176,1.022306
+STRIPE - column #8
+starting/ending position pixel values:  (30,90),(30,0)
+['xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'ooox', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'oooo']
+drop: 0.18
+starting pulley values:  1.054185,1.017549
+STRIPE - column #9
+starting/ending position pixel values:  (34,90),(34,0)
+['ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo']
+drop: 0.18
+starting pulley values:  1.059231,1.012833
+STRIPE - column #10
+starting/ending position pixel values:  (38,90),(38,0)
+['oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo']
+drop: 0.18
+starting pulley values:  1.064313,1.008158
+STRIPE - column #11
+starting/ending position pixel values:  (42,90),(42,0)
+['xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'ooox', 'ooox', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'oooo']
+drop: 0.18
+starting pulley values:  1.069431,1.003525
+STRIPE - column #12
+starting/ending position pixel values:  (46,90),(46,0)
+['ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo']
+drop: 0.18
+starting pulley values:  1.074584,0.998935
+STRIPE - column #13
+starting/ending position pixel values:  (50,90),(50,0)
+['oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo']
+drop: 0.18
+starting pulley values:  1.079771,0.994387
+STRIPE - column #14
+starting/ending position pixel values:  (54,90),(54,0)
+['xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'ooox', 'ooox', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'oooo']
+drop: 0.18
+starting pulley values:  1.084993,0.989884
+STRIPE - column #15
+starting/ending position pixel values:  (58,90),(58,0)
+['ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo']
+drop: 0.18
+starting pulley values:  1.090249,0.985425
+STRIPE - column #16
+starting/ending position pixel values:  (62,90),(62,0)
+['oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo']
+drop: 0.18
+starting pulley values:  1.095537,0.981011
+STRIPE - column #17
+starting/ending position pixel values:  (66,90),(66,0)
+['xoox', 'xoox', 'ooox', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'xoox', 'xoox', 'xoox', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'xooo', 'xoox', 'xooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'ooox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'oooo']
+drop: 0.18
+starting pulley values:  1.100859,0.976642
+STRIPE - column #18
+starting/ending position pixel values:  (70,90),(70,0)
+['ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo']
+drop: 0.18
+starting pulley values:  1.106213,0.97232
+STRIPE - column #19
+starting/ending position pixel values:  (74,90),(74,0)
+['oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oxoo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oooo', 'oooo', 'oxoo', 'oxoo', 'oooo']
+drop: 0.18
+starting pulley values:  1.111598,0.968045
+STRIPE - column #20
+starting/ending position pixel values:  (78,90),(78,0)
+['xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'oooo', 'oooo', 'xoox', 'xooo', 'oooo', 'xoox', 'xoox', 'xooo', 'xoox', 'ooox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'ooox', 'oooo', 'xoox', 'xoox', 'oooo', 'xoox', 'xoox', 'ooox', 'xoox', 'xoox', 'oooo']
+drop: 0.18
+starting pulley values:  1.117015,0.963817
+STRIPE - column #21
+starting/ending position pixel values:  (82,90),(82,0)
+['ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'oooo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo', 'ooxo', 'ooxo', 'oooo']
+drop: 0.18
+starting pulley values:  1.122463,0.959637
