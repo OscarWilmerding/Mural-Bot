@@ -50,6 +50,7 @@ typedef struct struct_message {
 } struct_message;
 
 struct_message outgoingMessage;
+struct_message incomingMessage; 
 
 bool          waitingForConfirmation = false;
 unsigned long confirmationStartTime   = 0;
@@ -148,6 +149,8 @@ void sendTriggerCommand();
 void handleSendTriggerCommand();
 void printCurrentPositions();
 void determineStripeVelocities(float posA, float posB, float &velA, float &velB);
+void startLargeStringSend(const String &strToSend);
+void sendNextChunk();
 
 
 /************************************************************/
@@ -374,11 +377,6 @@ void onDataSent(const uint8_t *macAddr, esp_now_send_status_t status) {
 }
 
 void onDataRecv(const esp_now_recv_info *info, const uint8_t *incomingData, int len) {
-  Serial.println("Confirmation received from Chassis");
-  commandConfirmed = true;
-}
-
-void onDataRecv(const esp_now_recv_info *info, const uint8_t *incomingData, int len) {
   if (len == sizeof(struct_message)) {
     // existing logic
     memcpy(&incomingMessage, incomingData, sizeof(incomingMessage));
@@ -601,9 +599,9 @@ void processSerialCommand(String command) {
     printCurrentPositions();
   }
   else if (command == "test") {
-    Serial.println("Triggering chassis without movement...");
-    sendTriggerCommand();
-    printCurrentPositions();
+    Serial.println("sending big data");
+    String bigData = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+    startLargeStringSend(bigData);
   }
   else if (command.startsWith("set command index ")) {
     int newIndex = command.substring(18).toInt();
