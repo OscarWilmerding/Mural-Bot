@@ -1,4 +1,4 @@
-23750502711362213
+23753980256036563
 AA_Oscars_Custom
 2 pin jst connector
 
@@ -25,8 +25,8 @@ AA_Oscars_Custom
 
 
 0
-0
-0
+3
+3
 AA_Oscars_Custom
 buzzer
 
@@ -34,6 +34,20 @@ buzzer
 0
 2
 2
+AA_Oscars_Custom
+simple 01x06
+
+
+0
+16
+16
+AA_Oscars_Custom
+simple 01x12
+
+
+0
+12
+12
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
