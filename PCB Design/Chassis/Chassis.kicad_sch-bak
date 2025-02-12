@@ -12693,7 +12693,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "AA_Oscars_Custom:Ec5 pigtail"
+		(property "Footprint" ""
 			(at 85.09 136.906 90)
 			(effects
 				(font

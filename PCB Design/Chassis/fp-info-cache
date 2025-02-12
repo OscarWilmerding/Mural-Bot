@@ -1,4 +1,4 @@
-23753980256036563
+23759197478234262
 AA_Oscars_Custom
 2 pin jst connector
 
@@ -27,6 +27,27 @@ AA_Oscars_Custom
 0
 3
 3
+AA_Oscars_Custom
+CONV_RPMGE12-10
+
+
+0
+7
+7
+AA_Oscars_Custom
+Ec5 pigtail
+
+
+0
+2
+2
+AA_Oscars_Custom
+array
+
+
+0
+50
+22
 AA_Oscars_Custom
 buzzer
 
