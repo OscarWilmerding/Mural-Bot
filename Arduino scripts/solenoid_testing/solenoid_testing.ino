@@ -1,5 +1,5 @@
-const int outputPin = 7;
-const int buttonPin = 9;
+const int outputPin = 10;
+const int buttonPin = 21;
 int durationMs = 100;           // Solenoid activation duration (in ms)
 int preActivationDelay = 0;     // Delay after button press before solenoid activation (in ms)
 const int fixedPostActivationDelay = 1000; // Fixed delay after solenoid activation
@@ -25,7 +25,7 @@ void loop() {
     // Cleaning cycle command
     if (input.equalsIgnoreCase("clean")) {
       Serial.println("Starting cleaning cycle...");
-      for (int i = 0; i < 10; i++) {
+      for (int i = 0; i < 40; i++) {
         digitalWrite(outputPin, HIGH);
         delay(500);       // Pin HIGH for 0.5 sec
         digitalWrite(outputPin, LOW);
@@ -47,6 +47,16 @@ void loop() {
           Serial.println(" ms");
         }
       }
+    }
+    else if (input.equalsIgnoreCase("forever")) {
+      Serial.println("Starting cleaning cycle...");
+      for (int i = 0; i < 100000; i++) {
+        digitalWrite(outputPin, HIGH);
+        delay(1000);       // Pin HIGH for 0.5 sec
+        digitalWrite(outputPin, LOW);
+        delay(30000);      // Pin LOW for 1 sec
+      }
+      Serial.println("Cleaning cycle complete.");
     }
     // Otherwise, treat as new solenoid activation duration
     else {
