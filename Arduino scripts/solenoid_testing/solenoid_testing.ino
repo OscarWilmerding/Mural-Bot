@@ -6,8 +6,10 @@ const int fixedPostActivationDelay = 1000; // Fixed delay after solenoid activat
 
 void setup() {
   pinMode(outputPin, OUTPUT);
-  pinMode(buttonPin, INPUT_PULLUP); // Button between pin 9 and GND
+  pinMode(buttonPin, INPUT_PULLUP); // Button between pin 21 and GND
   Serial.begin(9600);
+  // Seed the random number generator (using an unconnected analog pin)
+  randomSeed(analogRead(0));
   
   // Print initial information
   Serial.println("Default solenoid activation duration set to 100ms.");
@@ -52,11 +54,27 @@ void loop() {
       Serial.println("Starting cleaning cycle...");
       for (int i = 0; i < 100000; i++) {
         digitalWrite(outputPin, HIGH);
-        delay(1000);       // Pin HIGH for 0.5 sec
+        delay(1000);       // Pin HIGH for 1 sec
         digitalWrite(outputPin, LOW);
-        delay(30000);      // Pin LOW for 1 sec
+        delay(30000);      // Pin LOW for 30 sec
       }
       Serial.println("Cleaning cycle complete.");
+    }
+    // Random cycle command
+    else if (input.equalsIgnoreCase("rand")) {
+      Serial.println("Starting random cycle...");
+      delay(5000); // Initial 5-second delay
+      for (int i = 0; i < 10; i++) {
+        // Activate solenoid for the preset duration
+        digitalWrite(outputPin, HIGH);
+        delay(durationMs);
+        digitalWrite(outputPin, LOW);
+        
+        // Random pause between 500 and 1200 ms
+        int randomDelay = random(500, 1201); // upper bound is exclusive
+        delay(randomDelay);
+      }
+      Serial.println("Random cycle complete.");
     }
     // Otherwise, treat as new solenoid activation duration
     else {
@@ -82,7 +100,7 @@ void loop() {
     delay(durationMs);
     digitalWrite(outputPin, LOW);
 
-    // Fixed 1-second delay after solenoid activation
+    // Fixed delay after solenoid activation
     delay(fixedPostActivationDelay);
   }
 }
