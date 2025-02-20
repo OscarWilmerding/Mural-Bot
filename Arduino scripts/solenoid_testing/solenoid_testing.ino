@@ -16,6 +16,7 @@ void setup() {
   Serial.println("Enter a new duration (in ms) for solenoid activation.");
   Serial.println("Enter 'clean' to initiate a cleaning cycle.");
   Serial.println("Enter 'delay XX' to set a delay (in ms) BEFORE solenoid activation on button press.");
+  Serial.println("Hold the button for 10 seconds to start the forever cleaning cycle.");
 }
 
 void loop() {
@@ -27,7 +28,7 @@ void loop() {
     // Cleaning cycle command
     if (input.equalsIgnoreCase("clean")) {
       Serial.println("Starting cleaning cycle...");
-      for (int i = 0; i < 40; i++) {
+      for (int i = 0; i < 120; i++) {
         digitalWrite(outputPin, HIGH);
         delay(500);       // Pin HIGH for 0.5 sec
         digitalWrite(outputPin, LOW);
@@ -70,8 +71,8 @@ void loop() {
         delay(durationMs);
         digitalWrite(outputPin, LOW);
         
-        // Random pause between 500 and 1200 ms
-        int randomDelay = random(500, 1201); // upper bound is exclusive
+        // Random pause between 300 and 600 ms (as in your provided script)
+        int randomDelay = random(300, 600); 
         delay(randomDelay);
       }
       Serial.println("Random cycle complete.");
@@ -90,17 +91,39 @@ void loop() {
 
   // Button press handling (active LOW)
   if (digitalRead(buttonPin) == LOW) {
-    Serial.println("Button pressed, initiating sequence...");
+    unsigned long pressStartTime = millis();
+    bool longPress = false;
+    
+    // Wait until button is released or 10 seconds have passed
+    while (digitalRead(buttonPin) == LOW) {
+      if (millis() - pressStartTime >= 10000) { // 10 seconds hold
+        longPress = true;
+        break;
+      }
+    }
+    
+    if (longPress) {
+      Serial.println("Button held for 10 seconds, initiating forever cleaning cycle...");
+      for (int i = 0; i < 100000; i++) {
+        digitalWrite(outputPin, HIGH);
+        delay(1000);       // Pin HIGH for 1 sec
+        digitalWrite(outputPin, LOW);
+        delay(30000);      // Pin LOW for 30 sec
+      }
+      Serial.println("Cleaning cycle complete.");
+    } else {
+      Serial.println("Button pressed, initiating sequence...");
 
-    // Pre-activation delay from Serial input
-    delay(preActivationDelay);
+      // Pre-activation delay from Serial input
+      delay(preActivationDelay);
 
-    // Activate solenoid for durationMs
-    digitalWrite(outputPin, HIGH);
-    delay(durationMs);
-    digitalWrite(outputPin, LOW);
+      // Activate solenoid for durationMs
+      digitalWrite(outputPin, HIGH);
+      delay(durationMs);
+      digitalWrite(outputPin, LOW);
 
-    // Fixed delay after solenoid activation
-    delay(fixedPostActivationDelay);
+      // Fixed delay after solenoid activation
+      delay(fixedPostActivationDelay);
+    }
   }
 }

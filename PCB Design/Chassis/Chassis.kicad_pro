@@ -496,8 +496,8 @@
       "plot": "",
       "pos_files": "",
       "specctra_dsn": "",
-      "step": "",
-      "svg": "",
+      "step": "../../cad/Chassis PCB.step",
+      "svg": "../../cad/",
       "vrml": ""
     },
     "page_layout_descr_file": ""
