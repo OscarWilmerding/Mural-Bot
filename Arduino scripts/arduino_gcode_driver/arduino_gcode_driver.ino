@@ -658,38 +658,32 @@ void startNextCommand() {
       runMode = false; 
       currentCommandIndex++;
     }
-    /******************************************************/
-    /*   Snippet for the STRIPE portion in startNextCommand()   */
-    /******************************************************/
     else if (cmd.type == Command::STRIPE) {
       // Print which stripe command we're on
       Serial.print("Executing STRIPE command #");
       Serial.println(currentCommandIndex + 1);
 
-      // Print all relevant fields for this stripe
-      Serial.print("  Stripe Name: ");
-      Serial.println(cmd.stripeName);
+      // JSON formatting of stripe data
+      String stripeData = "{";
+      stripeData += "\"stripeName\":\"" + cmd.stripeName + "\",";
+      stripeData += "\"drop\":" + String(cmd.drop, 4) + ",";
+      stripeData += "\"startPulleyA\":" + String(cmd.startPulleyA, 4) + ",";
+      stripeData += "\"startPulleyB\":" + String(cmd.startPulleyB, 4) + ",";
+      stripeData += "\"pattern\":\"" + cmd.pattern + "\",";
+      stripeData += "\"stripeVelocity\":" + String(stripeVelocity, 4);
+      stripeData += "}";
 
-      Serial.print("  Drop Value: ");
-      Serial.println(cmd.drop);
+      Serial.println("Generated JSON Data for STRIPE:");
+      Serial.println(stripeData);
 
-      Serial.print("  Starting Position of Pulley A for stripe: ");
-      Serial.println(cmd.startPulleyA);
-
-      Serial.print("  Starting Position of Pulley B for stripe: ");
-      Serial.println(cmd.startPulleyB);
-
-      Serial.print("  Pattern String: ");
-      Serial.println(cmd.pattern);
-
-      
-
+      // Send JSON data to chassis
+      startLargeStringSend(stripeData);
 
       // Move to initial position (blocking move)
       Serial.println("Moving to initial stripe position...");
       move_to_position_blocking(cmd.startPulleyA, cmd.startPulleyB);
 
-      stepper1.setAcceleration(0); // it is important that these values are set after the move_to_position function is called
+      stepper1.setAcceleration(0);
       stepper2.setAcceleration(0);
       stepper1.setMaxSpeed(8000);  
       stepper2.setMaxSpeed(8000);
@@ -698,31 +692,28 @@ void startNextCommand() {
       delay(2000);
 
       // Calculate total time for movement (in milliseconds)
-      float timeForMovementSeconds = cmd.drop / stripeVelocity;  // seconds
-      float timeForMovementMs      = timeForMovementSeconds * 1000.0; // ms
+      float timeForMovementSeconds = cmd.drop / stripeVelocity;  
+      float timeForMovementMs = timeForMovementSeconds * 1000.0;
 
-      Serial.print("timeForMovementSeconds: ");
+      Serial.print("Time for movement (seconds): ");
       Serial.println(timeForMovementSeconds);
-      Serial.print("timeForMovementMs: ");
+      Serial.print("Time for movement (ms): ");
       Serial.println(timeForMovementMs);
 
-      unsigned long startTime    = millis();
+      unsigned long startTime = millis();
       unsigned long lastCallTime = millis();
 
-      Serial.println("Entering stripe movement while loop...");
+      Serial.println("Entering stripe movement loop...");
       while (millis() - startTime < timeForMovementMs) {
         unsigned long currentTime = millis();
-
-        // Always run the steppers each iteration
         stepper1.runSpeed();
         stepper2.runSpeed();
 
         // Recalculate velocity at intervals
         if (currentTime - lastCallTime >= velocityCalcDelay) {
-          Serial.println("   Velocity update   ");
+          Serial.println("Velocity update...");
           printCurrentPositions();
 
-          // Get positions in meters 
           float posA = stepper1.currentPosition() * motor1Direction;
           float posB = stepper2.currentPosition() * motor2Direction;
 
@@ -730,21 +721,12 @@ void startNextCommand() {
             Serial.println("CRITICAL - one value going into velocity func is negative");
           }
 
-          // Determine velocities
           float velocityA, velocityB;
           determineStripeVelocities(posA, posB, velocityA, velocityB);
 
-          // Convert to steps/sec
-          Serial.print("   velocityA (steps/s): ");
-          Serial.println(velocityA);
-          Serial.print("   velocityB (steps/s): ");
-          Serial.println(velocityB);
-
-          // Set speeds
-          stepper1.setSpeed(-1 * velocityA); // -1 is a crapshoot fix just works
+          stepper1.setSpeed(-1 * velocityA);
           stepper2.setSpeed(-1 * velocityB);
 
-          // Immediately run them after setting speed
           stepper1.runSpeed();
           stepper2.runSpeed();
 
@@ -756,7 +738,6 @@ void startNextCommand() {
       movementInProgress = false;
       currentCommandIndex++;
 
-      // Set new position to wherever the velocity movements landed
       stepper1.setCurrentPosition(stepper1.currentPosition());
       stepper2.setCurrentPosition(stepper2.currentPosition());
     }
@@ -768,6 +749,7 @@ void startNextCommand() {
     runMode = false;
   }
 }
+
 
 
 /************************************************************/
