@@ -41,7 +41,7 @@ float accelerationMultiplier    = 1.0;
 float maxSpeedMultiplier        = 1.0;
 
 // ESP-NOW variables
-uint8_t chassisAddress[]        = { 0xA0, 0xB7, 0x65, 0x07, 0xD5, 0x34 };
+uint8_t chassisAddress[]        = { 0xA0, 0xB7, 0x65, 0x07, 0xD5, 0x78 };
 bool commandConfirmed           = false;
 const uint8_t COMMAND_RUN       = 0x01;
 

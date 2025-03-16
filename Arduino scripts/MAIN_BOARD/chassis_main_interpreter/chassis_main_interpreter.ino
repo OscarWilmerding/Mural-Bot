@@ -36,6 +36,7 @@ void setAllPins(bool state) {
 // Process received long string (for future use)
 void processReceivedString() {
   Serial.println("Processing received large string...");
+  Serial.println(largeStringBuffer);
 }
 
 // Handle large string reception over ESP-NOW (from tested script)
