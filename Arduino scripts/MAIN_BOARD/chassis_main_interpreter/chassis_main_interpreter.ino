@@ -36,7 +36,6 @@ void setAllPins(bool state) {
 // Process received long string (for future use)
 void processReceivedString() {
   Serial.println("Processing received large string...");
-  Serial.println(largeStringBuffer);
 }
 
 // Handle large string reception over ESP-NOW (from tested script)
@@ -98,9 +97,13 @@ void onDataSent(const uint8_t *macAddr, esp_now_send_status_t status) {
 
 void setup() {
   Serial.begin(115200);
+  delay(5000);
 
   // Initialize WiFi
   WiFi.mode(WIFI_STA);
+  delay(1000); //trust
+  Serial.print("MAC address: ");
+  Serial.println(WiFi.macAddress());
   Serial.println("ESP-NOW Chassis Initialized");
 
   // Initialize ESP-NOW

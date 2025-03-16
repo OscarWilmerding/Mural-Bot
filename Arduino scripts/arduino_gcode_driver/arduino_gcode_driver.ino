@@ -41,7 +41,7 @@ float accelerationMultiplier    = 1.0;
 float maxSpeedMultiplier        = 1.0;
 
 // ESP-NOW variables
-uint8_t chassisAddress[]        = { 0x48, 0x27, 0xE2, 0xE6, 0xE8, 0x34 };
+uint8_t chassisAddress[]        = { 0xA0, 0xB7, 0x65, 0x07, 0xD5, 0x34 };
 bool commandConfirmed           = false;
 const uint8_t COMMAND_RUN       = 0x01;
 
@@ -158,8 +158,8 @@ void sendNextChunk();
 /************************************************************/
 void setup() {
   Serial.begin(115200);
+  delay(5000); //arduino connects to serial slow as hell so this is necissary
   Serial.println("Stepper Motor Control Initialized");
-
   // Set acceleration and max speed
   stepper1.setAcceleration(baseAcceleration * accelerationMultiplier);
   stepper1.setMaxSpeed(baseMaxSpeed * maxSpeedMultiplier);
@@ -175,6 +175,9 @@ void setup() {
 
   // Initialize WiFi
   WiFi.mode(WIFI_STA);
+  delay(1000); //to get right reading
+  Serial.print("MAC address: ");
+  Serial.println(WiFi.macAddress());
   Serial.println("ESP-NOW Hub Initialized");
 
   // Initialize ESP-NOW
@@ -301,24 +304,44 @@ void startLargeStringSend(const String &strToSend) {
   largeStringAckReceived = false;
 
   Serial.println("Initiating large string send...");
-  
-  // First, send a "start" packet containing total chunk count
-  // Packet format: [0x10, highByte(totalChunks), lowByte(totalChunks)]
+
+  // Send initial chunk-count packet
   uint8_t startPacket[3];
   startPacket[0] = 0x10;
   startPacket[1] = (uint8_t)((totalChunks >> 8) & 0xFF);
   startPacket[2] = (uint8_t)(totalChunks & 0xFF);
+  
   esp_err_t result = esp_now_send(chassisAddress, startPacket, sizeof(startPacket));
   
   if (result == ESP_OK) {
     Serial.println("Sent initial chunk-count packet.");
   } else {
     Serial.println("Failed to send initial chunk-count packet.");
+    largeStringInProgress = false;
+    return; // Stop immediately if failed
   }
 
-  // Immediately try sending the first chunk
-  lastSendAttempt = millis();
-  sendNextChunk();
+  // Blocking loop to send all chunks
+  for (currentChunkIndex = 0; currentChunkIndex < totalChunks; currentChunkIndex++) {
+    largeStringAckReceived = false; // Reset ack flag before sending chunk
+    sendNextChunk();
+    
+    // Wait for acknowledgment before sending next chunk
+    unsigned long sendTime = millis();
+    const unsigned long timeout = 2000; // 2 seconds timeout, adjust as needed
+
+    while (!largeStringAckReceived) {
+      if (millis() - sendTime > timeout) {
+        Serial.println("Chunk acknowledgment timeout, resending chunk...");
+        sendNextChunk(); // retry sending chunk on timeout
+        sendTime = millis(); // reset timeout timer
+      }
+      delay(10); // Short delay to prevent busy waiting
+    }
+  }
+
+  Serial.println("Large string transmission completed.");
+  largeStringInProgress = false;
 }
 
 /*****************************************************************************/
@@ -658,12 +681,12 @@ void startNextCommand() {
       runMode = false; 
       currentCommandIndex++;
     }
+
     else if (cmd.type == Command::STRIPE) {
-      // Print which stripe command we're on
       Serial.print("Executing STRIPE command #");
       Serial.println(currentCommandIndex + 1);
 
-      // JSON formatting of stripe data
+      // JSON formatting of stripe data (no change needed)
       String stripeData = "{";
       stripeData += "\"stripeName\":\"" + cmd.stripeName + "\",";
       stripeData += "\"drop\":" + String(cmd.drop, 4) + ",";
@@ -676,23 +699,22 @@ void startNextCommand() {
       Serial.println("Generated JSON Data for STRIPE:");
       Serial.println(stripeData);
 
-      // Send JSON data to chassis
+      // Send entire JSON data string using your known-working large string send scheme
       startLargeStringSend(stripeData);
 
-      // Move to initial position (blocking move)
+      // (Your existing positioning and movement code remains unchanged below this point)
       Serial.println("Moving to initial stripe position...");
       move_to_position_blocking(cmd.startPulleyA, cmd.startPulleyB);
 
       stepper1.setAcceleration(0);
       stepper2.setAcceleration(0);
-      stepper1.setMaxSpeed(8000);  
+      stepper1.setMaxSpeed(8000);
       stepper2.setMaxSpeed(8000);
 
       Serial.println("Done moving to initial position.");
       delay(2000);
 
-      // Calculate total time for movement (in milliseconds)
-      float timeForMovementSeconds = cmd.drop / stripeVelocity;  
+      float timeForMovementSeconds = cmd.drop / stripeVelocity;
       float timeForMovementMs = timeForMovementSeconds * 1000.0;
 
       Serial.print("Time for movement (seconds): ");
@@ -709,7 +731,6 @@ void startNextCommand() {
         stepper1.runSpeed();
         stepper2.runSpeed();
 
-        // Recalculate velocity at intervals
         if (currentTime - lastCallTime >= velocityCalcDelay) {
           Serial.println("Velocity update...");
           printCurrentPositions();
@@ -741,6 +762,8 @@ void startNextCommand() {
       stepper1.setCurrentPosition(stepper1.currentPosition());
       stepper2.setCurrentPosition(stepper2.currentPosition());
     }
+
+
   }
   else {
     Serial.println("All Commands Complete");
