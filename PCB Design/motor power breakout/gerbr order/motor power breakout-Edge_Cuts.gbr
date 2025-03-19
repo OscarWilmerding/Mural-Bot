@@ -1,0 +1,23 @@
+%TF.GenerationSoftware,KiCad,Pcbnew,9.0.0*%
+%TF.CreationDate,2025-03-18T18:28:57-04:00*%
+%TF.ProjectId,motor power breakout,6d6f746f-7220-4706-9f77-657220627265,rev?*%
+%TF.SameCoordinates,Original*%
+%TF.FileFunction,Profile,NP*%
+%FSLAX46Y46*%
+G04 Gerber Fmt 4.6, Leading zero omitted, Abs format (unit mm)*
+G04 Created by KiCad (PCBNEW 9.0.0) date 2025-03-18 18:28:57*
+%MOMM*%
+%LPD*%
+G01*
+G04 APERTURE LIST*
+%TA.AperFunction,Profile*%
+%ADD10C,0.050000*%
+%TD*%
+G04 APERTURE END LIST*
+D10*
+X111000000Y-87000000D02*
+X182500000Y-87000000D01*
+X182500000Y-126500000D01*
+X111000000Y-126500000D01*
+X111000000Y-87000000D01*
+M02*
