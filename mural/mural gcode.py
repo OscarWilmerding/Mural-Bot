@@ -862,7 +862,7 @@ def get_color_name(hex_code):
             if diff < min_diff:
                 min_diff = diff
                 closest_name = name
-        return closest_nam
+        return closest_name
 
 def generate_column_pattern_multi(img, column_index, color_index_map, output_file):
     """
