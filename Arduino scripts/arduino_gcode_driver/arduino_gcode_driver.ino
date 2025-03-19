@@ -699,9 +699,6 @@ void startNextCommand() {
       Serial.println("Generated JSON Data for STRIPE:");
       Serial.println(stripeData);
 
-      // Send entire JSON data string using your known-working large string send scheme
-      startLargeStringSend(stripeData);
-
       // (Your existing positioning and movement code remains unchanged below this point)
       Serial.println("Moving to initial stripe position...");
       move_to_position_blocking(cmd.startPulleyA, cmd.startPulleyB);
@@ -714,6 +711,9 @@ void startNextCommand() {
       Serial.println("Done moving to initial position.");
       delay(2000);
 
+      // Send entire JSON data string using your known-working large string send scheme
+      startLargeStringSend(stripeData);
+      
       float timeForMovementSeconds = cmd.drop / stripeVelocity;
       float timeForMovementMs = timeForMovementSeconds * 1000.0;
 

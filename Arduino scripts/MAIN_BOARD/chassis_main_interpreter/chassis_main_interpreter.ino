@@ -1,5 +1,6 @@
 #include <esp_now.h>
 #include <WiFi.h>
+#include <ArduinoJson.h>
 
 // Define Hub MAC address
 uint8_t hubAddress[] = {0x48, 0x27, 0xE2, 0xE6, 0xE6, 0x58};
@@ -33,10 +34,93 @@ void setAllPins(bool state) {
   }
 }
 
-// Process received long string (for future use)
+#include <ArduinoJson.h>
+
+// Process received long string as JSON,  filters out data then hands off movement to another func
 void processReceivedString() {
-  Serial.println("Processing received large string...");
-  Serial.println(largeStringBuffer);
+    Serial.println("Processing received large string...");
+
+    StaticJsonDocument<3072> doc;  // Adjust buffer size as needed
+    DeserializationError error = deserializeJson(doc, largeStringBuffer);
+
+    if (error) {
+        Serial.print("JSON Parsing Failed: ");
+        Serial.println(error.c_str());
+        return;
+    }
+
+    // Extracting values
+    const char* stripeName = doc["stripeName"];
+    float drop = doc["drop"];
+    float startPulleyA = doc["startPulleyA"];
+    float startPulleyB = doc["startPulleyB"];
+    float stripeVelocity = doc["stripeVelocity"];
+
+    // Extract pattern as a raw string
+    String patternRaw = doc["pattern"].as<String>();
+
+    // Clean up the pattern string (remove brackets, spaces, and extra quotes)
+    patternRaw.replace("[", "");
+    patternRaw.replace("]", "");
+    patternRaw.replace("'", ""); // Remove single quotes
+    patternRaw.replace("\"", ""); // Remove double quotes
+
+    int alottedListSize = 150;
+
+    // Convert the pattern string into a list
+    String patternList[alottedListSize]; 
+    int patternCount = 0;
+
+    int start = 0;
+    int end = patternRaw.indexOf(',');
+   
+
+    while (end != -1 && patternCount < alottedListSize) {
+        patternList[patternCount] = patternRaw.substring(start, end);
+        patternList[patternCount].trim(); // Remove any spaces
+        patternCount++;
+        start = end + 1;
+        end = patternRaw.indexOf(',', start);
+    }
+
+    // Add last entry if available
+    if (start < patternRaw.length() && patternCount < alottedListSize) {
+        patternList[patternCount] = patternRaw.substring(start);
+        patternList[patternCount].trim();
+        patternCount++;
+    }
+
+    // Print extracted values
+    Serial.println("Extracted Data:");
+    Serial.print("Stripe Name: "); Serial.println(stripeName);
+    Serial.print("Drop: "); Serial.println(drop, 4);
+    Serial.print("Start Pulley A: "); Serial.println(startPulleyA, 4);
+    Serial.print("Start Pulley B: "); Serial.println(startPulleyB, 4);
+    Serial.print("Stripe Velocity: "); Serial.println(stripeVelocity, 4);
+    
+    Serial.print("Pattern Count: ");
+    Serial.println(patternCount);
+
+    Serial.println("Pattern List:");
+    for (int i = 0; i < patternCount; i++) {
+        Serial.print("  Entry "); Serial.print(i); Serial.print(": ");
+        Serial.println(patternList[i]);
+    }
+
+  sprayAndStripe(stripeVelocity, drop, patternList, patternCount);
+}
+
+void sprayAndStripe(float stripeVelocity, float drop, String patternList[], int patternCount) {
+    float movementTimeMs = (drop / stripeVelocity) * 1000;  // Convert seconds to milliseconds
+    float timeBetweenSpraysMs = movementTimeMs / patternCount;
+
+    Serial.print("Movement Time (ms): ");
+    Serial.println(movementTimeMs);
+    
+    Serial.print("Time Between Sprays (ms): ");
+    Serial.println(timeBetweenSpraysMs);
+
+    
 }
 
 // Handle large string reception over ESP-NOW (from tested script)
