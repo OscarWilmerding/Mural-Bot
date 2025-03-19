@@ -14,7 +14,7 @@ import webcolors
 # 2) Ensure that the folder the script will save files to exists or provide a new path for 'root_folder' below.
 # 3) Provide a file path for 'gcode_filepath' below.
 
-root_folder = r'C:/Users/oewil/Documents/GitHub/Mural-Bot/mural'
+root_folder = r'C:/Users/oewil/OneDrive/Desktop/Mural-Bot/mural'
 gcode_filepath = os.path.join(root_folder, "gcode.txt")
 
 reduced_image_path = os.path.join(root_folder, "temp.png")
@@ -29,7 +29,7 @@ if not os.path.exists(temp_images_folder):
     print(f"Created directory: {temp_images_folder}")
 
 # Global variables - THESE ALSO SET AUTOFILLED DEFAULTS
-file_path = r"C:/Users/oewil\Documents/GitHub/Mural-Bot/mural/imput images/eye linocut.jpg"
+file_path = r"C:/Users/oewil/OneDrive/Desktop/Mural-Bot/mural/imput images/eye linocut.jpg"
 width = 30  # in pixels (should be an integer)
 pixel_size = 0.002  # size of each pixel in meters
 cable_sepperation = 1.265  # in meters (this is the pulley spacing)
@@ -924,7 +924,7 @@ def generate_position_data_multi_color_velocity_once(
     - Scans the entire 'simplified_image_path' (which is your processed_image_path).
     - Breaks columns in 4-pixel increments (same as the mono function).
     - For each pixel:
-        * If alpha=0 => prints 'x' and also prints a debug message about transparency.
+        * If alpha=0 or pure black => prints 'x' and also prints a debug message.
         * Otherwise => prints the digit that corresponds to that color in 'all_selected_hex_codes'.
     - Prints color mapping exactly once.
     """
@@ -971,9 +971,6 @@ def generate_position_data_multi_color_velocity_once(
                 patterns = []
                 col_start = 4 * c
 
-                # Loop over rows top-to-bottom or bottom-to-top
-                #   The existing code (mono) apparently goes top->bottom in the array
-                #   but its Y coordinate is reversed physically. We'll just replicate the logic.
                 for y in range(h):
                     row_pattern = ""
                     for offset in range(4):
@@ -984,9 +981,12 @@ def generate_position_data_multi_color_velocity_once(
                             continue
 
                         r, g, b, a = img.getpixel((x_coord, y))
-                        if a == 0:
-                            # Transparent
-                            print(f"[DEBUG] Transparent pixel at (x={x_coord}, y={y})")
+                        # Check for transparency OR pure black
+                        if a == 0 or (r == 0 and g == 0 and b == 0):
+                            if a == 0:
+                                print(f"[DEBUG] Transparent pixel at (x={x_coord}, y={y})")
+                            else:
+                                print(f"[DEBUG] Pure black pixel at (x={x_coord}, y={y})")
                             row_pattern += "x"
                         else:
                             # Convert pixel to lowercase hex
@@ -1006,14 +1006,10 @@ def generate_position_data_multi_color_velocity_once(
                 # Write out the list of row patterns
                 f.write(str(patterns) + "\n")
 
-                # Same "drop" and "starting pulley values" as the mono slicing approach
-                # (We assume these methods are already defined in your code: length_a, length_b, etc.)
+                # Calculate drop and pulley values
                 drop_val = pixel_size * h
                 f.write(f"drop: {drop_val}\n")
 
-                # The code in mono slicing calls length_a((c*4)-2, height), etc.
-                # We'll keep that consistent:
-                #   length_a(x, yFlipped?), or maybe the code doesn't flip? We'll match the original.
                 la = round(length_a((c*4)-2, h), 6)
                 lb = round(length_b((c*4)-2, h), 6)
                 f.write(f"starting pulley values:  {la},{lb}\n")
