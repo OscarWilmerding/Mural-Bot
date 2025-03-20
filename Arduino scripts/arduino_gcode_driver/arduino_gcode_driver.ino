@@ -128,7 +128,7 @@ struct Command {
 // NOTE: This number is important. If there is a memory overflow,
 // lower this number because the ESP32 can only manage so many 
 // global variables at once.
-const int MAX_COMMANDS      = 1500; 
+const int MAX_COMMANDS      = 200; 
 Command commands[MAX_COMMANDS];
 int     commandCount        = 0;
 int     currentCommandIndex = 0;

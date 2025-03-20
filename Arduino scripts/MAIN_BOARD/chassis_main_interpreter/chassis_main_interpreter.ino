@@ -110,18 +110,131 @@ void processReceivedString() {
   sprayAndStripe(stripeVelocity, drop, patternList, patternCount);
 }
 
-void sprayAndStripe(float stripeVelocity, float drop, String patternList[], int patternCount) {
-    float movementTimeMs = (drop / stripeVelocity) * 1000;  // Convert seconds to milliseconds
-    float timeBetweenSpraysMs = movementTimeMs / patternCount;
+////////////////////////////////////////////////////
+struct ledgerEntry {
+  int pin;
+  unsigned long triggerTime;  
+  bool triggered;             
+};
 
-    Serial.print("Movement Time (ms): ");
-    Serial.println(movementTimeMs);
-    
-    Serial.print("Time Between Sprays (ms): ");
-    Serial.println(timeBetweenSpraysMs);
+ledgerEntry ledger[50]; // adjust size as needed
 
-    
+// Initialize ledger entries as inactive
+void initLedger() {
+  for (int i = 0; i < 50; i++) {
+    ledger[i] = {-1, 0, false};
+  }
 }
+
+// Schedule a pin trigger at a specified delay from now
+void schedulePin(int pin, unsigned long delayFromNow) {
+  unsigned long triggerAt = millis() + delayFromNow;
+  for (int i = 0; i < 50; i++) {
+    if (ledger[i].pin == -1) { // empty slot
+      ledger[i] = {pin, triggerAt, false};
+      break;
+    }
+  }
+}
+
+
+void interpretPattern(string patternToProcess, currentMillis){
+  for (int i = 0; i < 4; i++) {
+    if (patternToProcess[i] == 'x') continue;  // Skip 'x'
+
+    Serial.print("Position ");
+    Serial.print(i + 1);
+    Serial.print(": ");
+
+    if (patternToProcess[i] == '1') {
+       if (i==0){
+        schedulePin(1, 1) //set to trigger 1ms from now
+       }
+       if (i==2){
+        schedulePin(2, 1) //set to trigger 1ms from now
+       }
+       if (i==2){
+        schedulePin(3, 1) //set to trigger 1ms from now
+       }
+       if (i==3){
+        schedulePin(4, 1) //set to trigger 1ms from now
+       }
+    } else if (patternToProcess[i] == '2') {
+      if (i==0){
+        schedulePin(1, 1) //set to trigger 1ms from now
+      }
+      if (i==2){
+        schedulePin(2, 1) //set to trigger 1ms from now
+      }
+      if (i==2){
+        schedulePin(3, 1) //set to trigger 1ms from now
+      }
+      if (i==3){
+        schedulePin(4, 1) //set to trigger 1ms from now
+      }
+    } else if (patternToProcess[i] == '3') {
+        Serial.println("Doing action for 3");
+        // Add logic for '3' here
+    }
+  }
+}
+
+
+void sprayAndStripe(float stripeVelocity, float drop, String patternList[], int patternCount) {
+  float movementTimeMs = (drop / stripeVelocity) * 1000;  // Convert seconds to milliseconds
+  float timeBetweenSpraysMs = movementTimeMs / patternCount;
+
+  Serial.print("Movement Time (ms): ");
+  Serial.println(movementTimeMs);
+  
+  Serial.print("Time Between Sprays (ms): ");
+  Serial.println(timeBetweenSpraysMs);
+
+  unsigned long startMillis = millis();
+  unsigned long lastTriggerMillis = startMillis;
+
+  while (true) {  
+    currentMillis = millis();
+
+    // Exit condition
+    if (currentMillis - startMillis >= movementTimeMs) {
+      break;
+    }
+
+    // Time for next trigger
+    if (currentMillis - lastTriggerMillis >= timeBetweenSpraysMs) {
+      interpretPattern(patternList[triggerCount++], currentMillis);
+      lastTriggerMillis += timeBetweenSpraysMs;
+    }
+
+    //CHECKING THE LEDGER FOR PINS TO TURN ON
+    for (int i = 0; i < 50; i++) {
+      if (ledger[i].pin != -1) {
+        if (!ledger[i].triggered && currentMillis >= ledger[i].triggerTime) {
+          digitalWrite(ledger[i].pin, HIGH);  //TODO remap this to the right pins
+          ledger[i].triggered = true;
+        } 
+        else if (ledger[i].triggered && currentMillis >= ledger[i].triggerTime + PIN_HIGH_DURATION_MS) {
+          digitalWrite(ledger[i].pin, LOW);
+          ledger[i].pin = -1;  // mark as inactive
+        }
+      }
+    }
+    
+    // Continuously update GPIO pins
+    updateEvents(currentMillis);
+  }
+
+  // Ensure all pins off at end
+  for (int i = 0; i < 12; i++) {
+    digitalWrite(i, LOW);
+  }
+
+}
+
+
+
+///////////////////////////////////////////////
 
 // Handle large string reception over ESP-NOW (from tested script)
 void handleLargeStringPacket(const uint8_t *data, int len) {

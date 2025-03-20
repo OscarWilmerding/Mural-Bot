@@ -985,8 +985,6 @@ def generate_position_data_multi_color_velocity_once(
                         if a == 0 or (r == 0 and g == 0 and b == 0):
                             if a == 0:
                                 print(f"[DEBUG] Transparent pixel at (x={x_coord}, y={y})")
-                            else:
-                                print(f"[DEBUG] Pure black pixel at (x={x_coord}, y={y})")
                             row_pattern += "x"
                         else:
                             # Convert pixel to lowercase hex
