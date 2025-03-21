@@ -8,6 +8,8 @@ uint8_t hubAddress[] = {0x48, 0x27, 0xE2, 0xE6, 0xE6, 0x58};
 // GPIO pin setup for serial commands
 const int pins[] = {17, 21, 22, 25, 32, 15, 33, 27, 4, 16, 26, 14, 13, 12};
 const int numPins = sizeof(pins) / sizeof(pins[0]);
+const unsigned long PIN_HIGH_DURATION_MS = 12; // or any desired duration
+
 
 int durationMs = 100;
 int preActivationDelay = 0;
@@ -138,7 +140,7 @@ void schedulePin(int pin, unsigned long delayFromNow) {
 }
 
 
-void interpretPattern(string patternToProcess, currentMillis){
+void interpretPattern(String patternToProcess, unsigned long currentMillis, int speed) {
   for (int i = 0; i < 4; i++) {
     if (patternToProcess[i] == 'x') continue;  // Skip 'x'
 
@@ -147,38 +149,72 @@ void interpretPattern(string patternToProcess, currentMillis){
     Serial.print(": ");
 
     if (patternToProcess[i] == '1') {
-       if (i==0){
-        schedulePin(1, 1) //set to trigger 1ms from now
-       }
-       if (i==2){
-        schedulePin(2, 1) //set to trigger 1ms from now
-       }
-       if (i==2){
-        schedulePin(3, 1) //set to trigger 1ms from now
-       }
-       if (i==3){
-        schedulePin(4, 1) //set to trigger 1ms from now
-       }
+      if (i == 0) {
+        schedulePin(1, 1);
+      }
+      if (i == 1) {
+        schedulePin(2, 1); 
+      }
+      if (i == 2) {
+        schedulePin(3, 1); 
+      }
+      if (i == 3) {
+        schedulePin(4, 1); 
+      }
     } else if (patternToProcess[i] == '2') {
-      if (i==0){
-        schedulePin(1, 1) //set to trigger 1ms from now
+      if (i == 0) {
+        schedulePin(5, (0.1 / speed) * 1000);
       }
-      if (i==2){
-        schedulePin(2, 1) //set to trigger 1ms from now
+      if (i == 1) {
+        schedulePin(6, (0.1 / speed) * 1000); 
       }
-      if (i==2){
-        schedulePin(3, 1) //set to trigger 1ms from now
+      if (i == 2) {
+        schedulePin(7, (0.1 / speed) * 1000); 
       }
-      if (i==3){
-        schedulePin(4, 1) //set to trigger 1ms from now
+      if (i == 3) {
+        schedulePin(8, (0.1 / speed) * 1000); 
       }
     } else if (patternToProcess[i] == '3') {
-        Serial.println("Doing action for 3");
-        // Add logic for '3' here
+      if (i == 0) {
+        schedulePin(9, (0.2 / speed) * 1000); 
+      }
+      if (i == 1) {
+        schedulePin(10, (0.2 / speed) * 1000); 
+      }
+      if (i == 2) {
+        schedulePin(11, (0.2 / speed) * 1000); 
+      }
+      if (i == 3) {
+        schedulePin(12, (0.2 / speed) * 1000); 
+      }
     }
   }
 }
 
+// Map solenoid numbers (1-12) to arbitrary GPIO pins
+// Solenoid-to-GPIO mapping (1–12)
+const int solenoidPins[14] = {
+  18, // Solenoid 1
+  23, // Solenoid 2
+  19, // Solenoid 3
+  25, // Solenoid 4
+  32, // Solenoid 5
+  15, // Solenoid 6
+  33, // Solenoid 7
+  27, // Solenoid 8
+  4,  // Solenoid 9
+  16, // Solenoid 10
+  26, // Solenoid 11
+  14  // Solenoid 12
+  13, // Extra port out
+  12  // Buzzer
+};
+
+void pullSolenoid(int solenoidNumber, int condition) {
+  if (solenoidNumber < 1 || solenoidNumber > 14) return; // Guard clause
+  int gpio = solenoidPins[solenoidNumber - 1];           // Convert to 0-based index
+  digitalWrite(gpio, condition);
+}
 
 void sprayAndStripe(float stripeVelocity, float drop, String patternList[], int patternCount) {
   float movementTimeMs = (drop / stripeVelocity) * 1000;  // Convert seconds to milliseconds
@@ -192,6 +228,8 @@ void sprayAndStripe(float stripeVelocity, float drop, String patternList[], int 
 
   unsigned long startMillis = millis();
   unsigned long lastTriggerMillis = startMillis;
+  unsigned long currentMillis = millis();
+  int triggerCount = 0;
 
   while (true) {  
     currentMillis = millis();
@@ -203,7 +241,7 @@ void sprayAndStripe(float stripeVelocity, float drop, String patternList[], int 
 
     // Time for next trigger
     if (currentMillis - lastTriggerMillis >= timeBetweenSpraysMs) {
-      interpretPattern(patternList[triggerCount++], currentMillis);
+      interpretPattern(patternList[triggerCount++], currentMillis, stripeVelocity);
       lastTriggerMillis += timeBetweenSpraysMs;
     }
 
@@ -211,25 +249,21 @@ void sprayAndStripe(float stripeVelocity, float drop, String patternList[], int 
     for (int i = 0; i < 50; i++) {
       if (ledger[i].pin != -1) {
         if (!ledger[i].triggered && currentMillis >= ledger[i].triggerTime) {
-          digitalWrite(ledger[i].pin, HIGH);  //TODO remap this to the right pins
+          pullSolenoid(ledger[i].pin, HIGH);  //TODO remap this to the right pins
           ledger[i].triggered = true;
         } 
         else if (ledger[i].triggered && currentMillis >= ledger[i].triggerTime + PIN_HIGH_DURATION_MS) {
-          digitalWrite(ledger[i].pin, LOW);
+          pullSolenoid(ledger[i].pin, LOW);
           ledger[i].pin = -1;  // mark as inactive
         }
       }
     }
-    
-    // Continuously update GPIO pins
-    updateEvents(currentMillis);
   }
 
   // Ensure all pins off at end
   for (int i = 0; i < 12; i++) {
-    digitalWrite(i, LOW);
+    pullSolenoid(i, LOW);
   }
-
 }
 
 
