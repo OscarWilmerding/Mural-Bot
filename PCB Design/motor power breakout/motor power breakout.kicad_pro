@@ -505,7 +505,7 @@
       "plot": "gerbr order/",
       "pos_files": "",
       "specctra_dsn": "",
-      "step": "",
+      "step": "../../cad/Big Motor Base/motor power breakout.step",
       "svg": "",
       "vrml": ""
     },
