@@ -9,6 +9,7 @@ import random
 from sklearn.cluster import KMeans
 import sys
 import webcolors
+import json
 # BEFORE RUNNING:
 # 1) Run the command 'pip install tkinter pillow numpy matplotlib sklearn' in your terminal to install all necessary libraries.
 # 2) Ensure that the folder the script will save files to exists or provide a new path for 'root_folder' below.
@@ -29,14 +30,14 @@ if not os.path.exists(temp_images_folder):
     print(f"Created directory: {temp_images_folder}")
 
 # Global variables - THESE ALSO SET AUTOFILLED DEFAULTS
-file_path = r"C:/Users/oewil/OneDrive/Desktop/Mural-Bot/mural/imput images/eye linocut.jpg"
-width = 30  # in pixels (should be an integer)
+file_path = r"C:/Users/oewil/OneDrive/Desktop/Mural-Bot/mural/imput images/deadman.jpg"
+width = 300  # in pixels (should be an integer)
 pixel_size = 0.002  # size of each pixel in meters
 cable_sepperation = 1.265  # in meters (this is the pulley spacing)
 dist_from_pulley = 1.0  # distance from pulleys to bottom of mural (m)
 offset = 0.0  # offset of image from center to the left (m)
 color_mode = '--'  # default color mode
-number_of_colors = 2  # default number of colors for 'Simplify Image' method
+number_of_colors = 3  # default number of colors for 'Simplify Image' method
 n_value = 3  # default N value for NxN methods
 peak_velocity = 0.5  # in meters per sec
 slicing_option = '--'  # default slicing option
@@ -1002,7 +1003,7 @@ def generate_position_data_multi_color_velocity_once(
                     patterns.append(row_pattern)
 
                 # Write out the list of row patterns
-                f.write(str(patterns) + "\n")
+                f.write('pattern: ' + json.dumps(patterns) + "\n")
 
                 # Calculate drop and pulley values
                 drop_val = pixel_size * h
@@ -1080,6 +1081,10 @@ if color_mode in ['RGB Scatter NxN', 'Dynamic Scatter NxN']:
     print("Value of N:", n_value)
 print("Slicing Option:", slicing_option)
 
-generate_preview_image(selected_hex_codes)
+if slicing_option == 'multi color velocity slicing':
+    with open("C:/Users/oewil/OneDrive/Desktop/Mural-Bot/mural/gcode viewer.py") as f:
+        exec(f.read())
+else:
+    generate_preview_image(selected_hex_codes)
 
 print('GCODE GENERATOR IS DONE')

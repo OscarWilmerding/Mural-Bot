@@ -1,0 +1,174 @@
+import re
+import ast
+from PIL import Image, ImageDraw, ImageFont
+import matplotlib.pyplot as plt
+import math
+
+def parse_gcode_file(filepath):
+    """
+    Reads the entire text file and extracts:
+      - color_map: dict of { '1': '#xxxxxx', '2': '#xxxxxx', ... , 'x': '#ffffff' }
+      - stripes: list of stripe patterns [ [row0, row1, ...], [row0, row1, ...], ... ]
+        Each rowN is a 4-character string (e.g. "2223").
+    """
+    color_map = {}
+    stripes = []
+
+    # Predefine 'x' => white in case it's missing from the file
+    color_map['x'] = '#ffffff'
+
+    # Regex to detect lines like: "Index 1 => #e59e60"
+    color_line_regex = re.compile(r'Index\s+(\S+)\s*=>\s*(#[0-9a-fA-F]{6})')
+
+    # Regex to detect start of a STRIPE block: "STRIPE - column #..."
+    stripe_start_regex = re.compile(r'^STRIPE\s*-\s*column\s*#(\d+)')
+
+    # Regex to detect "pattern: [ ... ]" - to capture the whole bracketed list
+    pattern_list_regex = re.compile(r'pattern:\s*(\[.*\])')
+
+    with open(filepath, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+
+    # Parse color mappings and stripes
+    in_color_mapping = False
+
+    current_stripe = None
+
+    for line in lines:
+        line_stripped = line.strip()
+
+        # Detect start or end of color mapping block
+        if '-- MULTI-COLOR INDEX MAPPING --' in line_stripped:
+            in_color_mapping = True
+            continue
+        if '-- END OF COLOR MAPPING --' in line_stripped:
+            in_color_mapping = False
+            continue
+
+        # If we are inside the color mapping lines, parse them
+        if in_color_mapping:
+            match = color_line_regex.search(line_stripped)
+            if match:
+                index_value = match.group(1)
+                hex_color = match.group(2)
+                color_map[index_value] = hex_color
+            continue
+
+        # Detect the start of a new stripe
+        s_match = stripe_start_regex.search(line_stripped)
+        if s_match:
+            # We found a new stripe, prepare a holder for its pattern
+            current_stripe = []
+            continue
+
+        # Extract the pattern array if found in the line
+        p_match = pattern_list_regex.search(line_stripped)
+        if p_match:
+            # Convert the bracketed string "[ "2222", "2233", ... ]" into a Python list
+            pattern_str = p_match.group(1)
+
+            # ast.literal_eval can safely parse the JSON-like list of strings
+            try:
+                pattern_list = ast.literal_eval(pattern_str)
+            except Exception:
+                pattern_list = []
+
+            # Each element in pattern_list is a 4-character string (e.g. "2223")
+            # We'll store it in current_stripe
+            current_stripe = pattern_list
+            stripes.append(current_stripe)
+
+    return color_map, stripes
+
+def create_image_from_stripes(color_map, stripes):
+    """
+    Create a Pillow Image from the stripes + color mapping.
+      - Each stripe is 4 pixels wide.
+      - The height is len(stripe_pattern).
+      - The total width is 4 * len(stripes).
+    """
+    if not stripes:
+        raise ValueError("No stripe data found.")
+
+    # Assume all stripes have the same pattern height
+    stripe_height = len(stripes[0])
+    total_width = 4 * len(stripes)
+
+    # Create a new image (RGBA or RGB)
+    img = Image.new('RGB', (total_width, stripe_height), color='white')
+    draw = ImageDraw.Draw(img)
+
+    for s_idx, stripe in enumerate(stripes):
+        for y, row_str in enumerate(stripe):
+            # row_str is something like "2223" or "x1x2"
+            for x_offset, char in enumerate(row_str):
+                # Determine color
+                pixel_color = color_map.get(char, '#ffffff')  # default to white if unknown
+                # Compute real X position in final image
+                x = s_idx * 4 + x_offset
+                # Draw pixel
+                draw.point((x, y), fill=pixel_color)
+
+    return img
+
+def add_legend_to_image(img, color_map):
+    """
+    Adds a legend at the bottom of the given image showing "Index => Color".
+    Returns a new, taller image with the legend appended.
+    """
+    # Sort the color_map by key so it’s stable (x might come last, etc.)
+    sorted_map_keys = sorted(color_map.keys(), key=lambda k: (k.isdigit(), k, ))
+
+    legend_lines = len(sorted_map_keys)
+    legend_height_per_line = 20
+    spacing = 5
+
+    # Create a new image taller by enough space for the legend
+    legend_height = legend_height_per_line * legend_lines + spacing * 2
+    new_height = img.height + legend_height
+    new_width = img.width
+
+    new_img = Image.new('RGB', (new_width, new_height), 'white')
+    new_img.paste(img, (0, 0))
+
+    draw = ImageDraw.Draw(new_img)
+    # If you have a specific font, you can set it here. Otherwise, Pillow's default.
+    font = ImageFont.load_default()
+
+    # Starting text position (left, top)
+    text_x = 10
+    text_y = img.height + spacing
+
+    for idx in sorted_map_keys:
+        color_hex = color_map[idx]
+        line_text = f"Index {idx} => {color_hex}"
+        # Draw a small color swatch
+        swatch_size = 10
+        draw.rectangle([text_x, text_y, text_x+swatch_size, text_y+swatch_size],
+                       fill=color_hex)
+        # Draw the text
+        draw.text((text_x + swatch_size + 5, text_y), line_text, fill='black', font=font)
+        text_y += legend_height_per_line
+
+    return new_img
+
+def main():
+    # 1) Parse data from file
+    filename = "C:/Users/oewil/OneDrive/Desktop/Mural-Bot/mural/gcode.txt"  # Replace with your gcode-like text file
+
+    color_map, stripes = parse_gcode_file(filename)
+
+    # 2) Create the main image
+    img = create_image_from_stripes(color_map, stripes)
+
+    # 3) Add legend
+    final_img = add_legend_to_image(img, color_map)
+
+    # 4) Display the final image using matplotlib
+    plt.figure()
+    plt.imshow(final_img)
+    plt.axis('off')
+    plt.show()
+
+if __name__ == "__main__":
+    main()
