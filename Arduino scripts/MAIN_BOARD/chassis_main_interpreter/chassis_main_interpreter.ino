@@ -8,7 +8,7 @@ uint8_t hubAddress[] = {0x48, 0x27, 0xE2, 0xE6, 0xE6, 0x58};
 // GPIO pin setup for serial commands
 const int pins[] = {17, 21, 22, 25, 32, 15, 33, 27, 4, 16, 26, 14, 13, 12};
 const int numPins = sizeof(pins) / sizeof(pins[0]);
-const unsigned long PIN_HIGH_DURATION_MS = 12; // or any desired duration
+const unsigned long PIN_HIGH_DURATION_MS = 12; 
 int MAX_LEDGER_SIZE = 50;
 
 int durationMs = 100;
@@ -21,15 +21,18 @@ static int expectedChunks = 0;
 static int receivedChunks = 0;
 static String largeStringBuffer;
 
+// <-- Added/Modified: New global flag
+bool newMessageReady = false;
+
 // Struct for ESP-NOW messages
 typedef struct struct_message {
   uint8_t command;
+  uint8_t chunkIndex;
 } struct_message;
 
 struct_message incomingMessage;
 struct_message confirmationMessage;
 
-// Set all defined GPIO pins to HIGH or LOW
 void setAllPins(bool state) {
   for (int i = 0; i < numPins; i++) {
     digitalWrite(pins[i], state ? HIGH : LOW);
@@ -38,19 +41,16 @@ void setAllPins(bool state) {
 
 #include <ArduinoJson.h>
 
-// Process received long string as JSON,  filters out data then hands off movement to another func
+// Process received long string as JSON
 void processReceivedString() {
     Serial.println("Processing received large string...");
-
-    // Print the entire contents of the large string buffer
     Serial.println("Full received data:");
     Serial.println(largeStringBuffer);
 
-    // Use DynamicJsonDocument instead of StaticJsonDocument for more memory
     DynamicJsonDocument doc(8192);
     DeserializationError error = deserializeJson(doc, largeStringBuffer);
 
-    // Free up memory immediately after parsing
+    // Free up memory after parsing
     String tempBuffer = largeStringBuffer;
     largeStringBuffer = "";
 
@@ -60,23 +60,16 @@ void processReceivedString() {
         return;
     }
 
-    // Extracting values
     const char* stripeName = doc["stripeName"];
     float drop = doc["drop"];
     float startPulleyA = doc["startPulleyA"];
     float startPulleyB = doc["startPulleyB"];
     float stripeVelocity = doc["stripeVelocity"];
 
-    // Use the JsonArray directly instead of converting to string first
-
     JsonArray patternArray = doc["pattern"].as<JsonArray>();
-
     int patternCount = patternArray.size();
-        
-    // Dynamically allocate memory for pattern list
+
     String* patternList = new String[patternCount];
-    
-    // Fill pattern list directly from JSON array
     int i = 0;
     Serial.println("starting to fill pattern array with json data");
     for (JsonVariant v : patternArray) {
@@ -87,7 +80,6 @@ void processReceivedString() {
         }
     }
 
-    // Print extracted values
     Serial.println("Extracted Data:");
     Serial.print("Stripe Name: "); Serial.println(stripeName);
     Serial.print("Drop: "); Serial.println(drop, 4);
@@ -96,10 +88,7 @@ void processReceivedString() {
     Serial.print("Stripe Velocity: "); Serial.println(stripeVelocity, 4);
     Serial.print("Pattern Count: "); Serial.println(patternCount);
 
-    // Call sprayAndStripe with our data
     sprayAndStripe(stripeVelocity, drop, patternList, patternCount);
-    
-    // Clean up allocated memory
     delete[] patternList;
 }
 
@@ -110,80 +99,51 @@ struct ledgerEntry {
   bool triggered;             
 };
 
-ledgerEntry ledger[50]; // adjust size as needed
+ledgerEntry ledger[50]; 
 
-// Initialize ledger entries as inactive
 void initLedger() {
   for (int i = 0; i < 50; i++) {
     ledger[i] = {-1, 0, false};
   }
 }
 
-// Schedule a pin trigger at a specified delay from now
 void schedulePin(int pin, unsigned long delayFromNow) {
   unsigned long triggerAt = millis() + delayFromNow;
   for (int i = 0; i < 50; i++) {
-    if (ledger[i].pin == -1) { // empty slot
+    if (ledger[i].pin == -1) {
       ledger[i] = {pin, triggerAt, false};
       break;
     }
   }
 }
 
-
 void interpretPattern(String patternToProcess, unsigned long currentMillis, int speed) {
   for (int i = 0; i < 4; i++) {
-    if (patternToProcess[i] == 'x') continue;  // Skip 'x'
+    if (patternToProcess[i] == 'x') continue;
 
     Serial.print("Position ");
     Serial.print(i + 1);
     Serial.print(": ");
 
     if (patternToProcess[i] == '1') {
-      if (i == 0) {
-        schedulePin(1, 1);
-      }
-      if (i == 1) {
-        schedulePin(2, 1); 
-      }
-      if (i == 2) {
-        schedulePin(3, 1); 
-      }
-      if (i == 3) {
-        schedulePin(4, 1); 
-      }
+      if (i == 0) { schedulePin(1, 1); }
+      if (i == 1) { schedulePin(2, 1); }
+      if (i == 2) { schedulePin(3, 1); }
+      if (i == 3) { schedulePin(4, 1); }
     } else if (patternToProcess[i] == '2') {
-      if (i == 0) {
-        schedulePin(5, (0.1 / speed) * 1000);
-      }
-      if (i == 1) {
-        schedulePin(6, (0.1 / speed) * 1000); 
-      }
-      if (i == 2) {
-        schedulePin(7, (0.1 / speed) * 1000); 
-      }
-      if (i == 3) {
-        schedulePin(8, (0.1 / speed) * 1000); 
-      }
+      if (i == 0) { schedulePin(5, (0.1 / speed) * 1000); }
+      if (i == 1) { schedulePin(6, (0.1 / speed) * 1000); }
+      if (i == 2) { schedulePin(7, (0.1 / speed) * 1000); }
+      if (i == 3) { schedulePin(8, (0.1 / speed) * 1000); }
     } else if (patternToProcess[i] == '3') {
-      if (i == 0) {
-        schedulePin(9, (0.2 / speed) * 1000); 
-      }
-      if (i == 1) {
-        schedulePin(10, (0.2 / speed) * 1000); 
-      }
-      if (i == 2) {
-        schedulePin(11, (0.2 / speed) * 1000); 
-      }
-      if (i == 3) {
-        schedulePin(12, (0.2 / speed) * 1000); 
-      }
+      if (i == 0) { schedulePin(9, (0.2 / speed) * 1000); }
+      if (i == 1) { schedulePin(10, (0.2 / speed) * 1000); }
+      if (i == 2) { schedulePin(11, (0.2 / speed) * 1000); }
+      if (i == 3) { schedulePin(12, (0.2 / speed) * 1000); }
     }
   }
 }
 
-// Map solenoid numbers (1-12) to arbitrary GPIO pins
-// Solenoid-to-GPIO mapping (1–12)
 const int solenoidPins[14] = {
   18, // Solenoid 1
   23, // Solenoid 2
@@ -196,14 +156,14 @@ const int solenoidPins[14] = {
   4,  // Solenoid 9
   16, // Solenoid 10
   26, // Solenoid 11
-  14,  // Solenoid 12
+  14, // Solenoid 12
   13, // Extra port out
   12  // Buzzer
 };
 
 void pullSolenoid(int solenoidNumber, int condition) {
-  if (solenoidNumber < 1 || solenoidNumber > 14) return; // Guard clause
-  int gpio = solenoidPins[solenoidNumber - 1];           // Convert to 0-based index
+  if (solenoidNumber < 1 || solenoidNumber > 14) return; 
+  int gpio = solenoidPins[solenoidNumber - 1];
   digitalWrite(gpio, condition);
 }
 
@@ -222,10 +182,10 @@ void sprayAndStripe(float stripeVelocity, float drop, String* patternList, int p
   unsigned long lastTriggerMillis = startMillis;
   int triggerCount = 0;
 
-  Serial.print("-- STARTING SPRAY STRIPE SOLENOID MOVEMENTS --")
+  Serial.print("-- STARTING SPRAY STRIPE SOLENOID MOVEMENTS --");
 
   while (millis() - startMillis < movementTimeMs) {
-    delay(1); //1ms delay prevents watchdog timeout error and keeps loop happy
+    delay(1); 
 
     unsigned long currentMillis = millis();
 
@@ -254,16 +214,14 @@ void sprayAndStripe(float stripeVelocity, float drop, String* patternList, int p
 }
 
 
-///////////////////////////////////////////////
-
-// Handle large string reception over ESP-NOW (from tested script)
+// Handle large string reception
 void handleLargeStringPacket(const uint8_t *data, int len) {
   uint8_t packetType = data[0];
 
   if (packetType == 0x10) {
     expectedChunks = data[1] << 8 | data[2];
     receivedChunks = 0;
-    largeStringBuffer.reserve(expectedChunks * 32); // Pre-allocate memory
+    largeStringBuffer.reserve(expectedChunks * 32); 
     largeStringBuffer = "";
     largeStringActive = true;
 
@@ -283,18 +241,26 @@ void handleLargeStringPacket(const uint8_t *data, int len) {
     Serial.print(expectedChunks);
     Serial.println(")");
 
+    // Send chunk-level ack
+    struct_message chunkAck;
+    chunkAck.command    = 0x13;
+    chunkAck.chunkIndex = chunkIndex; 
+    esp_now_send(hubAddress, (uint8_t *)&chunkAck, sizeof(chunkAck));
+    
+    // If all chunks arrived, send final confirmation and defer parsing
     if (receivedChunks >= expectedChunks) {
       Serial.println("All chunks received!");
-
       struct_message confirmMsg;
-      confirmMsg.command = 0x12; // Large string received confirmation
+      confirmMsg.command = 0x12;
+      confirmMsg.chunkIndex = 0;
       esp_now_send(hubAddress, (uint8_t *)&confirmMsg, sizeof(confirmMsg));
 
       Serial.println("Large string confirmation sent to Hub.");
       largeStringActive = false;
 
-      // Process the string
-      processReceivedString();
+      // <-- Added/Modified: Do NOT call processReceivedString() here.
+      // Instead, set flag to handle it in loop().
+      newMessageReady = true; // <-- Added/Modified
     }
   }
 }
@@ -316,10 +282,8 @@ void setup() {
   Serial.begin(115200);
   delay(2000);
 
-  // Initialize WiFi in station mode
   WiFi.mode(WIFI_STA);
   
-  // Initialize ESP-NOW first
   if (esp_now_init() != ESP_OK) {
     Serial.println("Error initializing ESP-NOW");
     return;
@@ -329,12 +293,10 @@ void setup() {
   Serial.println(WiFi.macAddress());
   Serial.println("ESP-NOW Chassis Initialized");
 
-  // Register callbacks
   esp_now_register_send_cb(onDataSent);
   esp_now_register_recv_cb(onDataRecv);
 
-  // Register hub peer
-  esp_now_peer_info_t peerInfo = {};  // Zero initialize
+  esp_now_peer_info_t peerInfo = {};
   memcpy(peerInfo.peer_addr, hubAddress, 6);
   peerInfo.channel = 0;
   peerInfo.encrypt = false;
@@ -344,13 +306,11 @@ void setup() {
     return;
   }
 
-  // Initialize GPIO pins
   for (int i = 0; i < numPins; i++) {
     pinMode(pins[i], OUTPUT);
-    digitalWrite(pins[i], LOW);  // Start LOW
+    digitalWrite(pins[i], LOW);
   }
 
-  // Initialize ledger
   initLedger();
 
   randomSeed(analogRead(0));
@@ -358,6 +318,12 @@ void setup() {
 }
 
 void loop() {
+  // <-- Added/Modified: If new message is ready, process now
+  if (newMessageReady) {         // <-- Added/Modified
+    newMessageReady = false;     // <-- Added/Modified
+    processReceivedString();     // <-- Added/Modified
+  }
+
   if (Serial.available() > 0) {
     String input = Serial.readStringUntil('\n');
     input.trim();
@@ -383,7 +349,7 @@ void loop() {
     } 
     else if (input.equalsIgnoreCase("forever")) {
       Serial.println("Starting forever cleaning cycle...");
-      for (;;) { // Infinite loop with serial feedback
+      for (;;) {
         Serial.println("Infinite loop running...");
         setAllPins(true);
         delay(1000);

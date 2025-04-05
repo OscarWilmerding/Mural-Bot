@@ -47,11 +47,13 @@ const uint8_t COMMAND_RUN       = 0x01;
 
 typedef struct struct_message {
   uint8_t command;
+  uint8_t chunkIndex;
 } struct_message;
 
 struct_message outgoingMessage;
 struct_message incomingMessage; 
 
+bool finalAckReceived = false;
 bool          waitingForConfirmation = false;
 unsigned long confirmationStartTime   = 0;
 unsigned long confirmationTimeout     = 5000;  // Default 5s timeout waiting for response
@@ -322,25 +324,38 @@ void startLargeStringSend(const String &strToSend) {
   }
 
   // Blocking loop to send all chunks
-  for (currentChunkIndex = 0; currentChunkIndex < totalChunks; currentChunkIndex++) {
-    largeStringAckReceived = false; // Reset ack flag before sending chunk
-    sendNextChunk();
+  for (currentChunkIndex = 0; currentChunkIndex < totalChunks;) {
     
-    // Wait for acknowledgment before sending next chunk
+    largeStringAckReceived = false; // Reset before each chunk
+    sendNextChunk();               // This sends chunk # currentChunkIndex
+    
     unsigned long sendTime = millis();
-    const unsigned long timeout = 2000; // 2 seconds timeout, adjust as needed
+    const unsigned long timeout = 500; // e.g. 500 ms, can adjust
 
+    // Wait for chunk-level ack
     while (!largeStringAckReceived) {
       if (millis() - sendTime > timeout) {
-        Serial.println("Chunk acknowledgment timeout, resending chunk...");
-        sendNextChunk(); // retry sending chunk on timeout
-        sendTime = millis(); // reset timeout timer
+        Serial.println("Chunk-level ack timeout, resending chunk...");
+        sendNextChunk(); // re-send this chunk
+        sendTime = millis(); // reset timeout
       }
-      delay(10); // Short delay to prevent busy waiting
+      delay(10); // prevent busy-wait lock
     }
   }
 
-  Serial.println("Large string transmission completed.");
+  unsigned long finalSendTime = millis();
+  unsigned long finalTimeout  = 3000; // 3s or so
+
+  while (!finalAckReceived && (millis() - finalSendTime < finalTimeout)) {
+    // We'll set finalAckReceived = true in onDataRecv when command == 0x12
+    delay(10);
+  }
+
+  if (finalAckReceived) {
+    Serial.println("Entire large string confirmed by receiver.");
+  } else {
+    Serial.println("Timed out waiting for final 0x12 ack from receiver.");
+  }
   largeStringInProgress = false;
 }
 
@@ -348,46 +363,41 @@ void startLargeStringSend(const String &strToSend) {
 /*                        3) sendNextChunk() Function                        */
 /*****************************************************************************/
 void sendNextChunk() {
-  if (!largeStringInProgress) return;  // guard
+    if (!largeStringInProgress) return;  
+    if (currentChunkIndex >= totalChunks) {
+      Serial.println("All chunks sent. Waiting for confirmation...");
+      return;
+    }
 
-  // If we've sent them all, do nothing. We'll wait for confirmation instead.
-  if (currentChunkIndex >= totalChunks) {
-    Serial.println("All chunks sent. Waiting for confirmation...");
-    return;
-  }
+    // Prepare chunk
+    int startIdx = currentChunkIndex * CHUNK_PAYLOAD_SIZE;
+    String chunkData = largeStringToSend.substring(startIdx, startIdx + CHUNK_PAYLOAD_SIZE);
 
-  // Prepare chunk
-  int startIdx = currentChunkIndex * CHUNK_PAYLOAD_SIZE;
-  String chunkData = largeStringToSend.substring(startIdx, startIdx + CHUNK_PAYLOAD_SIZE);
+    // Build packet
+    size_t packetSize = 2 + chunkData.length() + 1;
+    uint8_t *packet   = (uint8_t *) malloc(packetSize);
+    packet[0] = 0x11;
+    packet[1] = (uint8_t) currentChunkIndex;
+    memcpy(&packet[2], chunkData.c_str(), chunkData.length() + 1);
 
-  // Packet format:
-  //  [0x11, chunkIndex, chunkContent...]
-  // chunkIndex must fit in a byte if totalChunks < 256 (otherwise adjust logic)
-  // The chunk content is appended after data[2].
-  size_t packetSize = 2 + chunkData.length() + 1; // +1 for null terminator
-  uint8_t *packet   = (uint8_t *) malloc(packetSize);
+    // Send
+    esp_err_t result = esp_now_send(chassisAddress, packet, packetSize);
+    free(packet);
 
-  packet[0] = 0x11;
-  packet[1] = (uint8_t) currentChunkIndex;
-  memcpy(&packet[2], chunkData.c_str(), chunkData.length() + 1);
+    if (result == ESP_OK) {
+      Serial.print("Sent chunk #");
+      Serial.print(currentChunkIndex);
+      Serial.print(" of ");
+      Serial.println(totalChunks);
+    } else {
+      Serial.print("Failed to send chunk #");
+      Serial.println(currentChunkIndex);
+    }
 
-  // Send
-  esp_err_t result = esp_now_send(chassisAddress, packet, packetSize);
-  free(packet);
-
-  if (result == ESP_OK) {
-    Serial.print("Sent chunk #");
-    Serial.print(currentChunkIndex);
-    Serial.print(" of ");
-    Serial.println(totalChunks);
-  } else {
-    Serial.print("Failed to send chunk #");
-    Serial.println(currentChunkIndex);
-  }
-
-  currentChunkIndex++;
-  lastSendAttempt = millis();
+    // DO NOT increment here. Instead, increment only after the ack for this chunk arrives.
+    // currentChunkIndex++;
 }
+
 
 
 /************************************************************/
@@ -407,12 +417,18 @@ void onDataRecv(const esp_now_recv_info *info, const uint8_t *incomingData, int 
       Serial.println("Confirmation received from Chassis");
       commandConfirmed = true;
     }
+    else if (incomingMessage.command == 0x13) {
+      // If it matches the chunk we just sent, mark ack and *then* increment
+      if (incomingMessage.chunkIndex == currentChunkIndex) {
+        largeStringAckReceived = true;
+        currentChunkIndex++;  // move on to next chunk now that we have ack
+      }
+    }
     else if (incomingMessage.command == 0x12) {
-      // 0x12 = "Large string fully received" (from new code on receiver)
-      Serial.println("Large string ACK received from Chassis!");
-      largeStringAckReceived = true;
-      largeStringInProgress  = false;
-      // Possibly do something with that knowledge...
+      // Final ack that the whole string arrived
+      Serial.println("Final large string ACK received from Chassis!");
+      // We can set another bool, e.g., finalAckReceived = true;
+      finalAckReceived = true;
     }
   }
   else {
@@ -733,8 +749,7 @@ void startNextCommand() {
         stepper2.runSpeed();
 
         if (currentTime - lastCallTime >= velocityCalcDelay) {
-          //Serial.println("Velocity update...");
-          //printCurrentPositions();
+          printCurrentPositions();
 
           float posA = stepper1.currentPosition() * motor1Direction;
           float posB = stepper2.currentPosition() * motor2Direction;
@@ -1004,7 +1019,7 @@ void printCurrentPositions() {
   float position1 = steps1 / (stepsPerMeter * motor1Direction);
   float position2 = steps2 / (stepsPerMeter * motor2Direction);
 
-  Serial.print("Current Positions (m, steps) - Motor 1: ");
+  Serial.print("Positions (m, steps) - 1: ");
   Serial.print(position1);
   Serial.print(", ");
   Serial.print(steps1);
