@@ -76,7 +76,7 @@ unsigned long chassisWaitTime   = 2500;
 // Additional data from G-code
 float pulleySpacing             = 0.0;
 int   numberOfDrawnColumns      = 0;
-float stripeVelocity            = 0.05;  // default to 1 m/s for stripes
+float stripeVelocity            = 0.05;
 
 // New global for controlling how often (ms) you recalc velocities
 unsigned long velocityCalcDelay = 100; 
@@ -692,7 +692,8 @@ void startNextCommand() {
       stripeData += "\"drop\":" + String(cmd.drop, 4) + ",";
       stripeData += "\"startPulleyA\":" + String(cmd.startPulleyA, 4) + ",";
       stripeData += "\"startPulleyB\":" + String(cmd.startPulleyB, 4) + ",";
-      stripeData += "\"pattern\":\"" + cmd.pattern + "\",";
+
+      stripeData += "\"pattern\":" + cmd.pattern + ",";
       stripeData += "\"stripeVelocity\":" + String(stripeVelocity, 4);
       stripeData += "}";
 
@@ -732,8 +733,8 @@ void startNextCommand() {
         stepper2.runSpeed();
 
         if (currentTime - lastCallTime >= velocityCalcDelay) {
-          Serial.println("Velocity update...");
-          printCurrentPositions();
+          //Serial.println("Velocity update...");
+          //printCurrentPositions();
 
           float posA = stepper1.currentPosition() * motor1Direction;
           float posB = stepper2.currentPosition() * motor2Direction;
@@ -823,8 +824,10 @@ void loadCommandsFromFile(const char *path) {
   while (file.available()) {
     String line = file.readStringUntil('\n');
     line.trim();
+
+    // Skip commented or empty lines
     if (line.startsWith("//") || line.length() == 0) {
-      continue; 
+      continue;
     }
 
     // 1) "number of drawn columns"
@@ -856,20 +859,20 @@ void loadCommandsFromFile(const char *path) {
     // 3) "STRIPE - column #"
     if (line.startsWith("STRIPE - column #")) {
       readingStripeBlock = true;
-      tempCmd.type        = Command::STRIPE;
-      tempCmd.stripeName  = line;
-      tempCmd.drop        = 0.0;
-      tempCmd.startPulleyA= 0.0;
-      tempCmd.startPulleyB= 0.0;
-      tempCmd.pattern     = "";
+      tempCmd.type         = Command::STRIPE;
+      tempCmd.stripeName   = line;  // e.g. "STRIPE - column #0"
+      tempCmd.drop         = 0.0;
+      tempCmd.startPulleyA = 0.0;
+      tempCmd.startPulleyB = 0.0;
+      tempCmd.pattern      = "";
       Serial.print("Detected STRIPE block: ");
       Serial.println(tempCmd.stripeName);
       continue;
     }
 
-    // If we are in a stripe block, parse the lines
+    // If we are in a stripe block, parse any relevant lines
     if (readingStripeBlock) {
-      // ignore "starting/ending position pixel values"
+      // Ignore the "starting/ending position pixel values" line
       if (line.startsWith("starting/ending position pixel values:")) {
         continue;
       }
@@ -881,10 +884,17 @@ void loadCommandsFromFile(const char *path) {
         Serial.println(d);
         continue;
       }
-      // pattern array
-      if (line.startsWith("['") && line.endsWith("]")) {
-        tempCmd.pattern = line;
-        Serial.println("Parsed pattern array for stripe.");
+      // "pattern:"
+      if (line.startsWith("pattern:")) {
+        // We capture everything after "pattern:"
+        int colonIndex = line.indexOf(':');
+        if (colonIndex >= 0) {
+          String patternData = line.substring(colonIndex + 1);
+          patternData.trim();
+          tempCmd.pattern = patternData;
+          Serial.println("Parsed pattern array for stripe.");
+          Serial.println("pattern data raw being loaded into command struct:" + tempCmd.pattern);
+        }
         continue;
       }
       // "starting pulley values:"
@@ -902,7 +912,7 @@ void loadCommandsFromFile(const char *path) {
             tempCmd.startPulleyA = valA.toFloat();
             tempCmd.startPulleyB = valB.toFloat();
 
-            // Done reading stripe block
+            // Done reading this stripe block
             commands[commandCount++] = tempCmd;
             Serial.println("Finished STRIPE command. Added to array.");
             readingStripeBlock = false;
@@ -922,27 +932,16 @@ void loadCommandsFromFile(const char *path) {
       commands[commandCount++] = cmd;
     }
     else {
-      // Assume (x,y) move
-      int start = line.indexOf('(');
-      int comma = line.indexOf(',', start);
-      int end   = line.indexOf(')', comma);
-      if (start == -1 || comma == -1 || end == -1) {
-        continue; 
-      }
-      String xStr = line.substring(start + 1, comma);
-      String yStr = line.substring(comma + 1, end);
-
-      Command cmd;
-      cmd.type   = Command::MOVE;
-      cmd.pos.x  = xStr.toFloat();
-      cmd.pos.y  = yStr.toFloat();
-      commands[commandCount++] = cmd;
+      Serial.print("UNRECOGNIZED COMMANDS IN GCODE FILE");
+      // Optionally handle or ignore other lines here
     }
   }
+
   file.close();
   Serial.print("Total commands loaded: ");
   Serial.println(commandCount);
 }
+
 
 
 /************************************************************/

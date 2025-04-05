@@ -9,7 +9,7 @@ uint8_t hubAddress[] = {0x48, 0x27, 0xE2, 0xE6, 0xE6, 0x58};
 const int pins[] = {17, 21, 22, 25, 32, 15, 33, 27, 4, 16, 26, 14, 13, 12};
 const int numPins = sizeof(pins) / sizeof(pins[0]);
 const unsigned long PIN_HIGH_DURATION_MS = 12; // or any desired duration
-
+int MAX_LEDGER_SIZE = 50;
 
 int durationMs = 100;
 int preActivationDelay = 0;
@@ -19,7 +19,7 @@ const int fixedPostActivationDelay = 1000;
 static bool largeStringActive = false;
 static int expectedChunks = 0;
 static int receivedChunks = 0;
-static String largeStringBuffer = "";
+static String largeStringBuffer;
 
 // Struct for ESP-NOW messages
 typedef struct struct_message {
@@ -42,8 +42,17 @@ void setAllPins(bool state) {
 void processReceivedString() {
     Serial.println("Processing received large string...");
 
-    StaticJsonDocument<3072> doc;  // Adjust buffer size as needed
+    // Print the entire contents of the large string buffer
+    Serial.println("Full received data:");
+    Serial.println(largeStringBuffer);
+
+    // Use DynamicJsonDocument instead of StaticJsonDocument for more memory
+    DynamicJsonDocument doc(8192);
     DeserializationError error = deserializeJson(doc, largeStringBuffer);
+
+    // Free up memory immediately after parsing
+    String tempBuffer = largeStringBuffer;
+    largeStringBuffer = "";
 
     if (error) {
         Serial.print("JSON Parsing Failed: ");
@@ -58,38 +67,24 @@ void processReceivedString() {
     float startPulleyB = doc["startPulleyB"];
     float stripeVelocity = doc["stripeVelocity"];
 
-    // Extract pattern as a raw string
-    String patternRaw = doc["pattern"].as<String>();
+    // Use the JsonArray directly instead of converting to string first
 
-    // Clean up the pattern string (remove brackets, spaces, and extra quotes)
-    patternRaw.replace("[", "");
-    patternRaw.replace("]", "");
-    patternRaw.replace("'", ""); // Remove single quotes
-    patternRaw.replace("\"", ""); // Remove double quotes
+    JsonArray patternArray = doc["pattern"].as<JsonArray>();
 
-    int alottedListSize = 150;
-
-    // Convert the pattern string into a list
-    String patternList[alottedListSize]; 
-    int patternCount = 0;
-
-    int start = 0;
-    int end = patternRaw.indexOf(',');
-   
-
-    while (end != -1 && patternCount < alottedListSize) {
-        patternList[patternCount] = patternRaw.substring(start, end);
-        patternList[patternCount].trim(); // Remove any spaces
-        patternCount++;
-        start = end + 1;
-        end = patternRaw.indexOf(',', start);
-    }
-
-    // Add last entry if available
-    if (start < patternRaw.length() && patternCount < alottedListSize) {
-        patternList[patternCount] = patternRaw.substring(start);
-        patternList[patternCount].trim();
-        patternCount++;
+    int patternCount = patternArray.size();
+        
+    // Dynamically allocate memory for pattern list
+    String* patternList = new String[patternCount];
+    
+    // Fill pattern list directly from JSON array
+    int i = 0;
+    Serial.println("starting to fill pattern array with json data");
+    for (JsonVariant v : patternArray) {
+        if (i < patternCount) {
+            patternList[i++] = v.as<String>();
+        } else {
+            break;
+        }
     }
 
     // Print extracted values
@@ -99,17 +94,13 @@ void processReceivedString() {
     Serial.print("Start Pulley A: "); Serial.println(startPulleyA, 4);
     Serial.print("Start Pulley B: "); Serial.println(startPulleyB, 4);
     Serial.print("Stripe Velocity: "); Serial.println(stripeVelocity, 4);
+    Serial.print("Pattern Count: "); Serial.println(patternCount);
+
+    // Call sprayAndStripe with our data
+    sprayAndStripe(stripeVelocity, drop, patternList, patternCount);
     
-    Serial.print("Pattern Count: ");
-    Serial.println(patternCount);
-
-    Serial.println("Pattern List:");
-    for (int i = 0; i < patternCount; i++) {
-        Serial.print("  Entry "); Serial.print(i); Serial.print(": ");
-        Serial.println(patternList[i]);
-    }
-
-  sprayAndStripe(stripeVelocity, drop, patternList, patternCount);
+    // Clean up allocated memory
+    delete[] patternList;
 }
 
 ////////////////////////////////////////////////////
@@ -205,7 +196,7 @@ const int solenoidPins[14] = {
   4,  // Solenoid 9
   16, // Solenoid 10
   26, // Solenoid 11
-  14  // Solenoid 12
+  14,  // Solenoid 12
   13, // Extra port out
   12  // Buzzer
 };
@@ -216,56 +207,51 @@ void pullSolenoid(int solenoidNumber, int condition) {
   digitalWrite(gpio, condition);
 }
 
-void sprayAndStripe(float stripeVelocity, float drop, String patternList[], int patternCount) {
-  float movementTimeMs = (drop / stripeVelocity) * 1000;  // Convert seconds to milliseconds
+void sprayAndStripe(float stripeVelocity, float drop, String* patternList, int patternCount) {
+  float movementTimeMs = (drop / stripeVelocity) * 1000;
   float timeBetweenSpraysMs = movementTimeMs / patternCount;
 
-  Serial.print("Movement Time (ms): ");
-  Serial.println(movementTimeMs);
-  
-  Serial.print("Time Between Sprays (ms): ");
-  Serial.println(timeBetweenSpraysMs);
+  Serial.print("Total Movement Time: ");
+  Serial.print(movementTimeMs);
+  Serial.println(" ms");
+  Serial.print("Interval between sprays: ");
+  Serial.print(timeBetweenSpraysMs);
+  Serial.println(" ms");
 
   unsigned long startMillis = millis();
   unsigned long lastTriggerMillis = startMillis;
-  unsigned long currentMillis = millis();
   int triggerCount = 0;
 
-  while (true) {  
-    currentMillis = millis();
+  Serial.print("-- STARTING SPRAY STRIPE SOLENOID MOVEMENTS --")
 
-    // Exit condition
-    if (currentMillis - startMillis >= movementTimeMs) {
-      break;
-    }
+  while (millis() - startMillis < movementTimeMs) {
+    delay(1); //1ms delay prevents watchdog timeout error and keeps loop happy
 
-    // Time for next trigger
-    if (currentMillis - lastTriggerMillis >= timeBetweenSpraysMs) {
+    unsigned long currentMillis = millis();
+
+    if (currentMillis - lastTriggerMillis >= timeBetweenSpraysMs && triggerCount < patternCount) {
       interpretPattern(patternList[triggerCount++], currentMillis, stripeVelocity);
       lastTriggerMillis += timeBetweenSpraysMs;
     }
 
-    //CHECKING THE LEDGER FOR PINS TO TURN ON
-    for (int i = 0; i < 50; i++) {
+    for (int i = 0; i < MAX_LEDGER_SIZE; i++) {
       if (ledger[i].pin != -1) {
         if (!ledger[i].triggered && currentMillis >= ledger[i].triggerTime) {
-          pullSolenoid(ledger[i].pin, HIGH);  //TODO remap this to the right pins
+          pullSolenoid(ledger[i].pin, HIGH);
           ledger[i].triggered = true;
-        } 
-        else if (ledger[i].triggered && currentMillis >= ledger[i].triggerTime + PIN_HIGH_DURATION_MS) {
+        } else if (ledger[i].triggered && currentMillis >= ledger[i].triggerTime + PIN_HIGH_DURATION_MS) {
           pullSolenoid(ledger[i].pin, LOW);
-          ledger[i].pin = -1;  // mark as inactive
+          ledger[i].pin = -1;
         }
       }
     }
   }
 
-  // Ensure all pins off at end
-  for (int i = 0; i < 12; i++) {
+  Serial.println("Movement complete, turning off all solenoids.");
+  for (int i = 1; i <= 12; i++) {
     pullSolenoid(i, LOW);
   }
 }
-
 
 
 ///////////////////////////////////////////////
@@ -277,6 +263,7 @@ void handleLargeStringPacket(const uint8_t *data, int len) {
   if (packetType == 0x10) {
     expectedChunks = data[1] << 8 | data[2];
     receivedChunks = 0;
+    largeStringBuffer.reserve(expectedChunks * 32); // Pre-allocate memory
     largeStringBuffer = "";
     largeStringActive = true;
 
@@ -285,8 +272,7 @@ void handleLargeStringPacket(const uint8_t *data, int len) {
   } 
   else if (packetType == 0x11 && largeStringActive) {
     int chunkIndex = data[1];
-    const char* chunkContent = (const char*)&data[2];
-    largeStringBuffer += String(chunkContent);
+    largeStringBuffer += String((const char*)&data[2]);
     receivedChunks++;
 
     Serial.print("Received chunk #");
@@ -298,8 +284,7 @@ void handleLargeStringPacket(const uint8_t *data, int len) {
     Serial.println(")");
 
     if (receivedChunks >= expectedChunks) {
-      Serial.println("All chunks received! Reconstructed large string:");
-      Serial.println(largeStringBuffer);
+      Serial.println("All chunks received!");
 
       struct_message confirmMsg;
       confirmMsg.command = 0x12; // Large string received confirmation
@@ -308,7 +293,7 @@ void handleLargeStringPacket(const uint8_t *data, int len) {
       Serial.println("Large string confirmation sent to Hub.");
       largeStringActive = false;
 
-      // Pass the received string to a function for future processing
+      // Process the string
       processReceivedString();
     }
   }
@@ -329,27 +314,27 @@ void onDataSent(const uint8_t *macAddr, esp_now_send_status_t status) {
 
 void setup() {
   Serial.begin(115200);
-  delay(5000);
+  delay(2000);
 
-  // Initialize WiFi
+  // Initialize WiFi in station mode
   WiFi.mode(WIFI_STA);
-  delay(1000); //trust
-  Serial.print("MAC address: ");
-  Serial.println(WiFi.macAddress());
-  Serial.println("ESP-NOW Chassis Initialized");
-
-  // Initialize ESP-NOW
+  
+  // Initialize ESP-NOW first
   if (esp_now_init() != ESP_OK) {
     Serial.println("Error initializing ESP-NOW");
     return;
   }
+  
+  Serial.print("MAC address: ");
+  Serial.println(WiFi.macAddress());
+  Serial.println("ESP-NOW Chassis Initialized");
 
-  // Register ESP-NOW callbacks
+  // Register callbacks
   esp_now_register_send_cb(onDataSent);
   esp_now_register_recv_cb(onDataRecv);
 
-  // Register peer (Hub)
-  esp_now_peer_info_t peerInfo;
+  // Register hub peer
+  esp_now_peer_info_t peerInfo = {};  // Zero initialize
   memcpy(peerInfo.peer_addr, hubAddress, 6);
   peerInfo.channel = 0;
   peerInfo.encrypt = false;
@@ -362,10 +347,13 @@ void setup() {
   // Initialize GPIO pins
   for (int i = 0; i < numPins; i++) {
     pinMode(pins[i], OUTPUT);
+    digitalWrite(pins[i], LOW);  // Start LOW
   }
 
-  randomSeed(analogRead(0));
+  // Initialize ledger
+  initLedger();
 
+  randomSeed(analogRead(0));
   Serial.println("GPIO Control Script Initialized.");
 }
 
