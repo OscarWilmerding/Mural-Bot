@@ -59,9 +59,9 @@ unsigned long confirmationStartTime   = 0;
 unsigned long confirmationTimeout     = 5000;  // Default 5s timeout waiting for response
 
 // Conversion factor (meters -> steps)
-// this number has had many calibration constants applied to it which is what makes it ugly.
-// changing microstepping means dividing this by appropriate number
-const float stepsPerMeter       = 20308;  
+// this number has had many calibration constants applied to it which is what makes it ugly. derived via trial and error.
+//if its overshooting this number should become SMALLER
+float stepsPerMeter       = 9024;  
 
 // Direction control variables
 int motor1Direction             = -1;
@@ -575,6 +575,16 @@ void processSerialCommand(String command) {
     Serial.print("New max speed: ");
     Serial.println(newS);
   }
+  else if (command.startsWith("spr ")) {          // e.g. “SPR 3200”
+    int newSPR = command.substring(4).toInt();    // grab the number after the space
+    if (newSPR > 0) {
+      stepsPerMeter = newSPR;
+      Serial.print("Steps‑per‑revolution set to: ");
+      Serial.println(stepsPerMeter);
+    } else {
+      Serial.println("Invalid SPR value (must be > 0)");
+    }
+  }
   else if (command == "zero a") {
     motor1Position = 0.0;
     stepper1.setCurrentPosition(0);
@@ -818,6 +828,7 @@ void listAvailableCommands() {
   Serial.println("  skip color                  - Skip commands until next COLOR_CHANGE");
   Serial.println("  test                        - Trigger chassis without movement");
   Serial.println("  set command index X         - Set current command index");
+  Serial.println("  spr XX                      - Set steps per meter to XX");
   Serial.println("  ?                           - Show this help list");
 }
 

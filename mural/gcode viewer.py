@@ -114,50 +114,59 @@ def create_image_from_stripes(color_map, stripes):
 def add_legend_to_image(img, color_map):
     """
     Adds a legend at the bottom of the given image showing "Index => Color".
-    Returns a new, taller image with the legend appended.
+    Returns a new, taller (and potentially wider) image with the legend appended.
     """
-    # Sort the color_map by key so it’s stable (x might come last, etc.)
-    sorted_map_keys = sorted(color_map.keys(), key=lambda k: (k.isdigit(), k, ))
+    from PIL import ImageDraw, ImageFont
 
+    sorted_map_keys = sorted(color_map.keys(), key=lambda k: (k.isdigit(), k))
     legend_lines = len(sorted_map_keys)
     legend_height_per_line = 20
     spacing = 5
 
-    # Create a new image taller by enough space for the legend
+    font = ImageFont.load_default()
+    dummy_img = Image.new("RGB", (1, 1))
+    dummy_draw = ImageDraw.Draw(dummy_img)
+    max_text_width = 0
+    for idx in sorted_map_keys:
+        line_text = f"Index {idx} => {color_map[idx]}"
+        bbox = dummy_draw.textbbox((0, 0), line_text, font=font)
+        text_width = bbox[2] - bbox[0]
+        max_text_width = max(max_text_width, text_width)
+
+    legend_required_width = 10 + 5 + max_text_width + 10
+    new_width = max(img.width, legend_required_width)
     legend_height = legend_height_per_line * legend_lines + spacing * 2
     new_height = img.height + legend_height
-    new_width = img.width
 
     new_img = Image.new('RGB', (new_width, new_height), 'white')
     new_img.paste(img, (0, 0))
-
     draw = ImageDraw.Draw(new_img)
-    # If you have a specific font, you can set it here. Otherwise, Pillow's default.
-    font = ImageFont.load_default()
 
-    # Starting text position (left, top)
     text_x = 10
     text_y = img.height + spacing
-
     for idx in sorted_map_keys:
         color_hex = color_map[idx]
         line_text = f"Index {idx} => {color_hex}"
-        # Draw a small color swatch
         swatch_size = 10
-        draw.rectangle([text_x, text_y, text_x+swatch_size, text_y+swatch_size],
-                       fill=color_hex)
-        # Draw the text
+        draw.rectangle([text_x, text_y, text_x + swatch_size, text_y + swatch_size], fill=color_hex)
         draw.text((text_x + swatch_size + 5, text_y), line_text, fill='black', font=font)
         text_y += legend_height_per_line
 
-    return new_img
+    # Also print legend in terminal
+    print("Color Index Mapping:")
+    for idx in sorted_map_keys:
+        print(f"  Index {idx} => {color_map[idx]}")
 
+    return new_img
 def main():
     # 1) Parse data from file
     filename = "C:/Users/oewil/OneDrive/Desktop/Mural-Bot/mural/gcode.txt"  # Replace with your gcode-like text file
 
     color_map, stripes = parse_gcode_file(filename)
 
+    print("Color Index Mapping:")
+    for k, v in color_map.items():
+        print(f"  Index {k} => {v}")
     # 2) Create the main image
     img = create_image_from_stripes(color_map, stripes)
 

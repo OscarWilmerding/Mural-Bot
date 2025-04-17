@@ -145,9 +145,9 @@ void interpretPattern(String patternToProcess, unsigned long currentMillis, int 
 }
 
 const int solenoidPins[14] = {
-  18, // Solenoid 1
-  23, // Solenoid 2
-  19, // Solenoid 3
+  17, // Solenoid 1
+  21, // Solenoid 2
+  22, // Solenoid 3
   25, // Solenoid 4
   32, // Solenoid 5
   15, // Solenoid 6
@@ -368,6 +368,31 @@ void loop() {
       }
       Serial.println("Random cycle complete.");
     } 
+    else if (input.startsWith("trig ")) {            // includes trailing space
+      int commaPos = input.indexOf(',');
+      if (commaPos == -1) {
+        Serial.println("Syntax: trig <solenoid>,<count>");
+      } else {
+        int solenoidNum = input.substring(5, commaPos).toInt();     // after "trig "
+        int repeatCnt   = input.substring(commaPos + 1).toInt();
+
+        if (solenoidNum >= 1 && solenoidNum <= 14 && repeatCnt > 0) {
+          Serial.printf("Pulsing solenoid %d for %d time(s)\n",
+                       solenoidNum, repeatCnt);
+
+          if (preActivationDelay) delay(preActivationDelay);
+
+          for (int i = 0; i < repeatCnt; i++) {
+            pullSolenoid(solenoidNum, HIGH);   // fire
+            delay(durationMs);                 // pulse width
+            pullSolenoid(solenoidNum, LOW);    // release
+            delay(fixedPostActivationDelay);   // gap between pulses
+          }
+        } else {
+          Serial.println("Invalid solenoid # (1‑14) or count (>0).");
+        }
+      }
+    }
     else if (input.equalsIgnoreCase("trig")) {
       Serial.println("Trigger command received.");
       delay(preActivationDelay);
@@ -376,6 +401,17 @@ void loop() {
       setAllPins(false);
       delay(fixedPostActivationDelay);
     } 
+    else if (input == "?") {
+      Serial.println(F("=== Available Serial Commands ==="));
+      Serial.println(F("clean                – 120‑shot cleaning cycle"));
+      Serial.println(F("delay <ms>           – set pre‑activation delay"));
+      Serial.println(F("forever              – endless clean pulses"));
+      Serial.println(F("rand                 – 10 random pulses"));
+      Serial.println(F("trig                 – trigger ALL pins once"));
+      Serial.println(F("trig <S>,<C>         – pulse solenoid S, C times"));
+      Serial.println(F("<number>             – set pulse width (ms)"));
+      Serial.println(F("?                    – show this help list"));
+    }
     else {
       int newDuration = input.toInt();
       if (newDuration > 0) {
@@ -385,5 +421,6 @@ void loop() {
         Serial.println(" ms");
       }
     }
+    
   }
 }
