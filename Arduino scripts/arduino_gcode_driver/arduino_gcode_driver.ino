@@ -10,6 +10,9 @@
 /************************************************************/
 /*                   MOTOR & PIN DEFINITIONS                */
 /************************************************************/
+
+const int redButtonPin = 2;
+
 // Using a driver that requires step and direction pins
 #define motorInterfaceType 1
 
@@ -153,6 +156,8 @@ void printCurrentPositions();
 void determineStripeVelocities(float posA, float posB, float &velA, float &velB);
 void startLargeStringSend(const String &strToSend);
 void sendNextChunk();
+void IRAM_ATTR handleResetInterrupt();
+
 
 
 /************************************************************/
@@ -167,6 +172,10 @@ void setup() {
   stepper1.setMaxSpeed(baseMaxSpeed * maxSpeedMultiplier);
   stepper2.setAcceleration(baseAcceleration * accelerationMultiplier);
   stepper2.setMaxSpeed(baseMaxSpeed * maxSpeedMultiplier);
+  
+  pinMode(redButtonPin, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(redButtonPin), handleResetInterrupt, FALLING);
+
 
   // Initialize LittleFS and load the file
   if (!LittleFS.begin()) {
@@ -1104,4 +1113,9 @@ void determineStripeVelocities(float posA, float posB, float &velA, float &velB)
   Serial.print("velB = ");
   Serial.println(velB);
 */
+}
+
+void IRAM_ATTR handleResetInterrupt() {
+  serial.println("Red button pressed, restarting esp32");
+  esp_restart(); // Soft reset the ESP32
 }
