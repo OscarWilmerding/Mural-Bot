@@ -12,6 +12,7 @@
 /************************************************************/
 
 const int redButtonPin = 2;
+const int greyButtonPin = 9;
 
 // Using a driver that requires step and direction pins
 #define motorInterfaceType 1
@@ -175,6 +176,7 @@ void setup() {
   
   pinMode(redButtonPin, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(redButtonPin), handleResetInterrupt, FALLING);
+  pinMode(greyButtonPin, INPUT_PULLUP);
 
 
   // Initialize LittleFS and load the file
@@ -217,7 +219,13 @@ void setup() {
 /*                     MAIN LOOP                            */
 /************************************************************/
 void loop() {
-  // Check Serial for user commands
+  // Check Serial for user command
+
+  if (digitalRead(greyButtonPin) == LOW) {
+    Serial.println("grey button pressed");
+    processSerialCommand("go");
+  }
+
   if (Serial.available() > 0) {
     String command = Serial.readStringUntil('\n');
     command.trim(); // Ensure no extra spaces or newlines
@@ -1116,6 +1124,7 @@ void determineStripeVelocities(float posA, float posB, float &velA, float &velB)
 }
 
 void IRAM_ATTR handleResetInterrupt() {
-  serial.println("Red button pressed, restarting esp32");
+  
+  Serial.println("Red button pressed, restarting esp32");
   esp_restart(); // Soft reset the ESP32
 }

@@ -1,0 +1,10 @@
+File Path:                   C:/Users/oewil/OneDrive/Desktop/Mural-Bot/mural/imput images/deadman.jpg
+Width (pixels):             300
+Pixel Size (m):             0.002
+Pulley Spacing (m):         1.265
+Distance from Pulleys (m):  1.0
+Offset (m):                 0.0
+Color Mode:                 --
+Number of Colors:           3
+N value (NxN modes):        3
+Slicing Option:             --

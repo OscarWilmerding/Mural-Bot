@@ -383,30 +383,39 @@ def process_image_with_dynamic_base_colors_nxn(image_path, n_base_colors, n):
         # Process each pixel in the original image
         for x in range(width):
             for y in range(height):
-                # Get the RGB values of the original pixel
+                # Get the RGBA values of the original pixel
                 pixel = original_pixels[x, y]
                 if has_alpha:
                     r, g, b, a = pixel
                     if a == 0:
-                        continue  # Skip transparent pixels
+                        continue  # Skip fully transparent pixels
+                    # Calculate transparency factor (0 to 1)
+                    transparency = a / 255.0
                 else:
                     r, g, b = pixel
+                    transparency = 1.0  # No transparency
 
-                # Calculate the relative contribution of each base color to achieve the target color
+                # Calculate the relative contribution of each base color
                 target_color = np.array([r, g, b])
                 color_distances = [np.linalg.norm(target_color - np.array(color)) for color in base_colors_rgb]
                 contributions = np.array(color_distances)
                 contributions = 1 / (contributions + 1e-5)  # Inverse distance weighting
                 contributions /= contributions.sum()  # Normalize to sum to 1
 
-                # Calculate the number of pixels in the NxN block for each base color based on contributions
-                pixel_counts = (contributions * n * n).round().astype(int)
+                # Calculate total number of pixels based on transparency
+                total_pixels = int(round(n * n * transparency))
 
-                # Ensure exactly n*n pixels are assigned by adjusting for rounding errors
-                while pixel_counts.sum() < n * n:
-                    pixel_counts[np.argmin(pixel_counts)] += 1
-                while pixel_counts.sum() > n * n:
-                    pixel_counts[np.argmax(pixel_counts)] -= 1
+                # Calculate the number of pixels for each base color
+                if total_pixels > 0:
+                    pixel_counts = (contributions * total_pixels).round().astype(int)
+                    
+                    # Ensure the sum matches total_pixels by adjusting for rounding errors
+                    while pixel_counts.sum() < total_pixels:
+                        pixel_counts[np.argmin(pixel_counts)] += 1
+                    while pixel_counts.sum() > total_pixels:
+                        pixel_counts[np.argmax(pixel_counts)] -= 1
+                else:
+                    continue  # Skip if no pixels should be drawn
 
                 # Fill the NxN block with the assigned pixels
                 block_x = x * n
@@ -425,7 +434,7 @@ def process_image_with_dynamic_base_colors_nxn(image_path, n_base_colors, n):
                             py = block_y + py_offset
                             color = base_colors_rgb[color_index]
                             if has_alpha:
-                                new_pixels[px, py] = (*color, 255)
+                                new_pixels[px, py] = (*color, 255)  # Full opacity for placed pixels
                             else:
                                 new_pixels[px, py] = color
                             pos_index += 1
@@ -892,7 +901,6 @@ def generate_column_pattern_multi(img, column_index, color_index_map, output_fil
                 r, g, b, a = img.getpixel((x_coord, y))
                 if a == 0:
                     # Transparent
-                    print(f"[DEBUG] Transparent pixel detected at (x={x_coord}, y={y})")
                     row_pattern += "x"
                 else:
                     # Convert the pixel color to a hex code so we can look up its index
@@ -984,8 +992,6 @@ def generate_position_data_multi_color_velocity_once(
                         r, g, b, a = img.getpixel((x_coord, y))
                         # Check for transparency OR pure black
                         if a == 0 or (r == 0 and g == 0 and b == 0):
-                            if a == 0:
-                                print(f"[DEBUG] Transparent pixel at (x={x_coord}, y={y})")
                             row_pattern += "x"
                         else:
                             # Convert pixel to lowercase hex
