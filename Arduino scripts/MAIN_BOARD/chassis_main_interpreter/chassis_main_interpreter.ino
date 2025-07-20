@@ -167,6 +167,27 @@ void pullSolenoid(int solenoidNumber, int condition) {
   digitalWrite(gpio, condition);
 }
 
+// Sweep a solenoid through a range of pulse‑widths for calibration
+void runCalibration(int solenoid, int lowMs, int highMs, int stepMs) {
+  if (solenoid < 1 || solenoid > 14) return;      // basic safety
+  if (stepMs <= 0) stepMs = 1;                    // avoid infinite loop
+
+  int stepCount = 0;
+  for (int width = lowMs; width <= highMs; width += stepMs) {
+    ++stepCount;
+    Serial.printf("Cal step %d: solenoid %d width %d ms\n",
+                  stepCount, solenoid, width);
+
+    pullSolenoid(solenoid, HIGH);   // fire
+    delay(width);                   // variable HIGH time
+    pullSolenoid(solenoid, LOW);    // release
+    delay(1000);                    // fixed LOW time
+  }
+  // be certain the solenoid is off
+  pullSolenoid(solenoid, LOW);
+  Serial.println("Calibration complete.");
+}
+
 void sprayAndStripe(float stripeVelocity, float drop, String* patternList, int patternCount) {
   float movementTimeMs = (drop / stripeVelocity) * 1000;
   float timeBetweenSpraysMs = movementTimeMs / patternCount;
@@ -338,6 +359,24 @@ void loop() {
       }
       Serial.println("Cleaning cycle complete.");
     } 
+    else if (input.startsWith("calibration ")) {          // user: calibration 3,10,20,2
+      String args = input.substring(12);                  // drop the word and space
+      int first  = args.indexOf(',');
+      int second = args.indexOf(',', first  + 1);
+      int third  = args.indexOf(',', second + 1);
+
+      if (first > 0 && second > first && third > second) {
+        int sol  = args.substring(0, first).toInt();
+        int low  = args.substring(first  + 1, second).toInt();
+        int high = args.substring(second + 1, third).toInt();
+        int step = args.substring(third  + 1).toInt();
+
+        Serial.printf("Starting calibration sweep on solenoid %d\n", sol);
+        runCalibration(sol, low, high, step);
+      } else {
+        Serial.println("calibration syntax error");
+      }
+    }
     else if (input.startsWith("delay")) {
       int spaceIndex = input.indexOf(' ');
       if (spaceIndex != -1) {
@@ -410,6 +449,7 @@ void loop() {
       Serial.println(F("trig                 – trigger ALL pins once"));
       Serial.println(F("trig <S>,<C>         – pulse solenoid S, C times"));
       Serial.println(F("<number>             – set pulse width (ms)"));
+      Serial.println(F("calibration <solenoid number>,<low>,<high>,<step>  – sweep pulse widths"));
       Serial.println(F("?                    – show this help list"));
     }
     else {
