@@ -127,9 +127,9 @@ void interpretPattern(String patternToProcess, unsigned long currentMillis, int 
 
     if (patternToProcess[i] == '1') {
       if (i == 0) { schedulePin(1, 1); }
-      if (i == 1) { schedulePin(2, 1); }
+      if (i == 1) { schedulePin(2, (0.1 / speed) * 1000); }
       if (i == 2) { schedulePin(3, 1); }
-      if (i == 3) { schedulePin(4, 1); }
+      if (i == 3) { schedulePin(4, (0.1 / speed) * 1000); } //modified vals for my rachet put together design
     } else if (patternToProcess[i] == '2') {
       if (i == 0) { schedulePin(5, (0.1 / speed) * 1000); }
       if (i == 1) { schedulePin(6, (0.1 / speed) * 1000); }
@@ -294,9 +294,9 @@ void onDataRecv(const esp_now_recv_info *info, const uint8_t *incomingData, int 
 }
 
 // ESP-NOW send callback
-void onDataSent(const uint8_t *macAddr, esp_now_send_status_t status) {
-  Serial.print("Send Status: ");
-  Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Success" : "Fail");
+void onDataSent(const esp_now_send_info_t *info, esp_now_send_status_t status) {
+    Serial.print("Send Status: ");
+    Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Success" : "Fail");
 }
 
 void setup() {

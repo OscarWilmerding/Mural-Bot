@@ -1105,7 +1105,8 @@ void determineStripeVelocities(float posA, float posB, float &velA, float &velB)
   Serial.print("yPositionSteps = ");
   Serial.println(yPositionSteps);
   Serial.print("desiredXPositionSteps = ");
-  Serial.println(desiredXPositionSteps);
+  Serial.println(desiredXPosi
+tionSteps);
   Serial.print("desiredYPositionSteps = ");
   Serial.println(desiredYPositionSteps);
   Serial.print("aLengthDesired = ");
