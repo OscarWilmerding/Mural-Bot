@@ -35,9 +35,9 @@ bool movementInProgress         = false;
 bool motor1Done                 = false;
 bool motor2Done                 = false;
 
-// For acceleration and max velocity
-float baseAcceleration          = 2000.0 * 2.0;
-float baseMaxSpeed              = 400.0  * 2.0;
+// For acceleration and max velocity beleive this is in steps/s
+float baseAcceleration          = 4000.0;
+float baseMaxSpeed              = 400.0;
 float accelerationMultiplier    = 1.0;
 float maxSpeedMultiplier        = 1.0;
 
@@ -124,7 +124,10 @@ void setup() {
     Serial.flush();
     return;
   }
+
   Serial.println("[SETUP] LittleFS mounted successfully");
+  Serial.println("[SETUP] Loading commands from /gcode.txt");
+  loadCommandsFromFile("/gcode.txt");
 
   Serial.println("[SETUP] Setting WiFi mode to WIFI_STA");
   WiFi.mode(WIFI_STA);

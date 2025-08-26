@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <math.h>
+#include <float.h>
 #include <AccelStepper.h>
 #include "state.h"
 #include "modules.h"
@@ -49,6 +50,85 @@ void move_to_position_blocking(float position1, float position2) {
   }
 
   Serial.println("Blocking move complete.");
+}
+
+// Helper function to calculate ending pulley lengths for a stripe command
+void calculateEndingLengths(const Command& cmd, float& endA, float& endB) {
+  // Get all required variables
+  float drop = cmd.drop;
+  float As = cmd.startPulleyA;
+  float Bs = cmd.startPulleyB;
+  float Psep = pulleySpacing;
+  
+  // Calculate end positions
+  endA = sqrt(pow(sqrt(-pow(Psep, 0.4e1) + (double) (2 * As * As + 2 * Bs * Bs) * Psep * Psep - (double) ((int) pow((double) (As - Bs), (double) 2) * (int) pow((double) (As + Bs), (double) 2))) / Psep / 0.2e1 + drop, 0.2e1) + pow((double) (As * As) - (double) (Bs * Bs) + Psep * Psep, 0.2e1) * pow(Psep, -0.2e1) / 0.4e1);
+  endB = sqrt(pow(sqrt(-pow(Psep, 0.4e1) + (double) (2 * As * As + 2 * Bs * Bs) * Psep * Psep - (double) ((int) pow((double) (As - Bs), (double) 2) * (int) pow((double) (As + Bs), (double) 2))) / Psep / 0.2e1 + drop, 0.2e1) + pow(-(double) (As * As) + (double) (Bs * Bs) + Psep * Psep, 0.2e1) * pow(Psep, -0.2e1) / 0.4e1);
+  
+  // Serial.println("Input variables:");
+  // Serial.print("Drop: "); Serial.println(drop, 6);
+  // Serial.print("Start A: "); Serial.println(As, 6);
+  // Serial.print("Start B: "); Serial.println(Bs, 6);
+  // Serial.print("Pulley separation: "); Serial.println(Psep, 6);
+  
+  // Serial.println("Calculated end positions:");
+  // Serial.print("End A: "); Serial.println(endA, 6);
+  // Serial.print("End B: "); Serial.println(endB, 6);
+}
+
+// Four corners movement sequence
+void four_corners() {
+  // Find first and last stripe commands
+  Command* firstStripe = nullptr;
+  Command* lastStripe = nullptr;
+  
+  for (int i = 0; i < commandCount; i++) {
+    if (commands[i].type == Command::STRIPE) {
+      if (firstStripe == nullptr) {
+        firstStripe = &commands[i];
+      }
+      lastStripe = &commands[i];
+    }
+  }
+  
+  if (!firstStripe || !lastStripe) {
+    Serial.println("Error: No stripe commands found!");
+    return;
+  }
+
+  // Calculate ending positions for first and last stripes
+  float firstEndA, firstEndB, lastEndA, lastEndB;
+  calculateEndingLengths(*firstStripe, firstEndA, firstEndB);
+  calculateEndingLengths(*lastStripe, lastEndA, lastEndB);
+  
+  // Corner 1: First stripe starting position
+  Serial.println("Moving to Corner 1 (First stripe start)");
+  move_to_position_blocking(firstStripe->startPulleyA, firstStripe->startPulleyB);
+  Serial.println("Triggering at Corner 1");
+  sendSinglePaintBurst();
+  delay(5000);  // 5 second wait after trigger
+  
+  // Corner 2: Last stripe starting position
+  Serial.println("Moving to Corner 2 (Last stripe start)");
+  move_to_position_blocking(lastStripe->startPulleyA, lastStripe->startPulleyB);
+  Serial.println("Triggering at Corner 2");
+  sendSinglePaintBurst();
+  delay(5000);  // 5 second wait after trigger
+  
+  // Corner 3: First stripe ending position
+  Serial.println("Moving to Corner 3 (First stripe end)");
+  move_to_position_blocking(firstEndA, firstEndB);
+  Serial.println("Triggering at Corner 3");
+  sendSinglePaintBurst();
+  delay(5000);  // 5 second wait after trigger
+  
+  // Corner 4: Last stripe ending position
+  Serial.println("Moving to Corner 4 (Last stripe end)");
+  move_to_position_blocking(lastEndA, lastEndB);
+  Serial.println("Triggering at Corner 4");
+  sendSinglePaintBurst();
+  delay(5000);  // 5 second wait after trigger
+  
+  Serial.println("Four corners movement complete");
 }
 
 void printCurrentPositions() {

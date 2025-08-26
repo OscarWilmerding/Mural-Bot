@@ -166,6 +166,8 @@ class HubGUI:
                   command=lambda: self.send("restart")).grid(row=row, column=3, sticky="w", pady=2)
         ttk.Button(p, text="?", width=4,
                    command=lambda: self.send("?")).grid(row=row, column=4, sticky="w", pady=2)
+        ttk.Button(p, text="4 corners", width=10,
+                   command=lambda: self.send("4 corners")).grid(row=row, column=5, sticky="w", pady=2)
 
     # ───────────── console ─────────────
     def make_console(self):

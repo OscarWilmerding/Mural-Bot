@@ -161,3 +161,9 @@ void handleSendTriggerCommand() {
     }
   }
 }
+
+void sendSinglePaintBurst() {
+  Serial.println("Sending paint burst command...");
+  startLargeStringSend("paint burst");
+}
+

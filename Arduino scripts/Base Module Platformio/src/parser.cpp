@@ -27,6 +27,7 @@ void listAvailableCommands() {
   Serial.println("  test                        - Trigger chassis without movement");
   Serial.println("  set command index X         - Set current command index");
   Serial.println("  spr XX                      - Set steps per meter to XX");
+  Serial.println("  4corners                    - Move to four corners of the mural");
   Serial.println("  ?                           - Show this help list");
 }
 
@@ -134,7 +135,26 @@ void processSerialCommand(String command) {
   }
   else if (command == "run") {
     runMode = true;
-    startNextCommand();
+    Serial.println("Starting continuous run mode. Send any character to stop.");
+    while (runMode && currentCommandIndex < commandCount) {
+      if (Serial.available()) {
+        runMode = false;
+        Serial.println("\nRun mode interrupted by user input");
+        Serial.read(); // Clear the input
+        break;
+      }
+      startNextCommand();
+      if (commands[currentCommandIndex-1].type == Command::STRIPE) {
+        // After each stripe, briefly check for serial input
+        delay(100);  // Small delay to allow for serial input
+        if (Serial.available()) {
+          runMode = false;
+          Serial.println("\nRun mode interrupted by user input");
+          Serial.read(); // Clear the input
+          break;
+        }
+      }
+    }
   }
   else if (command.startsWith("set confirmation timeout ")) {
     unsigned long newTimeout = command.substring(24).toInt();
@@ -208,6 +228,9 @@ void processSerialCommand(String command) {
     Serial.print("Velocity recalculation delay set to: ");
     Serial.print(velocityCalcDelay);
     Serial.println(" ms");
+  }
+  else if (command == "4 corners" || command == "4corners") {
+    four_corners();
   }
   else {
     Serial.println("Invalid command. Type '?' for a list of commands.");
@@ -310,6 +333,9 @@ void startNextCommand() {
 
       stepper1.setCurrentPosition(stepper1.currentPosition());
       stepper2.setCurrentPosition(stepper2.currentPosition());
+      
+      // Don't delay if we're not in run mode
+      if (!runMode) return;
     }
 
   } else {
