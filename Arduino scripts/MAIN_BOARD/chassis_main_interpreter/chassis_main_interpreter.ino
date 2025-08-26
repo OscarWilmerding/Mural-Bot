@@ -2,29 +2,47 @@
 #include <WiFi.h>
 #include <ArduinoJson.h>
 
-// Define Hub MAC address
+// -------------------- Peer MAC --------------------
 uint8_t hubAddress[] = {0x48, 0x27, 0xE2, 0xE6, 0xE6, 0x58};
 
-// GPIO pin setup for serial commands
-const int pins[] = {17, 21, 22, 25, 32, 15, 33, 27, 4, 16, 26, 14, 13, 12};
-const int numPins = sizeof(pins) / sizeof(pins[0]);
-const unsigned long PIN_HIGH_DURATION_MS = 12; 
-int MAX_LEDGER_SIZE = 50;
+// -------------------- Pins (single source of truth) --------------------
+constexpr uint8_t SOLENOID_PINS[] = {
+  17, // 1
+  21, // 2
+  22, // 3
+  25, // 4
+  32, // 5
+  15, // 6
+  33, // 7
+  27, // 8
+  4,  // 9
+  16, // 10
+  26, // 11
+  14, // 12
+  13, // 13 (extra port)
+  12  // 14 (buzzer)
+};
+constexpr int NUM_SOLENOIDS = sizeof(SOLENOID_PINS) / sizeof(SOLENOID_PINS[0]);
 
-int durationMs = 100;
-int preActivationDelay = 0;
+// -------------------- Timing and config --------------------
+constexpr int MAX_LEDGER_SIZE = 100;
+
+int MAX_LEDGER_SIZE_UNUSED__remove_if_seen = MAX_LEDGER_SIZE; // keeps intent visible if you search
+
+int durationMs = 100;              // serial "trig" pulse width
+int preActivationDelay = 0;        // used by serial commands
 const int fixedPostActivationDelay = 1000;
 
-// Large string handling variables
-static bool largeStringActive = false;
-static int expectedChunks = 0;
-static int receivedChunks = 0;
+// -------------------- Long message reassembly --------------------
+static bool   largeStringActive   = false;
+static int    expectedChunks      = 0;
+static int    receivedChunks      = 0;
 static String largeStringBuffer;
 
-// <-- Added/Modified: New global flag
+// Process deferral after all chunks arrive
 bool newMessageReady = false;
 
-// Struct for ESP-NOW messages
+// -------------------- ESP-NOW message struct --------------------
 typedef struct struct_message {
   uint8_t command;
   uint8_t chunkIndex;
@@ -33,283 +51,265 @@ typedef struct struct_message {
 struct_message incomingMessage;
 struct_message confirmationMessage;
 
+// -------------------- Helpers: pins --------------------
+inline void pullSolenoid(int solenoidNumber, int level) {
+  if (solenoidNumber < 1 || solenoidNumber > NUM_SOLENOIDS) return;
+  digitalWrite(SOLENOID_PINS[solenoidNumber - 1], level);
+}
+
 void setAllPins(bool state) {
-  for (int i = 0; i < numPins; i++) {
-    digitalWrite(pins[i], state ? HIGH : LOW);
+  for (int i = 0; i < NUM_SOLENOIDS; i++) {
+    digitalWrite(SOLENOID_PINS[i], state ? HIGH : LOW);
   }
 }
 
-#include <ArduinoJson.h>
-
-// Process received long string as JSON
-void processReceivedString() {
-    Serial.println("Processing received large string...");
-    Serial.println("Full received data:");
-    Serial.println(largeStringBuffer);
-
-    DynamicJsonDocument doc(8192);
-    DeserializationError error = deserializeJson(doc, largeStringBuffer);
-
-    // Free up memory after parsing
-    String tempBuffer = largeStringBuffer;
-    largeStringBuffer = "";
-
-    if (error) {
-        Serial.print("JSON Parsing Failed: ");
-        Serial.println(error.c_str());
-        return;
-    }
-
-    const char* stripeName = doc["stripeName"];
-    float drop = doc["drop"];
-    float startPulleyA = doc["startPulleyA"];
-    float startPulleyB = doc["startPulleyB"];
-    float stripeVelocity = doc["stripeVelocity"];
-
-    JsonArray patternArray = doc["pattern"].as<JsonArray>();
-    int patternCount = patternArray.size();
-
-    String* patternList = new String[patternCount];
-    int i = 0;
-    Serial.println("starting to fill pattern array with json data");
-    for (JsonVariant v : patternArray) {
-        if (i < patternCount) {
-            patternList[i++] = v.as<String>();
-        } else {
-            break;
-        }
-    }
-
-    Serial.println("Extracted Data:");
-    Serial.print("Stripe Name: "); Serial.println(stripeName);
-    Serial.print("Drop: "); Serial.println(drop, 4);
-    Serial.print("Start Pulley A: "); Serial.println(startPulleyA, 4);
-    Serial.print("Start Pulley B: "); Serial.println(startPulleyB, 4);
-    Serial.print("Stripe Velocity: "); Serial.println(stripeVelocity, 4);
-    Serial.print("Pattern Count: "); Serial.println(patternCount);
-
-    sprayAndStripe(stripeVelocity, drop, patternList, patternCount);
-    delete[] patternList;
-}
-
-////////////////////////////////////////////////////
+// -------------------- Ledger-based scheduler --------------------
 struct ledgerEntry {
-  int pin;
-  unsigned long triggerTime;  
-  bool triggered;             
+  int      solenoid;        // 1..NUM_SOLENOIDS; -1 means empty
+  uint32_t triggerTimeMs;   // absolute millis when to go HIGH
+  uint16_t pulseWidthMs;    // width for this event
+  bool     triggered;       // whether we've already gone HIGH
 };
 
-ledgerEntry ledger[50]; 
+ledgerEntry ledger[MAX_LEDGER_SIZE];
 
 void initLedger() {
-  for (int i = 0; i < 50; i++) {
-    ledger[i] = {-1, 0, false};
+  for (int i = 0; i < MAX_LEDGER_SIZE; i++) {
+    ledger[i] = { -1, 0, 0, false };
   }
 }
 
-void schedulePin(int pin, unsigned long delayFromNow) {
-  unsigned long triggerAt = millis() + delayFromNow;
-  for (int i = 0; i < 50; i++) {
-    if (ledger[i].pin == -1) {
-      ledger[i] = {pin, triggerAt, false};
-      break;
+void schedulePin(int solenoid, uint32_t delayFromNowMs, uint16_t widthMs = durationMs) {
+  if (solenoid < 1 || solenoid > NUM_SOLENOIDS) return;
+  const uint32_t t = millis() + delayFromNowMs;
+
+  // Simple coalescing
+  for (int i = 0; i < MAX_LEDGER_SIZE; i++) {
+    if (ledger[i].solenoid == solenoid && !ledger[i].triggered) {
+      uint32_t a = ledger[i].triggerTimeMs, b = t;
+      uint32_t diff = (a > b) ? (a - b) : (b - a);
+      if (diff < widthMs) return; // close enough, don't double-schedule
     }
   }
+  // Insert
+  for (int i = 0; i < MAX_LEDGER_SIZE; i++) {
+    if (ledger[i].solenoid == -1) {
+      ledger[i] = { solenoid, t, widthMs, false };
+//      Serial.printf("SCHEDULED: solenoid %d in %lu ms (at %lu)\n", solenoid, (unsigned long)delayFromNowMs, (unsigned long)t);
+      return;
+    }
+  }
+
+  Serial.printf("WARNING: Ledger full. Could not schedule solenoid %d at %lu ms\n",
+                solenoid, (unsigned long)t);
 }
 
-void interpretPattern(String patternToProcess, unsigned long currentMillis, int speed) {
+
+// -------------------- Pattern interpreter --------------------
+void interpretPattern(const String& patternToProcess, float speed /*units per second*/) {
+  if (patternToProcess.length() < 4 || speed <= 0.0f) return;
+  auto ms = [](float seconds) -> uint32_t { return (uint32_t)(seconds * 1000.0f + 0.5f); };
+
   for (int i = 0; i < 4; i++) {
-    if (patternToProcess[i] == 'x') continue;
+    char c = patternToProcess[i];
+    if (c == 'x') continue;
 
-    Serial.print("Position ");
-    Serial.print(i + 1);
-    Serial.print(": ");
-
-    if (patternToProcess[i] == '1') {
+    if (c == '1') {
+      // your intentional offsets for 2 and 4 (kept)
       if (i == 0) { schedulePin(1, 1); }
-      if (i == 1) { schedulePin(2, (0.1 / speed) * 1000); }
+      if (i == 1) { schedulePin(2, ms(0.1f / speed)); }
       if (i == 2) { schedulePin(3, 1); }
-      if (i == 3) { schedulePin(4, (0.1 / speed) * 1000); } //modified vals for my rachet put together design
-    } else if (patternToProcess[i] == '2') {
-      if (i == 0) { schedulePin(5, (0.1 / speed) * 1000); }
-      if (i == 1) { schedulePin(6, (0.1 / speed) * 1000); }
-      if (i == 2) { schedulePin(7, (0.1 / speed) * 1000); }
-      if (i == 3) { schedulePin(8, (0.1 / speed) * 1000); }
-    } else if (patternToProcess[i] == '3') {
-      if (i == 0) { schedulePin(9, (0.2 / speed) * 1000); }
-      if (i == 1) { schedulePin(10, (0.2 / speed) * 1000); }
-      if (i == 2) { schedulePin(11, (0.2 / speed) * 1000); }
-      if (i == 3) { schedulePin(12, (0.2 / speed) * 1000); }
+      if (i == 3) { schedulePin(4, ms(0.1f / speed)); }
+    } else if (c == '2') {
+      // 5..8 with same delay
+      schedulePin(5 + i, ms(0.1f / speed));
+    } else if (c == '3') {
+      // 9..12 with same delay
+      schedulePin(9 + i, ms(0.2f / speed));
     }
   }
 }
 
-const int solenoidPins[14] = {
-  17, // Solenoid 1
-  21, // Solenoid 2
-  22, // Solenoid 3
-  25, // Solenoid 4
-  32, // Solenoid 5
-  15, // Solenoid 6
-  33, // Solenoid 7
-  27, // Solenoid 8
-  4,  // Solenoid 9
-  16, // Solenoid 10
-  26, // Solenoid 11
-  14, // Solenoid 12
-  13, // Extra port out
-  12  // Buzzer
-};
-
-void pullSolenoid(int solenoidNumber, int condition) {
-  if (solenoidNumber < 1 || solenoidNumber > 14) return; 
-  int gpio = solenoidPins[solenoidNumber - 1];
-  digitalWrite(gpio, condition);
-}
-
-// Sweep a solenoid through a range of pulse‑widths for calibration
+// -------------------- Calibration helper --------------------
 void runCalibration(int solenoid, int lowMs, int highMs, int stepMs) {
-  if (solenoid < 1 || solenoid > 14) return;      // basic safety
-  if (stepMs <= 0) stepMs = 1;                    // avoid infinite loop
+  if (solenoid < 1 || solenoid > NUM_SOLENOIDS) return;
+  if (stepMs <= 0) stepMs = 1;
 
   int stepCount = 0;
   for (int width = lowMs; width <= highMs; width += stepMs) {
     ++stepCount;
-    Serial.printf("Cal step %d: solenoid %d width %d ms\n",
-                  stepCount, solenoid, width);
-
-    pullSolenoid(solenoid, HIGH);   // fire
-    delay(width);                   // variable HIGH time
-    pullSolenoid(solenoid, LOW);    // release
-    delay(1000);                    // fixed LOW time
+    Serial.printf("Cal step %d: solenoid %d width %d ms\n", stepCount, solenoid, width);
+    pullSolenoid(solenoid, HIGH);
+    delay(width);
+    pullSolenoid(solenoid, LOW);
+    delay(1000);
   }
-  // be certain the solenoid is off
   pullSolenoid(solenoid, LOW);
   Serial.println("Calibration complete.");
 }
 
+// -------------------- Spray + Stripe state (blocking version) --------------------
 void sprayAndStripe(float stripeVelocity, float drop, String* patternList, int patternCount) {
-  float movementTimeMs = (drop / stripeVelocity) * 1000;
-  float timeBetweenSpraysMs = movementTimeMs / patternCount;
+  initLedger();                       // clear any residual entries
 
-  Serial.print("Total Movement Time: ");
-  Serial.print(movementTimeMs);
-  Serial.println(" ms");
-  Serial.print("Interval between sprays: ");
-  Serial.print(timeBetweenSpraysMs);
-  Serial.println(" ms");
+  if (stripeVelocity <= 0.0f || patternCount <= 0) return;
 
-  unsigned long startMillis = millis();
-  unsigned long lastTriggerMillis = startMillis;
+  const double movementTimeMs = (double)drop / (double)stripeVelocity * 1000.0;
+  const double intervalMs = movementTimeMs / (double)patternCount;
+
+  const uint32_t startMs = millis();
+  double nextTriggerAt = (double)startMs + intervalMs;
   int triggerCount = 0;
 
-  Serial.print("-- STARTING SPRAY STRIPE SOLENOID MOVEMENTS --");
+  Serial.print("Total Movement Time: "); Serial.print(movementTimeMs); Serial.println(" ms");
+  Serial.print("Interval between sprays: "); Serial.print(intervalMs); Serial.println(" ms");
+  Serial.println("-- STARTING SPRAY STRIPE SOLENOID MOVEMENTS --");
 
-  while (millis() - startMillis < movementTimeMs) {
-    delay(1); 
+  while ((double)(millis() - startMs) < movementTimeMs) {
+    const uint32_t now = millis();
 
-    unsigned long currentMillis = millis();
-
-    if (currentMillis - lastTriggerMillis >= timeBetweenSpraysMs && triggerCount < patternCount) {
-      interpretPattern(patternList[triggerCount++], currentMillis, stripeVelocity);
-      lastTriggerMillis += timeBetweenSpraysMs;
+    if (triggerCount < patternCount && (double)now >= nextTriggerAt) {
+      interpretPattern(patternList[triggerCount++], stripeVelocity);
+      nextTriggerAt += intervalMs;
     }
 
     for (int i = 0; i < MAX_LEDGER_SIZE; i++) {
-      if (ledger[i].pin != -1) {
-        if (!ledger[i].triggered && currentMillis >= ledger[i].triggerTime) {
-          pullSolenoid(ledger[i].pin, HIGH);
-          ledger[i].triggered = true;
-        } else if (ledger[i].triggered && currentMillis >= ledger[i].triggerTime + PIN_HIGH_DURATION_MS) {
-          pullSolenoid(ledger[i].pin, LOW);
-          ledger[i].pin = -1;
-        }
+      if (ledger[i].solenoid == -1) continue;
+
+      if (!ledger[i].triggered && now >= ledger[i].triggerTimeMs) {
+        pullSolenoid(ledger[i].solenoid, HIGH);
+//        Serial.printf("SOLENOID HIGH: %d at %lu ms, width=%u ms\n",ledger[i].solenoid, (unsigned long)millis(), (unsigned)ledger[i].pulseWidthMs);//COMMENT THIS LINE DURING PROPER RUNNING IT WILL SLOW SHIT DOWN
+        ledger[i].triggered = true;
+      } else if (ledger[i].triggered && now >= ledger[i].triggerTimeMs + ledger[i].pulseWidthMs) {
+        pullSolenoid(ledger[i].solenoid, LOW);
+        ledger[i].solenoid = -1; // free the slot
       }
     }
+    // no delay(1) — keep loop tight for lower jitter
   }
 
-  Serial.println("Movement complete, turning off all solenoids.");
-  for (int i = 1; i <= 12; i++) {
-    pullSolenoid(i, LOW);
-  }
+  Serial.println("Movement complete, turning off spray solenoids.");
+  for (int s = 1; s <= 12; s++) pullSolenoid(s, LOW); // keep original behavior
 }
 
+// -------------------- JSON processing --------------------
+void processReceivedString() {
+  Serial.println("Processing received large string...");
+  Serial.println("Full received data:");
+  Serial.println(largeStringBuffer);
 
-// Handle large string reception
+  DynamicJsonDocument doc(16384);
+  DeserializationError error = deserializeJson(doc, largeStringBuffer);
+
+  // free buffer early
+  String tmp = largeStringBuffer;
+  largeStringBuffer = "";
+
+  if (error) {
+    Serial.print("JSON Parsing Failed: ");
+    Serial.println(error.c_str());
+    return;
+  }
+
+  const char* stripeName     = doc["stripeName"] | "";
+  float drop                 = doc["drop"] | 0.0f;
+  float startPulleyA         = doc["startPulleyA"] | 0.0f;
+  float startPulleyB         = doc["startPulleyB"] | 0.0f;
+  float stripeVelocity       = doc["stripeVelocity"] | 0.0f;
+  JsonArray patternArray     = doc["pattern"].as<JsonArray>();
+  int patternCount           = patternArray.size();
+
+  String* patternList = new String[patternCount];
+  int i = 0;
+  for (JsonVariant v : patternArray) {
+    if (i < patternCount) patternList[i++] = v.as<String>();
+    else break;
+  }
+
+  Serial.println("Extracted Data:");
+  Serial.print("Stripe Name: ");      Serial.println(stripeName);
+  Serial.print("Drop: ");             Serial.println(drop, 4);
+  Serial.print("Start Pulley A: ");   Serial.println(startPulleyA, 4);
+  Serial.print("Start Pulley B: ");   Serial.println(startPulleyB, 4);
+  Serial.print("Stripe Velocity: ");  Serial.println(stripeVelocity, 4);
+  Serial.print("Pattern Count: ");    Serial.println(patternCount);
+
+  sprayAndStripe(stripeVelocity, drop, patternList, patternCount);
+  delete[] patternList;
+}
+
+// -------------------- ESP-NOW chunked receive --------------------
 void handleLargeStringPacket(const uint8_t *data, int len) {
+  if (len < 1) return;
   uint8_t packetType = data[0];
 
   if (packetType == 0x10) {
-    expectedChunks = data[1] << 8 | data[2];
+    expectedChunks = (data[1] << 8) | data[2];
     receivedChunks = 0;
-    largeStringBuffer.reserve(expectedChunks * 32); 
+    // reserve enough capacity. mirror CHUNK_PAYLOAD_SIZE from sender (200)
+    largeStringBuffer.reserve(expectedChunks * 200 + 1);
     largeStringBuffer = "";
     largeStringActive = true;
 
+    // ACK start
+    struct_message startAck;
+    startAck.command    = 0x10;      // start-ack
+    startAck.chunkIndex = 0;
+    esp_now_send(hubAddress, (uint8_t *)&startAck, sizeof(startAck));
+
     Serial.print("Large string incoming; total chunks: ");
     Serial.println(expectedChunks);
-  } 
-  else if (packetType == 0x11 && largeStringActive) {
-    int chunkIndex = data[1];
-    largeStringBuffer += String((const char*)&data[2]);
+    return;
+  }
+
+  if (packetType == 0x11 && largeStringActive) {
+    const uint8_t chunkIndex = data[1];
+
+    // safer append using known length
+    int payloadLen = len - 2;             // type + index already consumed
+    if (payloadLen > 0 && data[2 + payloadLen - 1] == '\0') {
+      payloadLen--;                       // drop trailing null if present
+    }
+    largeStringBuffer.concat((const char*)&data[2], payloadLen);
+
     receivedChunks++;
 
-    Serial.print("Received chunk #");
-    Serial.print(chunkIndex);
-    Serial.print(" (");
-    Serial.print(receivedChunks);
-    Serial.print("/");
-    Serial.print(expectedChunks);
-    Serial.println(")");
-
-    // Send chunk-level ack
-    struct_message chunkAck;
-    chunkAck.command    = 0x13;
-    chunkAck.chunkIndex = chunkIndex; 
+    // per-chunk ack
+    struct_message chunkAck{0x13, chunkIndex};
     esp_now_send(hubAddress, (uint8_t *)&chunkAck, sizeof(chunkAck));
-    
-    // If all chunks arrived, send final confirmation and defer parsing
+
     if (receivedChunks >= expectedChunks) {
-      Serial.println("All chunks received!");
-      struct_message confirmMsg;
-      confirmMsg.command = 0x12;
-      confirmMsg.chunkIndex = 0;
+      struct_message confirmMsg{0x12, 0};
       esp_now_send(hubAddress, (uint8_t *)&confirmMsg, sizeof(confirmMsg));
 
-      Serial.println("Large string confirmation sent to Hub.");
       largeStringActive = false;
-
-      // <-- Added/Modified: Do NOT call processReceivedString() here.
-      // Instead, set flag to handle it in loop().
-      newMessageReady = true; // <-- Added/Modified
+      newMessageReady = true;
     }
   }
 }
 
-// ESP-NOW receive callback
+// -------------------- ESP-NOW callbacks --------------------
 void onDataRecv(const esp_now_recv_info *info, const uint8_t *incomingData, int len) {
-  if (len >= 1) {
-    handleLargeStringPacket(incomingData, len);
-  }
+  if (len >= 1) handleLargeStringPacket(incomingData, len);
 }
 
-// ESP-NOW send callback
 void onDataSent(const esp_now_send_info_t *info, esp_now_send_status_t status) {
-    Serial.print("Send Status: ");
-    Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Success" : "Fail");
+  Serial.print("Send Status: ");
+  Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Success" : "Fail");
 }
 
+// -------------------- Arduino setup/loop --------------------
 void setup() {
   Serial.begin(115200);
   delay(2000);
 
   WiFi.mode(WIFI_STA);
-  
+
   if (esp_now_init() != ESP_OK) {
     Serial.println("Error initializing ESP-NOW");
     return;
   }
-  
+
   Serial.print("MAC address: ");
   Serial.println(WiFi.macAddress());
   Serial.println("ESP-NOW Chassis Initialized");
@@ -327,9 +327,9 @@ void setup() {
     return;
   }
 
-  for (int i = 0; i < numPins; i++) {
-    pinMode(pins[i], OUTPUT);
-    digitalWrite(pins[i], LOW);
+  for (int i = 0; i < NUM_SOLENOIDS; i++) {
+    pinMode(SOLENOID_PINS[i], OUTPUT);
+    digitalWrite(SOLENOID_PINS[i], LOW);
   }
 
   initLedger();
@@ -339,12 +339,13 @@ void setup() {
 }
 
 void loop() {
-  // <-- Added/Modified: If new message is ready, process now
-  if (newMessageReady) {         // <-- Added/Modified
-    newMessageReady = false;     // <-- Added/Modified
-    processReceivedString();     // <-- Added/Modified
+  // Handle deferred message parsing
+  if (newMessageReady) {
+    newMessageReady = false;
+    processReceivedString();
   }
 
+  // Serial command interface
   if (Serial.available() > 0) {
     String input = Serial.readStringUntil('\n');
     input.trim();
@@ -358,9 +359,9 @@ void loop() {
         delay(1000);
       }
       Serial.println("Cleaning cycle complete.");
-    } 
-    else if (input.startsWith("calibration ")) {          // user: calibration 3,10,20,2
-      String args = input.substring(12);                  // drop the word and space
+    }
+    else if (input.startsWith("calibration ")) {   // calibration 3,10,20,2
+      String args = input.substring(12);
       int first  = args.indexOf(',');
       int second = args.indexOf(',', first  + 1);
       int third  = args.indexOf(',', second + 1);
@@ -385,7 +386,7 @@ void loop() {
         Serial.print(preActivationDelay);
         Serial.println(" ms");
       }
-    } 
+    }
     else if (input.equalsIgnoreCase("forever")) {
       Serial.println("Starting forever cleaning cycle...");
       for (;;) {
@@ -395,7 +396,7 @@ void loop() {
         setAllPins(false);
         delay(30000);
       }
-    } 
+    }
     else if (input.equalsIgnoreCase("rand")) {
       Serial.println("Starting random cycle...");
       delay(5000);
@@ -406,29 +407,28 @@ void loop() {
         delay(random(300, 600));
       }
       Serial.println("Random cycle complete.");
-    } 
-    else if (input.startsWith("trig ")) {            // includes trailing space
+    }
+    else if (input.startsWith("trig ")) {          // trig <solenoid>,<count>
       int commaPos = input.indexOf(',');
       if (commaPos == -1) {
         Serial.println("Syntax: trig <solenoid>,<count>");
       } else {
-        int solenoidNum = input.substring(5, commaPos).toInt();     // after "trig "
+        int solenoidNum = input.substring(5, commaPos).toInt();
         int repeatCnt   = input.substring(commaPos + 1).toInt();
 
-        if (solenoidNum >= 1 && solenoidNum <= 14 && repeatCnt > 0) {
-          Serial.printf("Pulsing solenoid %d for %d time(s)\n",
-                       solenoidNum, repeatCnt);
+        if (solenoidNum >= 1 && solenoidNum <= NUM_SOLENOIDS && repeatCnt > 0) {
+          Serial.printf("Pulsing solenoid %d for %d time(s)\n", solenoidNum, repeatCnt);
 
           if (preActivationDelay) delay(preActivationDelay);
 
           for (int i = 0; i < repeatCnt; i++) {
-            pullSolenoid(solenoidNum, HIGH);   // fire
-            delay(durationMs);                 // pulse width
-            pullSolenoid(solenoidNum, LOW);    // release
-            delay(fixedPostActivationDelay);   // gap between pulses
+            pullSolenoid(solenoidNum, HIGH);
+            delay(durationMs);
+            pullSolenoid(solenoidNum, LOW);
+            delay(fixedPostActivationDelay);
           }
         } else {
-          Serial.println("Invalid solenoid # (1‑14) or count (>0).");
+          Serial.println("Invalid solenoid # or count.");
         }
       }
     }
@@ -439,17 +439,17 @@ void loop() {
       delay(durationMs);
       setAllPins(false);
       delay(fixedPostActivationDelay);
-    } 
+    }
     else if (input == "?") {
       Serial.println(F("=== Available Serial Commands ==="));
-      Serial.println(F("clean                – 120‑shot cleaning cycle"));
-      Serial.println(F("delay <ms>           – set pre‑activation delay"));
+      Serial.println(F("clean                – 120 shot cleaning cycle"));
+      Serial.println(F("delay <ms>           – set pre activation delay"));
       Serial.println(F("forever              – endless clean pulses"));
       Serial.println(F("rand                 – 10 random pulses"));
       Serial.println(F("trig                 – trigger ALL pins once"));
       Serial.println(F("trig <S>,<C>         – pulse solenoid S, C times"));
       Serial.println(F("<number>             – set pulse width (ms)"));
-      Serial.println(F("calibration <solenoid number>,<low>,<high>,<step>  – sweep pulse widths"));
+      Serial.println(F("calibration <solenoid>,<low>,<high>,<step> – sweep pulse widths"));
       Serial.println(F("?                    – show this help list"));
     }
     else {
@@ -461,6 +461,5 @@ void loop() {
         Serial.println(" ms");
       }
     }
-    
   }
 }

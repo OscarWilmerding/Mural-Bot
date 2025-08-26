@@ -19,10 +19,10 @@ const int greyButtonPin = 9;
 
 // Define pins for Motors
 // IF YOU ARE GOING TO CHANGE THESE YOU PROBABLY WIRED IT WRONG
-const int stepPin1 = 7;
-const int dirPin1  = 8;
-const int stepPin2 = 5;
-const int dirPin2  = 4;
+const int stepPin1 = 5;
+const int dirPin1  = 4;
+const int stepPin2 = 7;
+const int dirPin2  = 8;
 
 // Create instances of the AccelStepper class
 AccelStepper stepper1(motorInterfaceType, stepPin1, dirPin1);
@@ -64,10 +64,10 @@ unsigned long confirmationTimeout     = 5000;  // Default 5s timeout waiting for
 
 // Conversion factor (meters -> steps)
 // this number has had many calibration constants applied to it which is what makes it ugly. derived via trial and error.
-//if its overshooting this number should become SMALLER
-float stepsPerMeter       = 9024;  
+// if its overshooting this number should become SMALLER
+float stepsPerMeter       = 9727;  
 
-// Direction control variables
+// Direction control variab
 int motor1Direction             = -1;
 int motor2Direction             = -1;
 
@@ -87,7 +87,7 @@ float stripeVelocity            = 0.05;
 // New global for controlling how often (ms) you recalc velocities
 unsigned long velocityCalcDelay = 100; 
 
-//below vars relating to long string sending
+// below vars relating to long string sending
 static const int CHUNK_PAYLOAD_SIZE = 200; 
 static bool     largeStringInProgress = false;
 static String   largeStringToSend     = "";
@@ -97,6 +97,10 @@ static int      currentChunkIndex     = 0;
 static bool     largeStringAckReceived = false;
 static unsigned long lastSendAttempt   = 0;
 static unsigned long resendDelay       = 5000; 
+
+// HANDSHAKE STATE
+volatile bool startAckReceived = false;
+
 
 /************************************************************/
 /*                       DATA STRUCTURES                    */
@@ -143,7 +147,7 @@ int     currentCommandIndex = 0;
 /************************************************************/
 /*                  FUNCTION DECLARATIONS                   */
 /************************************************************/
-void onDataSent(const uint8_t *macAddr, esp_now_send_status_t status);
+void onDataSent(const esp_now_send_info_t *info, esp_now_send_status_t status);
 void onDataRecv(const esp_now_recv_info *info, const uint8_t *incomingData, int len);
 void move_to_position(float position1, float position2);
 void move_to_position_blocking(float position1, float position2);
@@ -158,7 +162,7 @@ void determineStripeVelocities(float posA, float posB, float &velA, float &velB)
 void startLargeStringSend(const String &strToSend);
 void sendNextChunk();
 void IRAM_ATTR handleResetInterrupt();
-
+static void sendStartPacket();   // forward declaration for start-ack packet
 
 
 /************************************************************/
@@ -166,7 +170,7 @@ void IRAM_ATTR handleResetInterrupt();
 /************************************************************/
 void setup() {
   Serial.begin(115200);
-  delay(5000); //arduino connects to serial slow as hell so this is necissary
+  delay(5000); // arduino connects to serial slow as hell so this is necissary
   Serial.println("Stepper Motor Control Initialized");
   // Set acceleration and max speed
   stepper1.setAcceleration(baseAcceleration * accelerationMultiplier);
@@ -178,7 +182,6 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(redButtonPin), handleResetInterrupt, FALLING);
   pinMode(greyButtonPin, INPUT_PULLUP);
 
-
   // Initialize LittleFS and load the file
   if (!LittleFS.begin()) {
     Serial.println("An error has occurred while mounting LittleFS");
@@ -188,7 +191,7 @@ void setup() {
 
   // Initialize WiFi
   WiFi.mode(WIFI_STA);
-  delay(1000); //to get right reading
+  delay(1000); // to get right reading
   Serial.print("MAC address: ");
   Serial.println(WiFi.macAddress());
   Serial.println("ESP-NOW Hub Initialized");
@@ -248,7 +251,6 @@ void loop() {
 
   if (largeStringInProgress && !largeStringAckReceived) {
     // Check if we still have chunks left to send
-    // (We might drip them out one at a time, or all at once, as you prefer.)
     static unsigned long chunkSendInterval = 50; // e.g., 50ms between chunk sends
     static unsigned long lastChunkSendTime = 0;
 
@@ -316,142 +318,133 @@ void loop() {
 void startLargeStringSend(const String &strToSend) {
   largeStringToSend      = strToSend;
   int len                = largeStringToSend.length();
-
-  totalChunks            = (len + CHUNK_PAYLOAD_SIZE - 1) / CHUNK_PAYLOAD_SIZE; 
+  totalChunks            = (len + CHUNK_PAYLOAD_SIZE - 1) / CHUNK_PAYLOAD_SIZE;
   currentChunkIndex      = 0;
   largeStringInProgress  = true;
   largeStringAckReceived = false;
+  finalAckReceived       = false;
+  startAckReceived       = false;
 
   Serial.println("Initiating large string send...");
+  sendStartPacket();
 
-  // Send initial chunk-count packet
-  uint8_t startPacket[3];
-  startPacket[0] = 0x10;
-  startPacket[1] = (uint8_t)((totalChunks >> 8) & 0xFF);
-  startPacket[2] = (uint8_t)(totalChunks & 0xFF);
-  
-  esp_err_t result = esp_now_send(chassisAddress, startPacket, sizeof(startPacket));
-  
-  if (result == ESP_OK) {
-    Serial.println("Sent initial chunk-count packet.");
-  } else {
-    Serial.println("Failed to send initial chunk-count packet.");
-    largeStringInProgress = false;
-    return; // Stop immediately if failed
+  // wait for start-ack with retries
+  unsigned long t0 = millis();
+  const unsigned long startTimeout = 1000;
+  while (!startAckReceived) {
+    if (millis() - t0 > startTimeout) {
+      Serial.println("No start-ack, resending 0x10...");
+      sendStartPacket();
+      t0 = millis();
+    }
+    delay(10);
   }
+  Serial.println("Start-ack received.");
 
-  // Blocking loop to send all chunks
-  for (currentChunkIndex = 0; currentChunkIndex < totalChunks;) {
-    
-    largeStringAckReceived = false; // Reset before each chunk
-    sendNextChunk();               // This sends chunk # currentChunkIndex
-    
+  for (currentChunkIndex = 0; currentChunkIndex < totalChunks; ) {
+    largeStringAckReceived = false;
+    sendNextChunk();
+
     unsigned long sendTime = millis();
-    const unsigned long timeout = 500; // e.g. 500 ms, can adjust
+    const unsigned long timeout = 500; // per-chunk timeout
 
-    // Wait for chunk-level ack
     while (!largeStringAckReceived) {
       if (millis() - sendTime > timeout) {
-        Serial.println("Chunk-level ack timeout, resending chunk...");
-        sendNextChunk(); // re-send this chunk
-        sendTime = millis(); // reset timeout
+        // if stuck on chunk 0, also resend 0x10
+        if (currentChunkIndex == 0) sendStartPacket();
+        Serial.println("Chunk-ack timeout, resending chunk...");
+        sendNextChunk();
+        sendTime = millis();
       }
-      delay(10); // prevent busy-wait lock
+      delay(10);
     }
   }
 
-  unsigned long finalSendTime = millis();
-  unsigned long finalTimeout  = 3000; // 3s or so
+  // wait for final 0x12
+  unsigned long finalT = millis();
+  while (!finalAckReceived && millis() - finalT < 3000) delay(10);
 
-  while (!finalAckReceived && (millis() - finalSendTime < finalTimeout)) {
-    // We'll set finalAckReceived = true in onDataRecv when command == 0x12
-    delay(10);
-  }
-
-  if (finalAckReceived) {
-    Serial.println("Entire large string confirmed by receiver.");
-  } else {
-    Serial.println("Timed out waiting for final 0x12 ack from receiver.");
-  }
   largeStringInProgress = false;
+  Serial.println(finalAckReceived ? "Entire large string confirmed." : "Timed out waiting for final ack.");
 }
 
 /*****************************************************************************/
 /*                        3) sendNextChunk() Function                        */
 /*****************************************************************************/
 void sendNextChunk() {
-    if (!largeStringInProgress) return;  
-    if (currentChunkIndex >= totalChunks) {
-      Serial.println("All chunks sent. Waiting for confirmation...");
-      return;
-    }
+  if (!largeStringInProgress) return;  
+  if (currentChunkIndex >= totalChunks) {
+    Serial.println("All chunks sent. Waiting for confirmation...");
+    return;
+  }
 
-    // Prepare chunk
-    int startIdx = currentChunkIndex * CHUNK_PAYLOAD_SIZE;
-    String chunkData = largeStringToSend.substring(startIdx, startIdx + CHUNK_PAYLOAD_SIZE);
+  // Prepare chunk
+  int startIdx = currentChunkIndex * CHUNK_PAYLOAD_SIZE;
+  String chunkData = largeStringToSend.substring(startIdx, startIdx + CHUNK_PAYLOAD_SIZE);
 
-    // Build packet
-    size_t packetSize = 2 + chunkData.length() + 1;
-    uint8_t *packet   = (uint8_t *) malloc(packetSize);
-    packet[0] = 0x11;
-    packet[1] = (uint8_t) currentChunkIndex;
-    memcpy(&packet[2], chunkData.c_str(), chunkData.length() + 1);
+  // Build packet
+size_t packetSize = 2 + chunkData.length();          // no +1
+uint8_t *packet   = (uint8_t *) malloc(packetSize);
+packet[0] = 0x11;
+packet[1] = (uint8_t) currentChunkIndex;
+memcpy(&packet[2], chunkData.c_str(), chunkData.length());   // no +1
 
-    // Send
-    esp_err_t result = esp_now_send(chassisAddress, packet, packetSize);
-    free(packet);
+  // Send
+  esp_err_t result = esp_now_send(chassisAddress, packet, packetSize);
+  free(packet);
 
-    if (result == ESP_OK) {
-      Serial.print("Sent chunk #");
-      Serial.print(currentChunkIndex);
-      Serial.print(" of ");
-      Serial.println(totalChunks);
-    } else {
-      Serial.print("Failed to send chunk #");
-      Serial.println(currentChunkIndex);
-    }
+  if (result == ESP_OK) {
+    Serial.print("Sent chunk #");
+    Serial.print(currentChunkIndex);
+    Serial.print(" of ");
+    Serial.println(totalChunks);
+  } else {
+    Serial.print("Failed to send chunk #");
+    Serial.println(currentChunkIndex);
+  }
 
-    // DO NOT increment here. Instead, increment only after the ack for this chunk arrives.
-    // currentChunkIndex++;
+  // increment only after ack in onDataRecv
 }
-
 
 
 /************************************************************/
 /*             CALLBACKS: ESP-NOW DATA SENT/RECV            */
 /************************************************************/
-void onDataSent(const uint8_t *macAddr, esp_now_send_status_t status) {
+void onDataSent(const esp_now_send_info_t *info, esp_now_send_status_t status) {
   Serial.print("Send Status: ");
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Success" : "Fail");
-  delay(50);
 }
 
 void onDataRecv(const esp_now_recv_info *info, const uint8_t *incomingData, int len) {
   if (len == sizeof(struct_message)) {
-    // existing logic
     memcpy(&incomingMessage, incomingData, sizeof(incomingMessage));
-    if (incomingMessage.command == 0x02) {
-      Serial.println("Confirmation received from Chassis");
-      commandConfirmed = true;
-    }
-    else if (incomingMessage.command == 0x13) {
-      // If it matches the chunk we just sent, mark ack and *then* increment
+    if (incomingMessage.command == 0x10) {      // start-ack
+      startAckReceived = true;
+    } else if (incomingMessage.command == 0x13) {
       if (incomingMessage.chunkIndex == currentChunkIndex) {
-        largeStringAckReceived = true;
-        currentChunkIndex++;  // move on to next chunk now that we have ack
+        if (!largeStringAckReceived) {
+          largeStringAckReceived = true;
+          currentChunkIndex++;
+        }
       }
-    }
-    else if (incomingMessage.command == 0x12) {
-      // Final ack that the whole string arrived
-      Serial.println("Final large string ACK received from Chassis!");
-      // We can set another bool, e.g., finalAckReceived = true;
+    } else if (incomingMessage.command == 0x12) {
       finalAckReceived = true;
     }
   }
-  else {
-    // any other data you handle
+}
+
+static void sendStartPacket() {
+  uint8_t startPacket[3] = {
+    0x10,
+    (uint8_t)((totalChunks >> 8) & 0xFF),
+    (uint8_t)(totalChunks & 0xFF)
+  };
+  esp_err_t result = esp_now_send(chassisAddress, startPacket, sizeof(startPacket));
+  if (result != ESP_OK) {
+    Serial.println("Failed to send start packet");
   }
 }
+
 
 /************************************************************/
 /*                  MOVEMENT HELPER FUNCTIONS               */
@@ -504,7 +497,6 @@ void move_to_position_blocking(float position1, float position2) {
   while ((stepper1.distanceToGo() != 0) || (stepper2.distanceToGo() != 0)) {
     stepper1.run();
     stepper2.run();
-    // If using runSpeed() for indefinite speed, you'd call runSpeed() here instead
   }
 
   Serial.println("Blocking move complete.");
@@ -596,10 +588,10 @@ void processSerialCommand(String command) {
     int newSPR = command.substring(4).toInt();    // grab the number after the space
     if (newSPR > 0) {
       stepsPerMeter = newSPR;
-      Serial.print("Steps‑per‑revolution set to: ");
+      Serial.print("Steps-per-meter set to: ");
       Serial.println(stepsPerMeter);
     } else {
-      Serial.println("Invalid SPR value (must be > 0)");
+      Serial.println("Invalid SPR value (must be > 0)");
     }
   }
   else if (command == "zero a") {
@@ -729,13 +721,12 @@ void startNextCommand() {
       Serial.print("Executing STRIPE command #");
       Serial.println(currentCommandIndex + 1);
 
-      // JSON formatting of stripe data (no change needed)
+      // JSON formatting of stripe data
       String stripeData = "{";
       stripeData += "\"stripeName\":\"" + cmd.stripeName + "\",";
       stripeData += "\"drop\":" + String(cmd.drop, 4) + ",";
       stripeData += "\"startPulleyA\":" + String(cmd.startPulleyA, 4) + ",";
       stripeData += "\"startPulleyB\":" + String(cmd.startPulleyB, 4) + ",";
-
       stripeData += "\"pattern\":" + cmd.pattern + ",";
       stripeData += "\"stripeVelocity\":" + String(stripeVelocity, 4);
       stripeData += "}";
@@ -743,7 +734,7 @@ void startNextCommand() {
       Serial.println("Generated JSON Data for STRIPE:");
       Serial.println(stripeData);
 
-      // (Your existing positioning and movement code remains unchanged below this point)
+      // Move to initial stripe position...
       Serial.println("Moving to initial stripe position...");
       move_to_position_blocking(cmd.startPulleyA, cmd.startPulleyB);
 
@@ -755,7 +746,7 @@ void startNextCommand() {
       Serial.println("Done moving to initial position.");
       delay(2000);
 
-      // Send entire JSON data string using your known-working large string send scheme
+      // Send entire JSON data string using large string send scheme
       startLargeStringSend(stripeData);
       
       float timeForMovementSeconds = cmd.drop / stripeVelocity;
@@ -770,13 +761,13 @@ void startNextCommand() {
       unsigned long lastCallTime = millis();
 
       Serial.println("Entering stripe movement loop...");
+      printCurrentPositions();
       while (millis() - startTime < timeForMovementMs) {
         unsigned long currentTime = millis();
         stepper1.runSpeed();
         stepper2.runSpeed();
 
         if (currentTime - lastCallTime >= velocityCalcDelay) {
-          printCurrentPositions();
 
           float posA = stepper1.currentPosition() * motor1Direction;
           float posB = stepper2.currentPosition() * motor2Direction;
@@ -799,13 +790,14 @@ void startNextCommand() {
       }
 
       Serial.println("Finished stripe movement loop.");
+      printCurrentPositions();
+      
       movementInProgress = false;
       currentCommandIndex++;
 
       stepper1.setCurrentPosition(stepper1.currentPosition());
       stepper2.setCurrentPosition(stepper2.currentPosition());
     }
-
 
   }
   else {
@@ -929,7 +921,6 @@ void loadCommandsFromFile(const char *path) {
       }
       // "pattern:"
       if (line.startsWith("pattern:")) {
-        // We capture everything after "pattern:"
         int colonIndex = line.indexOf(':');
         if (colonIndex >= 0) {
           String patternData = line.substring(colonIndex + 1);
@@ -976,7 +967,6 @@ void loadCommandsFromFile(const char *path) {
     }
     else {
       Serial.print("UNRECOGNIZED COMMANDS IN GCODE FILE");
-      // Optionally handle or ignore other lines here
     }
   }
 
@@ -984,7 +974,6 @@ void loadCommandsFromFile(const char *path) {
   Serial.print("Total commands loaded: ");
   Serial.println(commandCount);
 }
-
 
 
 /************************************************************/
@@ -1061,13 +1050,9 @@ void printCurrentPositions() {
 /************************************************************/
 /*   DETERMINE STRIPE VELOCITIES (CUSTOM CALC FOR STRIPES)  */
 /************************************************************/
-// TODO: Replace with your equation that ensures a certain chassis velocity, etc.
-// For demonstration, set both to half the global stripeVelocity
 void determineStripeVelocities(float posA, float posB, float &velA, float &velB) {
   float Vx = 0; // no movement in x direction.
   float Vy = stripeVelocity * stepsPerMeter; 
-             // this means the velocity in y direction is positive, 
-             // which is moving down the wall.
 
   float pulleySpacingSteps = pulleySpacing * stepsPerMeter;
 
@@ -1093,39 +1078,9 @@ void determineStripeVelocities(float posA, float posB, float &velA, float &velB)
 
   velA = (aLengthDesired - posA) / ((float)velocityCalcDelay / 1000); 
   velB = (bLengthDesired - posB) / ((float)velocityCalcDelay / 1000);
-
-/*
-  Serial.println("--------------------velocity debug information----------------------");
-  Serial.print("aLength = ");
-  Serial.println(posA);
-  Serial.print("bLength = ");
-  Serial.println(posB);
-  Serial.print("xPositionSteps = ");
-  Serial.println(xPositionSteps);
-  Serial.print("yPositionSteps = ");
-  Serial.println(yPositionSteps);
-  Serial.print("desiredXPositionSteps = ");
-  Serial.println(desiredXPosi
-tionSteps);
-  Serial.print("desiredYPositionSteps = ");
-  Serial.println(desiredYPositionSteps);
-  Serial.print("aLengthDesired = ");
-  Serial.println(aLengthDesired);
-  Serial.print("bLengthDesired = ");
-  Serial.println(bLengthDesired);
-  Serial.print("a diff = ");
-  Serial.println(aLengthDesired-posA);
-  Serial.print("b diff = ");
-  Serial.println(bLengthDesired-posB);
-  Serial.print("velA = ");
-  Serial.println(velA);
-  Serial.print("velB = ");
-  Serial.println(velB);
-*/
 }
 
 void IRAM_ATTR handleResetInterrupt() {
-  
   Serial.println("Red button pressed, restarting esp32");
   esp_restart(); // Soft reset the ESP32
 }
