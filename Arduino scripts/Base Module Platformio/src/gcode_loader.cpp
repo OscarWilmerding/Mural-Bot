@@ -6,9 +6,24 @@
 #include "modules.h"
 
 void loadCommandsFromFile(const char *path) {
+  Serial.print("[DEBUG] Attempting to open file: ");
+  Serial.println(path);
   File file = LittleFS.open(path, "r");
   if (!file) {
-    Serial.println("Failed to open file for reading");
+    Serial.println("[ERROR] Failed to open file for reading");
+    Serial.println("[DEBUG] Listing files in LittleFS root:");
+    File root = LittleFS.open("/");
+    if (root) {
+      File entry = root.openNextFile();
+      while (entry) {
+        Serial.print("[DEBUG] Found file: ");
+        Serial.println(entry.name());
+        entry = root.openNextFile();
+      }
+      root.close();
+    } else {
+      Serial.println("[DEBUG] Could not open LittleFS root directory.");
+    }
     return;
   }
 
@@ -110,6 +125,13 @@ void loadCommandsFromFile(const char *path) {
       cmd.colorHex = line.substring(16);
       cmd.colorHex.trim();
       cmd.colorHex.toUpperCase();
+      
+      // Check for command array overflow
+      if (commandCount >= MAX_COMMANDS) {
+          Serial.println("Error: Command array overflow! Cannot add more commands.");
+          break;
+      }
+
       commands[commandCount++] = cmd;
     } else {
       Serial.print("UNRECOGNIZED COMMANDS IN GCODE FILE");

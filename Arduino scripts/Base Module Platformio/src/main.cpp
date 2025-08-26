@@ -104,48 +104,55 @@ void setup() {
   Serial.begin(115200);
   delay(5000);
   Serial.println("Stepper Motor Control Initialized");
-
+  Serial.println("[SETUP] Starting stepper tuning");
   // Stepper tuning
   stepper1.setAcceleration(baseAcceleration * accelerationMultiplier);
   stepper1.setMaxSpeed(baseMaxSpeed * maxSpeedMultiplier);
   stepper2.setAcceleration(baseAcceleration * accelerationMultiplier);
   stepper2.setMaxSpeed(baseMaxSpeed * maxSpeedMultiplier);
+  Serial.println("[SETUP] Stepper tuning complete");
 
   pinMode(redButtonPin, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(redButtonPin), handleResetInterrupt, FALLING);
   pinMode(greyButtonPin, INPUT_PULLUP);
+  Serial.println("[SETUP] Pins configured");
 
   // FS
+  Serial.println("[SETUP] Mounting LittleFS");
   if (!LittleFS.begin()) {
-    Serial.println("An error has occurred while mounting LittleFS");
+    Serial.println("[ERROR] An error has occurred while mounting LittleFS");
+    Serial.flush();
     return;
   }
-  if (esp_now_init() != ESP_OK) {
-    Serial.println("Error initializing ESP-NOW");
+  Serial.println("[SETUP] LittleFS mounted successfully");
+
+  Serial.println("[SETUP] Setting WiFi mode to WIFI_STA");
+  WiFi.mode(WIFI_STA);
+  Serial.println("[SETUP] Initializing ESP-NOW");
+  esp_err_t result = esp_now_init();
+  if (result != ESP_OK) {
+    Serial.print("[ERROR] esp_now_init() failed with code: ");
+    Serial.println(result);
+    Serial.flush();
     return;
   }
-  
+  Serial.println("[SETUP] ESP-NOW initialized");
   esp_now_register_send_cb(onDataSent);
   esp_now_register_recv_cb(onDataRecv);
   Serial.println(WiFi.macAddress());
   Serial.println("ESP-NOW Hub Initialized");
 
-  // ESP-NOW
-  if (esp_now_init() != ESP_OK) {
-    Serial.println("Error initializing ESP-NOW");
-    return;
-  }
-  esp_now_register_send_cb(onDataSent);
-  esp_now_register_recv_cb(onDataRecv);
-
+  Serial.println("[SETUP] Adding ESP-NOW peer");
   esp_now_peer_info_t peerInfo = {};
   memcpy(peerInfo.peer_addr, chassisAddress, 6);
   peerInfo.channel = 0;
   peerInfo.encrypt = false;
   if (esp_now_add_peer(&peerInfo) != ESP_OK) {
-    Serial.println("Failed to add peer");
+    Serial.println("[ERROR] Failed to add peer");
+    Serial.flush();
     return;
   }
+  Serial.println("[SETUP] Peer added successfully");
 }
 
 /************************************************************/
