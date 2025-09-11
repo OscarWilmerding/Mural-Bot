@@ -1,4 +1,5 @@
 #include "core.h"
+#include "serial_commands.h"
 
 // Communication state
 static bool   largeStringActive   = false;
@@ -83,9 +84,21 @@ void handleLargeStringPacket(const uint8_t *data, int len) {
 }
 
 void processReceivedString() {
+
     Serial.println("Processing received large string...");
     Serial.println("Full received data:");
     Serial.println(largeStringBuffer);
+
+    // Check for relayed serial command
+    const String relayPrefix = "relayed command: ";
+    if (largeStringBuffer.startsWith(relayPrefix)) {
+        String relayedCmd = largeStringBuffer.substring(relayPrefix.length());
+        Serial.print("Relayed command detected: ");
+        Serial.println(relayedCmd);
+        processCommand(relayedCmd);
+        largeStringBuffer = "";
+        return;
+    }
 
     // Check for special 'paintburst' command
     if (largeStringBuffer == "paint burst") {

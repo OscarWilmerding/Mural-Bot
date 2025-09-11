@@ -28,13 +28,19 @@ void listAvailableCommands() {
   Serial.println("  set command index X         - Set current command index");
   Serial.println("  spr XX                      - Set steps per meter to XX");
   Serial.println("  4corners                    - Move to four corners of the mural");
+  Serial.println("  relayed command: <text>     - Relay any command as a large string to the chassis");
   Serial.println("  ?                           - Show this help list");
 }
 
 void processSerialCommand(String command) {
   command.trim();
 
-  if (command == "?") {
+  if (command.startsWith("relayed command: ")) {
+    // Relay the entire command as a large string to the chassis
+    startLargeStringSend(command);
+    Serial.println("Relayed command sent as large string to chassis.");
+  }
+  else if (command == "?") {
     listAvailableCommands();
   }
   else if (command.startsWith("move a to ")) {
