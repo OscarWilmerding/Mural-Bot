@@ -92,7 +92,7 @@ class HubGUI:
         ttk.Label(p, text="Command").grid(row=row, column=0, sticky="e")
         self.cmd_entry = ttk.Entry(p)
         self.cmd_entry.grid(row=row, column=1, columnspan=3, sticky="ew", padx=(4, 4))
-        ttk.Button(p, text="Send", width=10,
+        ttk.Button(p, text="Send", width=12,
                    command=self.send_from_entry).grid(row=row, column=4, sticky="w")
         self.cmd_entry.bind("<Return>", lambda e: self.send_from_entry())
         row += 1
@@ -156,10 +156,15 @@ class HubGUI:
                    command=lambda: self.send("skip color")).grid(row=row, column=0, sticky="w", pady=2)
         ttk.Button(p, text="reset run", width=10,
                    command=lambda: self.send("reset run")).grid(row=row, column=1, sticky="w", pady=2)
+        ttk.Button(p, text="test", width=12,
+                   command=lambda: self.send("test")).grid(row=row, column=2, sticky="w", pady=2)
+        ttk.Button(p, text="4 corners", width=12,
+                   command=lambda: self.send("4 corners")).grid(row=row, column=3, sticky="w", pady=2)
+        row += 1
         tk.Button(p, text="restart (ESP32)", fg="white", bg="#c0392b", width=15,
-                  command=lambda: self.send("restart")).grid(row=row, column=2, sticky="w", pady=2)
+                  command=lambda: self.send("restart")).grid(row=row, column=0, sticky="w", pady=2)
         ttk.Button(p, text="?", width=4,
-                   command=lambda: self.send("?")).grid(row=row, column=3, sticky="w", pady=2)
+                   command=lambda: self.send("?")).grid(row=row, column=1, sticky="w", pady=2)
         # test and 4 corners are not here; moved to relayed tab
 
     # ───────── relayed tab (SprayGUI set + test/4 corners) ─────────
@@ -169,7 +174,7 @@ class HubGUI:
 
         r = 0
 
-        # quick buttons: clean, forever, rand, trig, ?
+        # quick buttons: clean, forever, ?
         c = 0
         def rbtn(label, payload):
             nonlocal r, c
@@ -178,7 +183,7 @@ class HubGUI:
             c = (c + 1) % 6
             if c == 0:
                 r += 1
-        for lbl in ("clean", "forever", "rand", "trig", "?"):
+        for lbl in ("clean", "forever", "?"):
             rbtn(lbl, lbl)
         if c != 0:
             r += 1
@@ -187,26 +192,36 @@ class HubGUI:
         # pulse-width ms (just the number)
         ttk.Label(f, text="pulse-width ms").grid(row=r, column=0, sticky="e", padx=2)
         self.pw_entry = ttk.Entry(f, width=8); self.pw_entry.grid(row=r, column=1, sticky="w")
-        ttk.Button(f, text="Set",
+        ttk.Button(f, text="Set", width=12,
                    command=lambda: self.send_relay(self.pw_entry.get().strip())).grid(row=r, column=2, sticky="w")
         r += 1
 
         # delay ms
         ttk.Label(f, text="delay ms").grid(row=r, column=0, sticky="e", padx=2)
         self.delay_entry = ttk.Entry(f, width=8); self.delay_entry.grid(row=r, column=1, sticky="w")
-        ttk.Button(f, text="Set",
+        ttk.Button(f, text="Set", width=12,
                    command=lambda: self.send_relay(f"delay {self.delay_entry.get().strip()}")).grid(row=r, column=2, sticky="w")
-
-        # trig s,c
-        ttk.Label(f, text="trig").grid(row=r, column=3, sticky="e", padx=8)
-        self.trig_s = ttk.Entry(f, width=4); self.trig_c = ttk.Entry(f, width=4)
-        self.trig_s.grid(row=r, column=4); self.trig_c.grid(row=r, column=5)
-        ttk.Button(f, text="Send",
-                   command=lambda: self.send_relay(f"trig {self.trig_s.get().strip()},{self.trig_c.get().strip()}")).grid(row=r, column=6, sticky="w")
         r += 1
 
-        # calibration sol,low,high,step
+        # trig s,c,d - labels
+        ttk.Label(f, text="trig").grid(row=r, column=0, sticky="e", padx=2)
+        ttk.Label(f, text="S", foreground="grey", font=("TkDefaultFont", 8)).grid(row=r, column=1, sticky="w")
+        ttk.Label(f, text="C", foreground="grey", font=("TkDefaultFont", 8)).grid(row=r, column=2, sticky="w")
+        ttk.Label(f, text="D", foreground="grey", font=("TkDefaultFont", 8)).grid(row=r, column=3, sticky="w")
+        r += 1
+        self.trig_s = ttk.Entry(f, width=4); self.trig_c = ttk.Entry(f, width=4); self.trig_d = ttk.Entry(f, width=4)
+        self.trig_s.grid(row=r, column=1); self.trig_c.grid(row=r, column=2); self.trig_d.grid(row=r, column=3)
+        ttk.Button(f, text="Send", width=12,
+                   command=lambda: self.send_relay(f"trig {self.trig_s.get().strip()},{self.trig_c.get().strip()},{self.trig_d.get().strip()}")).grid(row=r, column=4, sticky="w")
+        r += 1
+
+        # calibration sol,low,high,step - labels
         ttk.Label(f, text="calibration").grid(row=r, column=0, sticky="e", padx=2)
+        ttk.Label(f, text="sol", foreground="grey", font=("TkDefaultFont", 8)).grid(row=r, column=1, sticky="w")
+        ttk.Label(f, text="low", foreground="grey", font=("TkDefaultFont", 8)).grid(row=r, column=2, sticky="w")
+        ttk.Label(f, text="high", foreground="grey", font=("TkDefaultFont", 8)).grid(row=r, column=3, sticky="w")
+        ttk.Label(f, text="step", foreground="grey", font=("TkDefaultFont", 8)).grid(row=r, column=4, sticky="w")
+        r += 1
         self.cal_sol  = ttk.Entry(f, width=4)
         self.cal_low  = ttk.Entry(f, width=6)
         self.cal_high = ttk.Entry(f, width=6)
@@ -215,7 +230,7 @@ class HubGUI:
         self.cal_low.grid( row=r, column=2)
         self.cal_high.grid(row=r, column=3)
         self.cal_step.grid(row=r, column=4)
-        ttk.Button(f, text="Run",
+        ttk.Button(f, text="Run", width=12,
                    command=lambda: self.send_relay(
                        f"calibration {self.cal_sol.get().strip()},{self.cal_low.get().strip()},"
                        f"{self.cal_high.get().strip()},{self.cal_step.get().strip()}")).grid(row=r, column=5, sticky="w")
@@ -224,28 +239,24 @@ class HubGUI:
         # heater control
         ttk.Label(f, text="heater").grid(row=r, column=0, sticky="e", padx=2)
         self.heater_select = ttk.Combobox(f, values=["1", "2", "both"], width=6, state="readonly")
-        self.heater_select.set("1")
+        self.heater_select.set("both")
         self.heater_select.grid(row=r, column=1, sticky="w")
         ttk.Label(f, text="%").grid(row=r, column=2, sticky="e", padx=(4, 2))
         self.heater_entry = ttk.Entry(f, width=4); self.heater_entry.grid(row=r, column=3, sticky="w")
-        ttk.Button(f, text="Set",
+        ttk.Button(f, text="Set", width=12,
                    command=lambda: self.send_relay(f"heater {self.heater_select.get()} {self.heater_entry.get().strip()}%")).grid(row=r, column=4, sticky="w")
         r += 1
 
         # moved hub buttons
         ttk.Separator(f, orient="horizontal").grid(row=r, column=0, columnspan=7, sticky="ew", pady=(6, 6))
         r += 1
-        ttk.Button(f, text="test", width=12,
-                   command=lambda: self.send("test")).grid(row=r, column=0, sticky="w", pady=2)
-        ttk.Button(f, text="4 corners", width=12,
-                   command=lambda: self.send("4 corners")).grid(row=r, column=1, sticky="w", pady=2)
 
         # optional free-form relay box for ad-hoc chassis commands
         r += 1
         ttk.Label(f, text="free-form relay").grid(row=r, column=0, sticky="e")
         self.relay_entry = ttk.Entry(f)
         self.relay_entry.grid(row=r, column=1, columnspan=4, sticky="ew", padx=(4, 4))
-        ttk.Button(f, text="Send", width=10,
+        ttk.Button(f, text="Send", width=12,
                    command=self.send_relay_from_entry).grid(row=r, column=5, sticky="w")
         self.relay_entry.bind("<Return>", lambda e: self.send_relay_from_entry())
 

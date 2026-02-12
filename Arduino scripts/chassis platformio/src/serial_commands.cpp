@@ -2,7 +2,7 @@
 
 void printHelp() {
     Serial.println(F("=== Available Serial Commands ==="));
-    Serial.println(F("clean                – 120 shot cleaning cycle"));
+    Serial.println(F("clean                – waterfall cleaning cycle (all solenoids, 20x each, 100ms between)"));
     Serial.println(F("delay <ms>           – set pre activation delay (fractional ms allowed)"));
     Serial.println(F("forever              – endless clean pulses"));
     Serial.println(F("rand                 – 10 random pulses"));
@@ -18,12 +18,17 @@ void processCommand(String input) {
     input.trim();
 
     if (input.equalsIgnoreCase("clean")) {
-        Serial.println("Starting cleaning cycle...");
-        for (int i = 0; i < 120; i++) {
-            setAllPins(true);
-            delay(500);
-            setAllPins(false);
-            delay(1000);
+        Serial.println("Starting waterfall cleaning cycle...");
+        unsigned long pulseMs = (unsigned long)(durationMs + 0.5f);
+        
+        // 20 cycles through all solenoids
+        for (int cycle = 0; cycle < 20; cycle++) {
+            // Trigger each solenoid in sequence
+            for (int sol = 1; sol <= NUM_SOLENOIDS; sol++) {
+                pullSolenoidForUs(sol, (unsigned long)(durationMs * 1000.0f + 0.5f));
+                // Wait 100ms after pulse completes before triggering next solenoid
+                delay(100);
+            }
         }
         Serial.println("Cleaning cycle complete.");
     }
@@ -77,26 +82,17 @@ void processCommand(String input) {
         Serial.println("Random cycle complete.");
     }
     else if (input.startsWith("trig ")) {
-        // Expect: trig <solenoid>,<count>[,<downtime_ms>]
+        // Expect: trig <solenoid>,<count>,<downtime_ms>
         String args = input.substring(5);
         int firstComma = args.indexOf(',');
-        if (firstComma == -1) {
-            Serial.println("Syntax: trig <solenoid>,<count>[,<downtime_ms>]");
+        int secondComma = args.indexOf(',', firstComma + 1);
+        
+        if (firstComma == -1 || secondComma == -1) {
+            Serial.println("Syntax: trig <solenoid>,<count>,<downtime_ms>");
         } else {
-            int secondComma = args.indexOf(',', firstComma + 1);
-
             int solenoidNum = args.substring(0, firstComma).toInt();
-            int repeatCnt   = 0;
-            float downtimeMs  = (float)fixedPostActivationDelay; // default ms
-
-            if (secondComma == -1) {
-                // Only two values provided
-                repeatCnt = args.substring(firstComma + 1).toInt();
-            } else {
-                // Three values provided
-                repeatCnt  = args.substring(firstComma + 1, secondComma).toInt();
-                downtimeMs = args.substring(secondComma + 1).toFloat();
-            }
+            int repeatCnt = args.substring(firstComma + 1, secondComma).toInt();
+            float downtimeMs = args.substring(secondComma + 1).toFloat();
 
             if (solenoidNum >= 1 && solenoidNum <= NUM_SOLENOIDS && repeatCnt > 0) {
                 Serial.print("Pulsing solenoid "); Serial.print(solenoidNum);
