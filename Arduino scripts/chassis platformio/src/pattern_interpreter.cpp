@@ -11,7 +11,8 @@ void initLedger() {
 void schedulePin(int solenoid, uint32_t delayFromNowMs, uint16_t widthMs) {
     if (solenoid < 1 || solenoid > NUM_SOLENOIDS) return;
     const uint32_t t = millis() + delayFromNowMs;
-    uint16_t actualWidth = widthMs == 0 ? durationMs : widthMs;
+    // widthMs == 0 means use the global durationMs (may be fractional); round to nearest ms
+    uint16_t actualWidth = widthMs == 0 ? (uint16_t)(durationMs + 0.5f) : widthMs;
 
     // Simple coalescing
     for (int i = 0; i < MAX_LEDGER_SIZE; i++) {
@@ -42,15 +43,19 @@ void interpretPattern(const String& patternToProcess, float speed) {
         char c = patternToProcess[i];
         if (c == 'x') continue;
 
+
+                //below, the leftmost nozzle triggers on a delay because its higher than next one
         if (c == '1') {
-            if (i == 0) { schedulePin(1, 1); }
-            if (i == 1) { schedulePin(2, ms(0.1f / speed)); }
-            if (i == 2) { schedulePin(3, 1); }
-            if (i == 3) { schedulePin(4, ms(0.1f / speed)); }
+            if (i == 0) { schedulePin(1, ms(0.1f / speed)); }  //this equation for the time delay is correct trust
+            if (i == 1) { schedulePin(2, 1); }
+            if (i == 2) { schedulePin(3, ms(0.1f / speed)); }
+            if (i == 3) { schedulePin(4, 1); }
+            if (i == 4) { schedulePin(5, ms(0.1f / speed)); }
+            if (i == 5) { schedulePin(6, 1); }
         } else if (c == '2') {
-            schedulePin(5 + i, ms(0.1f / speed));
+            Serial.println("C==2 this probably shouldn't happen");
         } else if (c == '3') {
-            schedulePin(9 + i, ms(0.2f / speed));
+            Serial.println("C==3 this probably shouldn't happen");
         }
     }
 }

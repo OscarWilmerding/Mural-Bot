@@ -4,8 +4,8 @@
 
 // Global variables from config.h
 uint8_t hubAddress[] = {0x48, 0x27, 0xE2, 0xE6, 0xE6, 0x58};
-int durationMs = 100;
-int preActivationDelay = 0;
+float durationMs = 100.0f; // ms (may be fractional)
+float preActivationDelay = 0.0f; // ms (may be fractional)
 
 void setup() {
     Serial.begin(115200);
@@ -17,6 +17,7 @@ void setup() {
         digitalWrite(SOLENOID_PINS[i], LOW);
     }
 
+    initializeHeaterPWM();
     initLedger();
     initializeESPNow();
 

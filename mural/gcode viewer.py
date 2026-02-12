@@ -73,7 +73,7 @@ def parse_gcode_file(filepath):
             except Exception:
                 pattern_list = []
 
-            # Each element in pattern_list is a 4-character string (e.g. "2223")
+            # Each element in pattern_list is a string (width depends on num_nozzles, e.g. "222233" or "2223")
             # We'll store it in current_stripe
             current_stripe = pattern_list
             stripes.append(current_stripe)
@@ -83,16 +83,23 @@ def parse_gcode_file(filepath):
 def create_image_from_stripes(color_map, stripes):
     """
     Create a Pillow Image from the stripes + color mapping.
-      - Each stripe is 4 pixels wide.
+      - Each stripe's width is determined dynamically from the pattern strings.
       - The height is len(stripe_pattern).
-      - The total width is 4 * len(stripes).
+      - The total width is stripe_width * len(stripes).
     """
     if not stripes:
         raise ValueError("No stripe data found.")
 
     # Assume all stripes have the same pattern height
     stripe_height = len(stripes[0])
-    total_width = 4 * len(stripes)
+    
+    # Dynamically determine stripe width from the first stripe's pattern
+    stripe_width = len(stripes[0][0]) if stripes[0] else 0
+    
+    if stripe_width == 0:
+        raise ValueError("No pattern data found in stripes.")
+    
+    total_width = stripe_width * len(stripes)
 
     # Create a new image (RGBA or RGB)
     img = Image.new('RGB', (total_width, stripe_height), color='white')
@@ -100,12 +107,12 @@ def create_image_from_stripes(color_map, stripes):
 
     for s_idx, stripe in enumerate(stripes):
         for y, row_str in enumerate(stripe):
-            # row_str is something like "2223" or "x1x2"
+            # row_str is something like "222233" or "x1x2x1" (width determined dynamically)
             for x_offset, char in enumerate(row_str):
                 # Determine color
                 pixel_color = color_map.get(char, '#ffffff')  # default to white if unknown
                 # Compute real X position in final image
-                x = s_idx * 4 + x_offset
+                x = s_idx * stripe_width + x_offset
                 # Draw pixel
                 draw.point((x, y), fill=pixel_color)
 

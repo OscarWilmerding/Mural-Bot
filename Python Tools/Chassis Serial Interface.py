@@ -34,7 +34,8 @@ class SprayGUI:
         top.grid(sticky="ew")
         self.root.columnconfigure(0, weight=1)
 
-        ports = [p.device for p in serial.tools.list_ports.comports()]
+        # get ports, always omit COM3 and COM4
+        ports = self._list_ports_filtered()
         self.port_var.set(ports[0] if ports else "")
         self.port_cbx = ttk.Combobox(
             top, textvariable=self.port_var,
@@ -54,7 +55,8 @@ class SprayGUI:
 
     def refresh_ports(self):
         current = self.port_var.get()
-        ports = [p.device for p in serial.tools.list_ports.comports()]
+        # refresh port list while omitting COM3 and COM4
+        ports = self._list_ports_filtered()
         self.port_cbx["values"] = ports
         if current in ports:
             self.port_var.set(current)
@@ -81,8 +83,13 @@ class SprayGUI:
 
         def btn(label, cmdstr):
             nonlocal r, c
-            ttk.Button(cmd, text=label, width=10,
-                       command=lambda s=cmdstr: self.send(s)).grid(row=r, column=c, pady=2)
+            # if this is the quick 'trig' button, send trig with parameters from the trig entries if available
+            if cmdstr == 'trig':
+                ttk.Button(cmd, text=label, width=10,
+                           command=self._send_trig).grid(row=r, column=c, pady=2)
+            else:
+                ttk.Button(cmd, text=label, width=10,
+                           command=lambda s=cmdstr: self.send(s)).grid(row=r, column=c, pady=2)
             c = (c + 1) % 6
             if c == 0:
                 r += 1
@@ -102,11 +109,13 @@ class SprayGUI:
         ttk.Button(cmd, text="Set",
                    command=lambda: self.send(f"delay {self.delay_entry.get()}")).grid(row=r, column=2)
 
-        ttk.Label(cmd, text="trig").grid(row=r, column=3, sticky="e", padx=2)
+        ttk.Label(cmd, text="trig (sol,count,down ms)").grid(row=r, column=3, sticky="e", padx=2)
         self.trig_s = ttk.Entry(cmd, width=3); self.trig_c = ttk.Entry(cmd, width=3)
         self.trig_s.grid(row=r, column=4); self.trig_c.grid(row=r, column=5)
-        ttk.Button(cmd, text="Send",
-                   command=lambda: self.send(f"trig {self.trig_s.get()},{self.trig_c.get()}")).grid(row=r, column=6)
+        # additional unlabeled downtime input (break between pulses)
+        self.trig_d = ttk.Entry(cmd, width=4)
+        self.trig_d.grid(row=r, column=6)
+        ttk.Button(cmd, text="Send", command=self._send_trig).grid(row=r, column=7)
         r += 1
 
         ttk.Label(cmd, text="calibration").grid(row=r, column=0, sticky="e", padx=2)
@@ -232,6 +241,56 @@ class SprayGUI:
             return
         self.send(txt)
         self.free_entry.delete(0, tk.END)
+
+    def _list_ports_filtered(self):
+        """Return list of available serial port device names excluding COM3 and COM4.
+
+        This centralizes the filtering so every place that queries ports
+        will consistently omit those two ports.
+        """
+        try:
+            ports = [p.device for p in serial.tools.list_ports.comports()]
+        except Exception:
+            # If listing fails, return empty list
+            return []
+        # Normalize names to uppercase for comparison; keep original casing in result
+        filtered = [p for p in ports if p.upper() not in ("COM3", "COM4")]
+        return filtered
+
+    def _send_trig(self):
+        """Read the trig input fields, validate/normalize them, and send the command as 'trig s,c,d'.
+        s: solenoid index or id (string), c: count (int), d: downtime in ms (int)
+        If count or downtime are missing or invalid, they default to 1 and 1000 respectively.
+        """
+        s = self.trig_s.get().strip() if hasattr(self, 'trig_s') else ''
+        c = self.trig_c.get().strip() if hasattr(self, 'trig_c') else ''
+        d = self.trig_d.get().strip() if hasattr(self, 'trig_d') else ''
+
+        # defaults and validation
+        if not s:
+            messagebox.showerror("Invalid trig", "Specify solenoid (e.g. 1)")
+            return
+        try:
+            c_int = int(c) if c else 1
+            if c_int < 1:
+                c_int = 1
+        except Exception:
+            c_int = 1
+        try:
+            d_int = int(d) if d else 1000
+            if d_int < 0:
+                d_int = 1000
+        except Exception:
+            d_int = 1000
+
+        cmd = f"trig {s},{c_int},{d_int}"
+        self.send(cmd)
+
+        # for convenience also print to console the normalized command
+        self.console.configure(state="normal")
+        self.console.insert(tk.END, f"[trig cmd sent: {cmd}]\n")
+        self.console.see(tk.END)
+        self.console.configure(state="disabled")
 
 
 if __name__ == "__main__":

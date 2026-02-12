@@ -26,6 +26,7 @@ constexpr int NUM_SOLENOIDS = sizeof(SOLENOID_PINS) / sizeof(SOLENOID_PINS[0]);
 
 // Timing configuration
 constexpr int MAX_LEDGER_SIZE = 100;
-extern int durationMs;              // serial "trig" pulse width
-extern int preActivationDelay;      // used by serial commands
-constexpr int fixedPostActivationDelay = 1000;
+// Duration values are stored as milliseconds (allowing fractional ms)
+extern float durationMs;              // serial "trig" pulse width (ms, may be fractional)
+extern float preActivationDelay;      // used by serial commands (ms, may be fractional)
+constexpr int fixedPostActivationDelay = 1000; // ms (fixed post-activation delay)

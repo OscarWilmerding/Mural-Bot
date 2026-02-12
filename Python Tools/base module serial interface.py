@@ -38,8 +38,8 @@ class HubGUI:
         bar = ttk.Frame(self.root, padding=6)
         bar.grid(sticky="ew")
         self.root.columnconfigure(0, weight=1)
-
-        ports = [p.device for p in serial.tools.list_ports.comports()]
+        # get ports, always omit COM3 and COM4
+        ports = self._list_ports_filtered()
         if ports:
             self.port_var.set(ports[0])
         self.port_cbx = ttk.Combobox(bar, textvariable=self.port_var,
@@ -61,7 +61,7 @@ class HubGUI:
 
     def refresh_ports(self):
         current = self.port_var.get()
-        ports = [p.device for p in serial.tools.list_ports.comports()]
+        ports = self._list_ports_filtered()
         self.port_cbx["values"] = ports
         if current in ports:
             self.port_var.set(current)
@@ -221,6 +221,17 @@ class HubGUI:
                        f"{self.cal_high.get().strip()},{self.cal_step.get().strip()}")).grid(row=r, column=5, sticky="w")
         r += 1
 
+        # heater control
+        ttk.Label(f, text="heater").grid(row=r, column=0, sticky="e", padx=2)
+        self.heater_select = ttk.Combobox(f, values=["1", "2", "both"], width=6, state="readonly")
+        self.heater_select.set("1")
+        self.heater_select.grid(row=r, column=1, sticky="w")
+        ttk.Label(f, text="%").grid(row=r, column=2, sticky="e", padx=(4, 2))
+        self.heater_entry = ttk.Entry(f, width=4); self.heater_entry.grid(row=r, column=3, sticky="w")
+        ttk.Button(f, text="Set",
+                   command=lambda: self.send_relay(f"heater {self.heater_select.get()} {self.heater_entry.get().strip()}%")).grid(row=r, column=4, sticky="w")
+        r += 1
+
         # moved hub buttons
         ttk.Separator(f, orient="horizontal").grid(row=r, column=0, columnspan=7, sticky="ew", pady=(6, 6))
         r += 1
@@ -243,6 +254,14 @@ class HubGUI:
         self.console = scrolledtext.ScrolledText(self.root, height=14, wrap=tk.WORD, state="disabled")
         self.console.grid(sticky="nsew", padx=6, pady=(0, 6))
         self.root.rowconfigure(3, weight=1)
+
+    def _list_ports_filtered(self):
+        """Return list of available serial port device names excluding COM3 and COM4."""
+        try:
+            ports = [p.device for p in serial.tools.list_ports.comports()]
+        except Exception:
+            return []
+        return [p for p in ports if p.upper() not in ("COM3", "COM4")]
 
     # ───────── serial helpers ─────────
     def open_port(self):

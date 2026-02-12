@@ -104,7 +104,8 @@ void processReceivedString() {
     if (largeStringBuffer == "paint burst") {
         Serial.println("Triggering solenoids");
         setAllPins(true);
-        delay(durationMs);
+        unsigned long usecAll = (unsigned long)(durationMs * 1000.0f + 0.5f);
+        if (usecAll > 0) delayMicroseconds(usecAll);
         setAllPins(false);
         delay(fixedPostActivationDelay);
         largeStringBuffer = "";

@@ -1,0 +1,10 @@
+﻿"Symbol";"Value";"Unit";
+"TraceParts.PartNumber";"10-15112010-066291";"";
+"REFERENCE";"ES-2W-12-V";"";
+"TraceParts.PartTitle";"Electronic ES Series Valves - Normally-Closed 2-Way & 3-Way Electronic Poppet Valves with Wire Leads";"";
+"TraceParts.InstanceId";"10-15112010-0662919AFLF3F7KIGF2SYTG9QVQIZ75";"";
+"SUPPLIER";"Clippard Minimatic";"";
+"DESIGN";"2-Way Electronic Valve, Normally-Closed, Wire Leads, 12 VDC, FKM Seals";"";
+"TRACEPARTS";"TRACEPARTS";"";
+"TraceParts.PartLanguage";"en";"";
+"TraceParts.PartVersion";"1.1.8";"";
