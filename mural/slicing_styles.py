@@ -64,8 +64,9 @@ def generate_position_data_mono_velocity_sequential_colors(hex_path, hex_code, g
                 f.write(
                     f"drop: {pixel_size*h}\n"
                     f"starting pulley values:  "
-                    f"{round(utils.length_a(start_x, h, dist_from_pulley, cable_sepperation, width, pixel_size, offset), 6)},"
-                    f"{round(utils.length_b(start_x, h, dist_from_pulley, cable_sepperation, width, pixel_size, offset), 6)}\n"
+                    # width for the pulley math should be the actual image width
+                    f"{round(utils.length_a(start_x, h, dist_from_pulley, cable_sepperation, w, pixel_size, offset), 6)},"
+                    f"{round(utils.length_b(start_x, h, dist_from_pulley, cable_sepperation, w, pixel_size, offset), 6)}\n"
                 )
 
     except Exception as e:

@@ -1,0 +1,113 @@
+(footprint "adafruit colorful button"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(property "Reference" "but"
+		(at 0 -0.5 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "6baf2920-1ba5-4d1a-92c3-df0ad66a0bf3")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+		)
+	)
+	(property "Value" "Untitled"
+		(at 0 1 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "99d8b644-f7db-4824-85e4-55215a50b943")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" "https://www.digikey.com/en/products/detail/adafruit-industries-llc/1010/7244937"
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "50de1be8-cc03-4b87-bc7b-a12f80fbcfa1")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "4978b839-bcb3-4441-9aaf-27df13f46677")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr through_hole)
+	(fp_rect
+		(start -6.35 7.62)
+		(end 6.35 20.32)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(fill no)
+		(layer "F.SilkS")
+		(uuid "28c6b706-5147-4b07-8f8f-6281cdcbe027")
+	)
+	(fp_text user "$but"
+		(at 0 2.5 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "27e6bd49-b089-495c-a121-7a226d2ee51b")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "1" thru_hole circle
+		(at -2.54 7.62)
+		(size 2.54 2.54)
+		(drill 1.15)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "510c1daa-5428-4ab0-9966-a589c0be8d6f")
+	)
+	(pad "1" thru_hole circle
+		(at -2.54 20.32)
+		(size 2.54 2.54)
+		(drill 1.15)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "c8525994-5ed8-4d39-b309-3dc93e4fe51a")
+	)
+	(pad "2" thru_hole circle
+		(at 2.54 7.62)
+		(size 2.54 2.54)
+		(drill 1.15)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "1f4e85fc-c3d4-4996-9fd5-204994cd1a85")
+	)
+	(pad "2" thru_hole circle
+		(at 2.54 20.32)
+		(size 2.54 2.54)
+		(drill 1.15)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "6b7fea34-7d9d-4e53-8a95-fe8efd3a488b")
+	)
+	(embedded_fonts no)
+)

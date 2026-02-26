@@ -11,8 +11,8 @@ void initLedger() {
 void schedulePin(int solenoid, uint32_t delayFromNowMs, uint16_t widthMs) {
     if (solenoid < 1 || solenoid > NUM_SOLENOIDS) return;
     const uint32_t t = millis() + delayFromNowMs;
-    // widthMs == 0 means use the global durationMs (may be fractional); round to nearest ms
-    uint16_t actualWidth = widthMs == 0 ? (uint16_t)(durationMs + 0.5f) : widthMs;
+    // widthMs == 0 means use the per-solenoid duration (may be fractional); round to nearest ms
+    uint16_t actualWidth = widthMs == 0 ? (uint16_t)(getActualDuration(solenoid) + 0.5f) : widthMs;
 
     // Simple coalescing
     for (int i = 0; i < MAX_LEDGER_SIZE; i++) {

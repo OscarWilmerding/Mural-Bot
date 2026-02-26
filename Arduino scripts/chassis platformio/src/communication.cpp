@@ -103,10 +103,11 @@ void processReceivedString() {
     // Check for special 'paintburst' command
     if (largeStringBuffer == "paint burst") {
         Serial.println("Triggering solenoids");
-        setAllPins(true);
-        unsigned long usecAll = (unsigned long)(durationMs * 1000.0f + 0.5f);
-        if (usecAll > 0) delayMicroseconds(usecAll);
-        setAllPins(false);
+        // Trigger all solenoids with their individual durations
+        for (int sol = 1; sol <= NUM_SOLENOIDS; sol++) {
+            unsigned long usec = (unsigned long)(getActualDuration(sol) * 1000.0f + 0.5f);
+            pullSolenoidForUs(sol, usec);
+        }
         delay(fixedPostActivationDelay);
         largeStringBuffer = "";
         return;

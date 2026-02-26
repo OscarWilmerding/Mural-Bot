@@ -8,7 +8,8 @@ void printHelp() {
     Serial.println(F("rand                 – 10 random pulses"));
     Serial.println(F("trig                 – trigger ALL pins once"));
     Serial.println(F("trig <S>,<C>,<D>     – pulse solenoid S, C times; D=downtime ms between shots (fractional ms allowed)"));
-    Serial.println(F("<number>             – set pulse width (ms) (fractional allowed, e.g. 2.45)"));
+    Serial.println(F("<number>             – set pulse width for ALL solenoids (ms) (fractional allowed, e.g. 2.45)"));
+    Serial.println(F("solenoid <N> <dur>   – set pulse width for solenoid N only (fractional allowed)"));
     Serial.println(F("calibration <solenoid>,<low>,<high>,<step> – sweep pulse widths"));
     Serial.println(F("heater <1|2|both> <0-100>% – set heater PWM duty cycle"));
     Serial.println(F("?                    – show this help list"));
@@ -19,13 +20,13 @@ void processCommand(String input) {
 
     if (input.equalsIgnoreCase("clean")) {
         Serial.println("Starting waterfall cleaning cycle...");
-        unsigned long pulseMs = (unsigned long)(durationMs + 0.5f);
         
         // 20 cycles through all solenoids
         for (int cycle = 0; cycle < 20; cycle++) {
             // Trigger each solenoid in sequence
             for (int sol = 1; sol <= NUM_SOLENOIDS; sol++) {
-                pullSolenoidForUs(sol, (unsigned long)(durationMs * 1000.0f + 0.5f));
+                unsigned long usec = (unsigned long)(getActualDuration(sol) * 1000.0f + 0.5f);
+                pullSolenoidForUs(sol, usec);
                 // Wait 100ms after pulse completes before triggering next solenoid
                 delay(100);
             }
@@ -63,20 +64,23 @@ void processCommand(String input) {
         Serial.println("Starting forever cleaning cycle...");
         for (;;) {
             Serial.println("Infinite loop running...");
-            setAllPins(true);
-            delay(1000);
-            setAllPins(false);
-            delay(30000);
+            // Trigger all solenoids with their individual durations
+            for (int sol = 1; sol <= NUM_SOLENOIDS; sol++) {
+                unsigned long usec = (unsigned long)(getActualDuration(sol) * 1000.0f + 0.5f);
+                pullSolenoidForUs(sol, usec);
+                delay(100);
+            }
         }
     }
     else if (input.equalsIgnoreCase("rand")) {
         Serial.println("Starting random cycle...");
         delay(5000);
         for (int i = 0; i < 10; i++) {
-            setAllPins(true);
-            unsigned long usec = (unsigned long)(durationMs * 1000.0f + 0.5f);
-            if (usec > 0) delayMicroseconds(usec);
-            setAllPins(false);
+            // Trigger all solenoids with their individual durations
+            for (int sol = 1; sol <= NUM_SOLENOIDS; sol++) {
+                unsigned long usec = (unsigned long)(getActualDuration(sol) * 1000.0f + 0.5f);
+                pullSolenoidForUs(sol, usec);
+            }
             delay(random(300, 600));
         }
         Serial.println("Random cycle complete.");
@@ -101,7 +105,7 @@ void processCommand(String input) {
                 if (preActivationDelay) delay((unsigned long)(preActivationDelay + 0.5f));
 
                 for (int i = 0; i < repeatCnt; i++) {
-                    unsigned long usec = (unsigned long)(durationMs * 1000.0f + 0.5f);
+                    unsigned long usec = (unsigned long)(getActualDuration(solenoidNum) * 1000.0f + 0.5f);
                     pullSolenoidForUs(solenoidNum, usec);
                     // use downtime between shots (off-time) instead of fixedPostActivationDelay
                     if (downtimeMs > 0.0f) delay((unsigned long)(downtimeMs + 0.5f));
@@ -116,10 +120,12 @@ void processCommand(String input) {
     else if (input.equalsIgnoreCase("trig")) {
         Serial.println("Trigger command received.");
         if (preActivationDelay) delay((unsigned long)(preActivationDelay + 0.5f));
-        setAllPins(true);
-        unsigned long usecAll = (unsigned long)(durationMs * 1000.0f + 0.5f);
-        if (usecAll > 0) delayMicroseconds(usecAll);
-        setAllPins(false);
+        
+        // Trigger all solenoids with their individual durations
+        for (int sol = 1; sol <= NUM_SOLENOIDS; sol++) {
+            unsigned long usec = (unsigned long)(getActualDuration(sol) * 1000.0f + 0.5f);
+            pullSolenoidForUs(sol, usec);
+        }
         delay(fixedPostActivationDelay);
     }
     else if (input == "?") {
@@ -176,13 +182,40 @@ void processCommand(String input) {
             Serial.println("Error: heater must be '1', '2', or 'both'");
         }
     }
+    else if (input.startsWith("solenoid ")) {
+        String args = input.substring(9);  // Skip "solenoid "
+        int spaceIndex = args.indexOf(' ');
+        
+        if (spaceIndex == -1) {
+            Serial.println("Syntax: solenoid <N> <duration>");
+            return;
+        }
+        
+        int solenoidNum = args.substring(0, spaceIndex).toInt();
+        float duration = args.substring(spaceIndex + 1).toFloat();
+        
+        if (solenoidNum >= 1 && solenoidNum <= NUM_SOLENOIDS && duration > 0.0f) {
+            solenoidDurationMs[solenoidNum - 1] = duration;
+            Serial.print("Solenoid ");
+            Serial.print(solenoidNum);
+            Serial.print(" pulse width set to: ");
+            Serial.print(duration, 3);
+            Serial.println(" ms");
+        } else {
+            Serial.println("Error: invalid solenoid number or duration");
+        }
+    }
     else {
         float newDuration = input.toFloat();
         if (newDuration > 0.0f) {
+            // Set global and reset all per-solenoid durations
             durationMs = newDuration;
+            for (int i = 0; i < NUM_SOLENOIDS; i++) {
+                solenoidDurationMs[i] = newDuration;
+            }
             Serial.print("Activation duration set to: ");
             Serial.print(durationMs, 3);
-            Serial.println(" ms");
+            Serial.println(" ms (all solenoids)");
         }
     }
 }

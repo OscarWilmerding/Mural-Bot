@@ -1,0 +1,5 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "chassis v2 primary board")(type "KiCad")(uri "${KIPRJMOD}/chassis v2 primary board.pretty")(options "")(descr ""))
+  (lib (name "rpmg")(type "KiCad")(uri "C:/Users/oewil/Downloads/RPMGE12-10")(options "")(descr ""))
+)

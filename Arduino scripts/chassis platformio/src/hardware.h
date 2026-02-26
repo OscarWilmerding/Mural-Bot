@@ -35,9 +35,13 @@ constexpr int HEATER_PWM_RESOLUTION = 8;    // 0-255 resolution
 // Timing configuration
 constexpr int MAX_LEDGER_SIZE = 100;
 // Duration values stored in milliseconds (may be fractional)
-extern float durationMs;              // serial "trig" pulse width (ms)
+extern float durationMs;              // serial "trig" pulse width (ms) - global default for all solenoids
+extern float solenoidDurationMs[];    // per-solenoid pulse width override (ms)
 extern float preActivationDelay;      // used by serial commands (ms)
 constexpr int fixedPostActivationDelay = 1000; // ms
+
+// Helper function to get actual duration for a solenoid
+float getActualDuration(int solenoidNumber);
 
 // Hardware control functions
 void pullSolenoid(int solenoidNumber, int level);

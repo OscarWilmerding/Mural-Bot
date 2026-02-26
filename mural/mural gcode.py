@@ -30,18 +30,18 @@ if not os.path.exists(temp_images_folder):
     print(f"Created directory: {temp_images_folder}")
 
 # Global variables - THESE ALSO SET AUTOFILLED DEFAULTS
-file_path = r"C:/Users/oewil/OneDrive/Desktop/Mural-Bot/mural/imput images/deadman.jpg"
-width = 300  # in pixels (should be an integer)
-pixel_size = 0.002  # size of each pixel in meters
-cable_sepperation = 1.265  # in meters (this is the pulley spacing)
-dist_from_pulley = 1.0  # distance from pulleys to bottom of mural (m)
+file_path = r"C:/Users/oewil/OneDrive/Desktop/Mural-Bot/mural/imput images/jules eye 257 wide.jpg"
+width = 257  # in pixels (should be an integer)
+pixel_size = 0.012  # size of each pixel in meters
+cable_sepperation = 4  # in meters (this is the pulley spacing)
+dist_from_pulley = 5  # distance from pulleys to bottom of mural (m)
 offset = 0.0  # offset of image from center to the left (m)
 color_mode = 'Simplify Image'  # default color mode
 number_of_colors = 2  # default number of colors for 'Simplify Image' method
 n_value = 3  # default N value for NxN methods
 peak_velocity = 0.5  # in meters per sec
 slicing_option = 'multi color velocity slicing'  # default slicing option
-Num_nozzles = 6 # number of nozzles / pixels per stripe (was hardcoded as 4)
+Num_nozzles = 8 # number of nozzles / pixels per stripe (was hardcoded as 4). Default changed to 8 and exposed in GUI.
 
 
 HAS_PRINTED_COLOR_MAPPING = False
@@ -81,9 +81,10 @@ def initial_popup():
     def submit():
         global file_path, width, pixel_size, number_of_colors
         global cable_sepperation, dist_from_pulley, offset, color_mode, n_value
-        global slicing_option
+        global slicing_option, Num_nozzles
         file_path = file_path_entry.get()
         width = int(width_entry.get())
+        Num_nozzles = int(nozzles_entry.get())
         pixel_size = float(pixel_size_entry.get())
         cable_sepperation = float(cable_sepperation_entry.get())
         dist_from_pulley = float(dist_from_pulley_entry.get())
@@ -100,15 +101,15 @@ def initial_popup():
         selected_mode = color_mode_var.get()
         # Show/hide Number of Colors
         if selected_mode in ['Simplify Image', 'Dynamic Scatter NxN']:
-            number_of_colors_label.grid(row=2, column=0, padx=10, pady=10)
-            number_of_colors_entry.grid(row=2, column=1, padx=10, pady=10)
+            number_of_colors_label.grid(row=3, column=0, padx=10, pady=10)
+            number_of_colors_entry.grid(row=3, column=1, padx=10, pady=10)
         else:
             number_of_colors_label.grid_remove()
             number_of_colors_entry.grid_remove()
         # Show/hide N value
         if selected_mode in ['RGB Scatter NxN', 'Dynamic Scatter NxN']:
-            n_value_label.grid(row=3, column=0, padx=10, pady=10)
-            n_value_entry.grid(row=3, column=1, padx=10, pady=10)
+            n_value_label.grid(row=4, column=0, padx=10, pady=10)
+            n_value_entry.grid(row=4, column=1, padx=10, pady=10)
         else:
             n_value_label.grid_remove()
             n_value_entry.grid_remove()
@@ -128,6 +129,13 @@ def initial_popup():
     width_entry.grid(row=1, column=1, padx=10, pady=10)
     width_entry.insert(0, str(width))
 
+    # Nozzles per stripe (stripe width)
+    nozzles_label = tk.Label(root, text="Nozzles per stripe:")
+    nozzles_entry = tk.Entry(root)
+    nozzles_entry.grid(row=2, column=1, padx=10, pady=10)
+    nozzles_label.grid(row=2, column=0, padx=10, pady=10)
+    nozzles_entry.insert(0, str(Num_nozzles))
+
     # Number of Colors (initially hidden)
     number_of_colors_label = tk.Label(root, text="Number of Colors:")
     number_of_colors_entry = tk.Entry(root)
@@ -144,66 +152,67 @@ def initial_popup():
 
     # Pixel Size (m)
     pixel_size_label = tk.Label(root, text="Pixel Size (m):")
-    pixel_size_label.grid(row=4, column=0, padx=10, pady=10)
+    pixel_size_label.grid(row=5, column=0, padx=10, pady=10)
     pixel_size_entry = tk.Entry(root)
-    pixel_size_entry.grid(row=4, column=1, padx=10, pady=10)
+    pixel_size_entry.grid(row=5, column=1, padx=10, pady=10)
     pixel_size_entry.insert(0, str(pixel_size))
 
     # Pulley Spacing (m)
     cable_sepperation_label = tk.Label(root, text="Pulley Spacing (m):")
-    cable_sepperation_label.grid(row=5, column=0, padx=10, pady=10)
+    cable_sepperation_label.grid(row=6, column=0, padx=10, pady=10)
     cable_sepperation_entry = tk.Entry(root)
-    cable_sepperation_entry.grid(row=5, column=1, padx=10, pady=10)
+    cable_sepperation_entry.grid(row=6, column=1, padx=10, pady=10)
     cable_sepperation_entry.insert(0, str(cable_sepperation))
 
     # Distance from Pulleys to Bottom of Mural (m)
     dist_from_pulley_label = tk.Label(root, text="Distance from Pulleys to Bottom of Mural (m):")
-    dist_from_pulley_label.grid(row=6, column=0, padx=10, pady=10)
+    dist_from_pulley_label.grid(row=7, column=0, padx=10, pady=10)
     dist_from_pulley_entry = tk.Entry(root)
-    dist_from_pulley_entry.grid(row=6, column=1, padx=10, pady=10)
+    dist_from_pulley_entry.grid(row=7, column=1, padx=10, pady=10)
     dist_from_pulley_entry.insert(0, str(dist_from_pulley))
 
     # Offset of Image from Center to the Left (m)
     offset_label = tk.Label(root, text="Offset of Image from Center to the Left (m):")
-    offset_label.grid(row=7, column=0, padx=10, pady=10)
+    offset_label.grid(row=8, column=0, padx=10, pady=10)
     offset_entry = tk.Entry(root)
-    offset_entry.grid(row=7, column=1, padx=10, pady=10)
+    offset_entry.grid(row=8, column=1, padx=10, pady=10)
     offset_entry.insert(0, str(offset))
 
     # Color Mode Dropdown
     color_mode_var = tk.StringVar(value=color_mode)
     color_mode_var.trace('w', on_color_mode_change)  # Trace changes
-    tk.Label(root, text="Color Mode:").grid(row=8, column=0, padx=10, pady=10)
+    tk.Label(root, text="Color Mode:").grid(row=9, column=0, padx=10, pady=10)
     color_options = ['RGB', 'CMYK', 'Simplify Image', 'RGB Scatter NxN', 'Dynamic Scatter NxN']
     color_dropdown = tk.OptionMenu(root, color_mode_var, *color_options)
-    color_dropdown.grid(row=8, column=1, padx=10, pady=10)
+    color_dropdown.grid(row=9, column=1, padx=10, pady=10)
     
     # Trigger initial visibility based on default color_mode
     on_color_mode_change()
 
     # Slicing Options Dropdown
     slicing_option_var = tk.StringVar(value=slicing_option)  # default value
-    tk.Label(root, text="Slicing Options:").grid(row=9, column=0, padx=10, pady=10)
-
+    tk.Label(root, text="Slicing Options:").grid(row=10, column=0, padx=10, pady=10)
+    
     # UPDATED slicing_options: 'mono color velocity slicing' (old velocity) + new 'multi color velocity slicing'
     slicing_options = ['position slicing', 'mono color velocity slicing', 'multi color velocity slicing']
     slicing_dropdown = tk.OptionMenu(root, slicing_option_var, *slicing_options)
-    slicing_dropdown.grid(row=9, column=1, padx=10, pady=10)
+    slicing_dropdown.grid(row=10, column=1, padx=10, pady=10)
 
     # Notes area (read-only in the GUI; edit the text directly in the code)
     notes_label = tk.Label(root, text="Notes:")
-    notes_label.grid(row=10, column=0, padx=10, pady=10)
+    notes_label.grid(row=11, column=0, padx=10, pady=10)
     notes_text = tk.Text(root, width=50, height=6, wrap='word', font=("Arial", 10))
     filler = (
         "horizontal seperation = 12mm , vertical seperation = 20mm\n"
         "aiming wall width 9ft (with 12mm pixels means 228 pixels wide)\n"
+        "Jules eye temp target 257\n"
     )
     notes_text.insert('1.0', filler)
     notes_text.configure(state='disabled')
-    notes_text.grid(row=10, column=1, columnspan=2, padx=10, pady=10)
+    notes_text.grid(row=11, column=1, columnspan=2, padx=10, pady=10)
 
     submit_button = tk.Button(root, text="Submit", command=submit)
-    submit_button.grid(row=11, column=0, columnspan=3, pady=20)
+    submit_button.grid(row=12, column=0, columnspan=3, pady=20)
 
     root.mainloop()
 
@@ -706,7 +715,6 @@ def generate_position_data_multi_color_velocity_once(
         cable_sepperation,
         dist_from_pulley,
         width,
-        offset,
         Num_nozzles,
     )
 
@@ -770,6 +778,7 @@ if color_mode in ['Simplify Image', 'Dynamic Scatter NxN']:
 if color_mode in ['RGB Scatter NxN', 'Dynamic Scatter NxN']:
     print("Value of N:", n_value)
 print("Slicing Option:", slicing_option)
+print("Nozzles per stripe:", Num_nozzles)
 
 if slicing_option == 'multi color velocity slicing':
     with open("C:/Users/oewil/OneDrive/Desktop/Mural-Bot/mural/gcode viewer.py") as f:

@@ -13,6 +13,12 @@ void pullSolenoidForUs(int solenoidNumber, unsigned long microseconds) {
     digitalWrite(SOLENOID_PINS[solenoidNumber - 1], LOW);
 }
 
+// Get actual duration for a solenoid (per-solenoid override or global default)
+float getActualDuration(int solenoidNumber) {
+    if (solenoidNumber < 1 || solenoidNumber > NUM_SOLENOIDS) return durationMs;
+    return solenoidDurationMs[solenoidNumber - 1];
+}
+
 void setAllPins(bool state) {
     for (int i = 0; i < NUM_SOLENOIDS; i++) {
         digitalWrite(SOLENOID_PINS[i], state ? HIGH : LOW);
