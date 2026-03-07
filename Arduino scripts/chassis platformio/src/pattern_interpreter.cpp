@@ -39,19 +39,19 @@ void interpretPattern(const String& patternToProcess, float speed) {
     if (patternToProcess.length() < 4 || speed <= 0.0f) return;
     auto ms = [](float seconds) -> uint32_t { return (uint32_t)(seconds * 1000.0f + 0.5f); };
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 8; i++) {
         char c = patternToProcess[i];
         if (c == 'x') continue;
 
 
-                //below, the leftmost nozzle triggers on a delay because its higher than next one
+                //EVEN solenoids are given a delay distance is 20mm seperation
         if (c == '1') {
-            if (i == 0) { schedulePin(1, ms(0.1f / speed)); }  //this equation for the time delay is correct trust
-            if (i == 1) { schedulePin(2, 1); }
-            if (i == 2) { schedulePin(3, ms(0.1f / speed)); }
-            if (i == 3) { schedulePin(4, 1); }
-            if (i == 4) { schedulePin(5, ms(0.1f / speed)); }
-            if (i == 5) { schedulePin(6, 1); }
+            int solenoid = i + 1;
+            if (i % 2 == 1) {
+                schedulePin(solenoid, ms(0.04f / speed));
+            } else {
+                schedulePin(solenoid, 1);
+            }
         } else if (c == '2') {
             Serial.println("C==2 this probably shouldn't happen");
         } else if (c == '3') {

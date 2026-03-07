@@ -35,6 +35,7 @@ extern float baseAcceleration;
 extern float baseMaxSpeed;
 extern float accelerationMultiplier;
 extern float maxSpeedMultiplier;
+extern float stripeVelocityMultiplier;
 
 extern uint8_t chassisAddress[6];
 extern bool commandConfirmed;
@@ -61,6 +62,7 @@ extern float motor2Position;
 
 extern unsigned long prePokePause;
 extern unsigned long chassisWaitTime;
+extern unsigned long pauseAtTheTop;
 
 extern float pulleySpacing;
 extern int   numberOfDrawnColumns;

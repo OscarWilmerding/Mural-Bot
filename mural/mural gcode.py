@@ -33,15 +33,15 @@ if not os.path.exists(temp_images_folder):
 file_path = r"C:/Users/oewil/OneDrive/Desktop/Mural-Bot/mural/imput images/jules eye 257 wide.jpg"
 width = 257  # in pixels (should be an integer)
 pixel_size = 0.012  # size of each pixel in meters
-cable_sepperation = 4  # in meters (this is the pulley spacing)
-dist_from_pulley = 5  # distance from pulleys to bottom of mural (m)
+cable_sepperation = 4.6  # in meters (this is the pulley spacing)
+dist_from_pulley = 3.95  # distance from pulleys to bottom of mural (m)
 offset = 0.0  # offset of image from center to the left (m)
 color_mode = 'Simplify Image'  # default color mode
 number_of_colors = 2  # default number of colors for 'Simplify Image' method
 n_value = 3  # default N value for NxN methods
 peak_velocity = 0.5  # in meters per sec
 slicing_option = 'multi color velocity slicing'  # default slicing option
-Num_nozzles = 8 # number of nozzles / pixels per stripe (was hardcoded as 4). Default changed to 8 and exposed in GUI.
+Num_nozzles = 7 # number of nozzles / pixels per stripe (was hardcoded as 4). Default changed to 8 and exposed in GUI.
 
 
 HAS_PRINTED_COLOR_MAPPING = False

@@ -36,13 +36,14 @@ bool motor1Done                 = false;
 bool motor2Done                 = false;
 
 // For acceleration and max velocity beleive this is in steps/s
-float baseAcceleration          = 4000.0;
-float baseMaxSpeed              = 400.0;
+float baseAcceleration          = 8000.0;
+float baseMaxSpeed              = 1200.0;
 float accelerationMultiplier    = 1.0;
 float maxSpeedMultiplier        = 1.0;
+float stripeVelocityMultiplier  = 1.0;
 
 // ESP-NOW variables
-uint8_t chassisAddress[]        = { 0xA0, 0xB7, 0x65, 0x07, 0xD5, 0x78 };
+uint8_t chassisAddress[]        = { 0xE8, 0x6B, 0xEA, 0xFC, 0xD4, 0xA4 };
 bool commandConfirmed           = false;
 const uint8_t COMMAND_RUN       = 0x01;
 
@@ -68,6 +69,7 @@ float motor2Position      = 0.0;
 // Timing knobs
 unsigned long prePokePause    = 0;
 unsigned long chassisWaitTime = 2500;
+unsigned long pauseAtTheTop   = 5000;  // Blocking delay before stripe initiates (after data transfer), in ms
 
 // From G-code
 float pulleySpacing        = 0.0;

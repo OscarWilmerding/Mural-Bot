@@ -16,6 +16,7 @@ void listAvailableCommands() {
   Serial.println("  set b to X                  - Set Motor 2 position to X meters");
   Serial.println("  acceleration multiplier X   - Set acceleration multiplier to X");
   Serial.println("  velocity multiplier X       - Set velocity multiplier to X");
+  Serial.println("  stripe velocity multiplier X- Set stripe velocity multiplier to X");
   Serial.println("  set stripe velocity X       - Set the global stripeVelocity (m/s)");
   Serial.println("  set velocity calc delay X   - Set ms delay between velocity recalculations");
   Serial.println("  set confirmation timeout X  - Set confirmation timeout (ms)");
@@ -115,6 +116,18 @@ void processSerialCommand(String command) {
     Serial.print("New max speed: ");
     Serial.println(newS);
   }
+  else if (command.startsWith("stripe velocity multiplier ")) {
+    float multiplier = command.substring(26).toFloat();
+    float prev = stripeVelocity * stripeVelocityMultiplier;
+    stripeVelocityMultiplier = multiplier;
+    float newSV = stripeVelocity * stripeVelocityMultiplier;
+    Serial.print("Stripe velocity multiplier set to: ");
+    Serial.println(multiplier);
+    Serial.print("Previous stripe velocity: ");
+    Serial.println(prev);
+    Serial.print("New stripe velocity: ");
+    Serial.println(newSV);
+  }
   else if (command.startsWith("spr ")) {
     int newSPR = command.substring(4).toInt();
     if (newSPR > 0) {
@@ -212,11 +225,11 @@ void processSerialCommand(String command) {
     startLargeStringSend(bigData);
   }
   else if (command.startsWith("set command index ")) {
-    int newIndex = command.substring(18).toInt();
+    int newIndex = command.substring(18).toInt() - 1;  // Convert from 1-indexed (user input) to 0-indexed (internal)
     if (newIndex >= 0 && newIndex < commandCount) {
       currentCommandIndex = newIndex;
       Serial.print("Command index set to: ");
-      Serial.println(currentCommandIndex);
+      Serial.println(currentCommandIndex + 1);  // Display as 1-indexed
     } else {
       Serial.println("Invalid index. Out of range.");
     }
@@ -273,7 +286,7 @@ void startNextCommand() {
       stripeData += "\"startPulleyA\":" + String(cmd.startPulleyA, 4) + ",";
       stripeData += "\"startPulleyB\":" + String(cmd.startPulleyB, 4) + ",";
       stripeData += "\"pattern\":" + cmd.pattern + ",";
-      stripeData += "\"stripeVelocity\":" + String(stripeVelocity, 4);
+      stripeData += "\"stripeVelocity\":" + String(stripeVelocity * stripeVelocityMultiplier, 4);
       stripeData += "}";
 
       Serial.println("Generated JSON Data for STRIPE:");
@@ -292,7 +305,15 @@ void startNextCommand() {
 
       startLargeStringSend(stripeData);
 
-      float timeForMovementSeconds = cmd.drop / stripeVelocity;
+      if (pauseAtTheTop > 0) {
+        Serial.print("Pausing at the top for: ");
+        Serial.print(pauseAtTheTop);
+        Serial.println(" ms");
+        delay(pauseAtTheTop);
+        Serial.println("Pause complete. Beginning stripe movement...");
+      }
+
+      float timeForMovementSeconds = cmd.drop / (stripeVelocity * stripeVelocityMultiplier);
       float timeForMovementMs = timeForMovementSeconds * 1000.0;
 
       Serial.print("Time for movement (seconds): ");
@@ -333,6 +354,11 @@ void startNextCommand() {
 
       Serial.println("Finished stripe movement loop.");
       printCurrentPositions();
+      
+      // Print stripe completion message
+      Serial.print("Stripe index ");
+      Serial.print(currentCommandIndex + 1);  // Display index as 1-indexed
+      Serial.println(" completed.");
 
       movementInProgress = false;
       currentCommandIndex++;

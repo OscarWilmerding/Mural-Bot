@@ -6,39 +6,6 @@ import utils
 # State used to ensure the color mapping is printed only once
 HAS_PRINTED_COLOR_MAPPING = False
 
-
-def generate_column_pattern_multi(img, column_index, color_index_map, output_file):
-    width, height = img.size
-    col_start = num_nozzles * column_index
-
-    with open(output_file, 'w') as f:
-        for y in range(height):
-            row_pattern = ""
-            color_comments = []
-
-            for offset in range(num_nozzles):
-                x_coord = col_start + offset
-                if x_coord < 0 or x_coord >= width:
-                    row_pattern += "x"
-                    continue
-
-                r, g, b, a = img.getpixel((x_coord, y))
-                if a == 0:
-                    row_pattern += "x"
-                else:
-                    hex_code = "#{:02x}{:02x}{:02x}".format(r, g, b)
-                    if hex_code not in color_index_map:
-                        print(f"[DEBUG] Pixel color {hex_code} not in color_index_map—treating as transparent.")
-                        row_pattern += "x"
-                    else:
-                        row_pattern += str(color_index_map[hex_code])
-                    color_comments.append(utils.get_color_name(hex_code))
-
-            f.write(f"{y}: {row_pattern}\n")
-            if color_comments:
-                f.write(f"// {', '.join(color_comments)}\n")
-
-
 def generate_position_data_multi_color_velocity_once(simplified_image_path, all_selected_hex_codes, gcode_filepath, pixel_size, cable_sepperation, dist_from_pulley, width, num_nozzles):
     """Perform multi-color velocity slicing and write results to the given gcode file.
     The ``width`` argument used to be the only measurement of mural width, but
@@ -66,14 +33,20 @@ def generate_position_data_multi_color_velocity_once(simplified_image_path, all_
         print(f"Total mural height: {h * pixel_size:.4f} meters ({h} pixels)")
         print("=====================================\n")
 
+        # Reorder colors so that white (#ffffff) comes last
+        white_hex = '#ffffff'
+        non_white_colors = [c for c in all_selected_hex_codes if c.lower() != white_hex.lower()]
+        white_in_colors = any(c.lower() == white_hex.lower() for c in all_selected_hex_codes)
+        reordered_colors = non_white_colors + ([white_hex] if white_in_colors else [])
+
         color_index_map = {}
-        for i, hex_col in enumerate(all_selected_hex_codes, start=1):
+        for i, hex_col in enumerate(reordered_colors, start=1):
             color_index_map[hex_col.lower()] = i
 
         if not HAS_PRINTED_COLOR_MAPPING:
             with open(gcode_filepath, 'a') as f:
                 f.write("\n-- MULTI-COLOR INDEX MAPPING --\n")
-                for i, hex_col in enumerate(all_selected_hex_codes, start=1):
+                for i, hex_col in enumerate(reordered_colors, start=1):
                     f.write(f"Index {i} => {hex_col}\n")
                 f.write("-- END OF COLOR MAPPING --\n\n")
             HAS_PRINTED_COLOR_MAPPING = True

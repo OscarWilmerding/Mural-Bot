@@ -36,6 +36,8 @@ class HubGUI:
         self.make_topbar()
         self.make_tabs()
         self.make_console()
+        # start global mouse listener (maps side buttons to 'trig')
+        self._start_mouse_listener()
 
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
         self.root.after(100, self.check_rx_queue)
@@ -151,8 +153,9 @@ class HubGUI:
 
         self.accel_entry  = num_cmd("accel mult", "acceleration multiplier {}")
         self.vel_entry    = num_cmd("vel mult",   "velocity multiplier {}")
+        # stripe velocity multiplier replaces the old direct set command
+        self.stripe_mult  = num_cmd("stripe vel mult", "stripe velocity multiplier {}")
         self.spr_entry    = num_cmd("SPR",        "spr {}")
-        self.stripe_v     = num_cmd("stripe vel", "set stripe velocity {}")
         self.vel_calc     = num_cmd("vel calc ms","set velocity calc delay {}")
         self.conf_timeout = num_cmd("confirm ms", "set confirmation timeout {}")
         self.pre_poke     = num_cmd("pre poke ms","pre poke pause {}")
@@ -210,6 +213,13 @@ class HubGUI:
                    command=lambda: self.send_relay(f"delay {self.delay_entry.get().strip()}")).grid(row=r, column=2, sticky="w")
         r += 1
 
+        # trig single - label + entry + send
+        ttk.Label(f, text="trig").grid(row=r, column=0, sticky="e", padx=2)
+        self.trig_single = ttk.Entry(f, width=8); self.trig_single.grid(row=r, column=1, sticky="w")
+        ttk.Button(f, text="Send", width=14,
+               command=lambda: self.send_relay(f"trig {self.trig_single.get().strip()}" )).grid(row=r, column=2, sticky="w")
+        r += 1
+
         # trig s,c,d - labels
         ttk.Label(f, text="trig").grid(row=r, column=0, sticky="e", padx=2)
         ttk.Label(f, text="S", foreground="grey", font=("TkDefaultFont", 9)).grid(row=r, column=1, sticky="w")
@@ -254,17 +264,18 @@ class HubGUI:
                    command=lambda: self.send_relay(f"heater {self.heater_select.get()} {self.heater_entry.get().strip()}%")).grid(row=r, column=4, sticky="w")
         r += 1
 
-        # solenoid direct controls (solenoid N <value>)
-        self.sol_entries = []
-        for sol in range(1, 7):
-            ttk.Label(f, text=f"solenoid {sol}").grid(row=r, column=0, sticky="e", padx=2)
-            e = ttk.Entry(f, width=8)
-            e.grid(row=r, column=1, sticky="w")
-            ttk.Button(f, text="Send", width=14,
-                       command=(lambda s=sol, ent=e: self.send_solenoid(s, ent))).grid(row=r, column=2, sticky="w")
-            e.bind("<Return>", (lambda event, s=sol, ent=e: self.send_solenoid(s, ent)))
-            self.sol_entries.append(e)
-            r += 1
+        # solenoid direct control (compact, generalized)
+        ttk.Label(f, text="solenoid").grid(row=r, column=0, sticky="e", padx=2)
+        self.sol_num = ttk.Entry(f, width=6)
+        self.sol_num.grid(row=r, column=1, sticky="w")
+        self.sol_val = ttk.Entry(f, width=8)
+        self.sol_val.grid(row=r, column=2, sticky="w")
+        ttk.Button(f, text="Send", width=14,
+                   command=self.send_solenoid_generic).grid(row=r, column=3, sticky="w")
+        # allow Enter to send from either field
+        self.sol_num.bind("<Return>", lambda e: self.send_solenoid_generic())
+        self.sol_val.bind("<Return>", lambda e: self.send_solenoid_generic())
+        r += 1
 
         # moved hub buttons
         ttk.Separator(f, orient="horizontal").grid(row=r, column=0, columnspan=7, sticky="ew", pady=(6, 6))
@@ -450,9 +461,45 @@ class HubGUI:
             return
         self.send_relay(f"solenoid {sol} {val}")
 
+    def send_solenoid_generic(self):
+        """Send a solenoid relay command using the compact solenoid number/value fields."""
+        num = self.sol_num.get().strip()
+        val = self.sol_val.get().strip()
+        if not num or not val:
+            return
+        self.send_relay(f"solenoid {num} {val}")
+
     def on_close(self):
+        # stop mouse listener if running
+        try:
+            if hasattr(self, "_mouse_listener") and self._mouse_listener:
+                try:
+                    self._mouse_listener.stop()
+                except Exception:
+                    pass
+        except Exception:
+            pass
         self.close_port()
         self.root.destroy()
+
+    def _start_mouse_listener(self):
+        """Start a background pynput mouse listener mapping side buttons to 'trig'."""
+        try:
+            from pynput.mouse import Listener, Button
+        except Exception:
+            # pynput not installed; skip silently (user can install to enable)
+            return
+
+        def _on_click(x, y, button, pressed):
+            if pressed and button in (Button.x1, Button.x2):
+                try:
+                    self.send_relay("trig")
+                except Exception:
+                    pass
+
+        self._mouse_listener = Listener(on_click=_on_click)
+        self._mouse_listener.daemon = True
+        self._mouse_listener.start()
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-24781606379457950
+24783380861463213
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -99568,6 +99568,13 @@ Battery pigtail
 2
 2
 chassis v2 primary board
+Big Mosfet Old Style
+TO-220-3, Vertical, RM 2.54mm, see https://www.vishay.com/docs/66542/to-220-1.pdf
+TO-220-3 Vertical RM 2.54mm
+0
+3
+3
+chassis v2 primary board
 CONV_OKI-78SR-5_1.5-W36-C
 
 
@@ -99582,12 +99589,12 @@ EYE
 0
 0
 chassis v2 primary board
-TO-220-3_Vertical modified
-TO-220-3, Vertical, RM 2.54mm, see https://www.vishay.com/docs/66542/to-220-1.pdf
-TO-220-3 Vertical RM 2.54mm
+JST ZH 2 pin
+
+
 0
-3
-3
+2
+2
 chassis v2 primary board
 Untitled
 

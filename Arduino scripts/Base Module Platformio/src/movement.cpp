@@ -149,7 +149,7 @@ void printCurrentPositions() {
 
 void determineStripeVelocities(float posA, float posB, float &velA, float &velB) {
   float Vx = 0;
-  float Vy = stripeVelocity * stepsPerMeter;
+  float Vy = stripeVelocity * stripeVelocityMultiplier * stepsPerMeter;
 
   float pulleySpacingSteps = pulleySpacing * stepsPerMeter;
 
@@ -164,7 +164,7 @@ void determineStripeVelocities(float posA, float posB, float &velA, float &velB)
 
   float desiredXPositionSteps = stepsPerMeter * Vx * ((float)velocityCalcDelay / 1000)
                               + xPositionSteps;
-  float desiredYPositionSteps = stepsPerMeter * stripeVelocity * ((float)velocityCalcDelay / 1000)
+  float desiredYPositionSteps = stepsPerMeter * stripeVelocity * stripeVelocityMultiplier * ((float)velocityCalcDelay / 1000)
                               + yPositionSteps;
 
   float aLengthDesired = sqrt(desiredXPositionSteps * desiredXPositionSteps

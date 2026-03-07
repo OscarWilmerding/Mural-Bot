@@ -23,7 +23,14 @@ void setup() {
     initLedger();
     initializeESPNow();
 
-    randomSeed(analogRead(0));
+    // ADC2 channels are unavailable once Wi‑Fi is enabled, which is what
+    // triggered the startup error on GPIO0.
+    //
+    // Instead of sampling an analog pin after ESP‑NOW starts, seed the RNG
+    // from the ESP32's hardware random number generator.  Alternatively you
+    // could move the analogRead() above initializeESPNow() or use an ADC1
+    // pin, but esp_random() is easiest and avoids any ADC2/Wi‑Fi conflict.
+    randomSeed(esp_random());
     Serial.println("GPIO Control Script Initialized.");
 }
 
