@@ -9,7 +9,7 @@ void loadCommandsFromFile(const char *path);
 
 /*** movement.cpp ***/
 void move_to_position(float position1, float position2);
-void move_to_position_blocking(float position1, float position2);
+bool move_to_position_blocking(float position1, float position2);
 void calculateEndingLengths(const Command& cmd, float& endA, float& endB);
 void four_corners();
 void printCurrentPositions();
@@ -22,6 +22,7 @@ void startLargeStringSend(const String &strToSend);
 void sendTriggerCommand();
 void handleSendTriggerCommand();
 void sendSinglePaintBurst();
+void emergencyStop();
 void startLargeStringSend(const String &strToSend);
 void sendNextChunk();
 void sendTriggerCommand();

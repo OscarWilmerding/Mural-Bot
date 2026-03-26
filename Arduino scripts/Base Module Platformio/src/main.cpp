@@ -7,6 +7,10 @@
 #include "state.h"
 #include "modules.h"
 
+//for power switch handling usb to batt   
+#include "soc/soc.h"
+#include "soc/rtc_cntl_reg.h"
+
 /************************************************************/
 /*                   MOTOR & PIN DEFINITIONS                */
 /************************************************************/
@@ -36,8 +40,8 @@ bool motor1Done                 = false;
 bool motor2Done                 = false;
 
 // For acceleration and max velocity beleive this is in steps/s
-float baseAcceleration          = 8000.0;
-float baseMaxSpeed              = 1200.0;
+float baseAcceleration          = 3200.0;
+float baseMaxSpeed              = 1800.0;
 float accelerationMultiplier    = 1.0;
 float maxSpeedMultiplier        = 1.0;
 float stripeVelocityMultiplier  = 1.0;
@@ -56,7 +60,7 @@ unsigned long confirmationStartTime   = 0;
 unsigned long confirmationTimeout     = 5000;  // Default 5s
 
 // meters -> steps
-float stepsPerMeter       = 9727;
+float stepsPerMeter       = 8835; //corrected mar 25 from 9718
 
 // Motor directions
 int motor1Direction       = -1;
@@ -74,7 +78,7 @@ unsigned long pauseAtTheTop   = 5000;  // Blocking delay before stripe initiates
 // From G-code
 float pulleySpacing        = 0.0;
 int   numberOfDrawnColumns = 0;
-float stripeVelocity       = 0.05;
+float stripeVelocity       = 0.125;
 
 // Velocity recalc cadence
 unsigned long velocityCalcDelay = 100;
@@ -114,6 +118,9 @@ void setup() {
   stepper2.setMaxSpeed(baseMaxSpeed * maxSpeedMultiplier);
   Serial.println("[SETUP] Stepper tuning complete");
 
+  //for switch usb to batt
+  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); // disable brownout detector
+  
   pinMode(redButtonPin, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(redButtonPin), handleResetInterrupt, FALLING);
   pinMode(greyButtonPin, INPUT_PULLUP);
@@ -170,17 +177,21 @@ void loop() {
   }
 
   if (Serial.available() > 0) {
-    String command = Serial.readStringUntil('\n');
-    command.trim();
-    Serial.print("USER COMMAND: ");
-    Serial.println(command);
+    if (movementInProgress) {
+      emergencyStop();
+    } else {
+      String command = Serial.readStringUntil('\n');
+      command.trim();
+      Serial.print("USER COMMAND: ");
+      Serial.println(command);
 
-    if (runMode) {
-      runMode = false;
-      Serial.println("Run Mode Interrupted by User Input");
+      if (runMode) {
+        runMode = false;
+        Serial.println("Run Mode Interrupted by User Input");
+      }
+      processSerialCommand(command);
+      Serial.println();
     }
-    processSerialCommand(command);
-    Serial.println();
   }
 
   stepper1.run();

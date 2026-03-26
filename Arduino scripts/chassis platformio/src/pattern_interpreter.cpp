@@ -44,14 +44,10 @@ void interpretPattern(const String& patternToProcess, float speed) {
         if (c == 'x') continue;
 
 
-                //EVEN solenoids are given a delay distance is 20mm seperation
+        // All solenoids now fire together; no even/odd offset
         if (c == '1') {
             int solenoid = i + 1;
-            if (i % 2 == 1) {
-                schedulePin(solenoid, ms(0.04f / speed));
-            } else {
-                schedulePin(solenoid, 1);
-            }
+            schedulePin(solenoid, 0);
         } else if (c == '2') {
             Serial.println("C==2 this probably shouldn't happen");
         } else if (c == '3') {
@@ -76,7 +72,8 @@ void sprayAndStripe(float stripeVelocity, float drop, String* patternList, int p
     Serial.print("Interval between sprays: "); Serial.print(intervalMs); Serial.println(" ms");
     Serial.println("-- STARTING SPRAY STRIPE SOLENOID MOVEMENTS --");
 
-    while ((double)(millis() - startMs) < movementTimeMs) {
+    stopRequested = false;
+    while (!stopRequested && (double)(millis() - startMs) < movementTimeMs) {
         const uint32_t now = millis();
 
         if (triggerCount < patternCount && (double)now >= nextTriggerAt) {
@@ -95,6 +92,12 @@ void sprayAndStripe(float stripeVelocity, float drop, String* patternList, int p
                 ledger[i].solenoid = -1; // free the slot
             }
         }
+    }
+
+    if (stopRequested) {
+        Serial.println("STOP received mid-stripe: aborting.");
+        for (int s = 1; s <= NUM_SOLENOIDS; s++) pullSolenoid(s, LOW);
+        return;
     }
 
     Serial.println("Movement complete, turning off spray solenoids.");

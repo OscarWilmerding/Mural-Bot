@@ -92,54 +92,140 @@ def get_color_name(hex_code):
 
 
 def count_unique_hex_colors(image_path):
-    try:
-        image = Image.open(image_path)
-        image = image.convert("RGBA")
-        pixels = list(image.getdata())
-        hex_codes = {f'#{r:02x}{g:02x}{b:02x}' for r, g, b, a in pixels if a != 0}
+    """Show a window listing all unique colors in the image.
 
+    Returns (selected_colors, color_index_map) where color_index_map is a
+    dict mapping hex string -> int index (1-based, user-editable).
+    """
+    try:
         import tkinter as tk
+        from collections import Counter
+
+        print(f"[DEBUG] count_unique_hex_colors called with: {image_path}")
+        image = Image.open(image_path).convert("RGBA")
+        pixels = list(image.getdata())
+        total_opaque = sum(1 for r, g, b, a in pixels if a != 0)
+
+        # Count pixels per color
+        color_counts = Counter(
+            f'#{r:02x}{g:02x}{b:02x}' for r, g, b, a in pixels if a != 0
+        )
+
+        # Auto-guess indices: white last, others sorted by pixel count desc
+        white_hex = '#ffffff'
+        non_white = sorted(
+            [c for c in color_counts if c.lower() != white_hex],
+            key=lambda c: color_counts[c], reverse=True
+        )
+        has_white = white_hex in color_counts
+        ordered = non_white + ([white_hex] if has_white else [])
+
+        # --- Build UI ---
+        BG = "#f5f5f5"
+        PANEL = "#ffffff"
+        ACCENT = "#2563eb"
+        FG = "#1e293b"
 
         root = tk.Tk()
-        root.title("Unique Colors")
+        root.title("Color Index Assignment")
+        root.configure(bg=BG)
+        root.resizable(False, False)
+        root.lift()
+        root.attributes('-topmost', True)
+        root.after(200, lambda: root.attributes('-topmost', False))
 
-        frame = tk.Frame(root)
-        frame.pack(fill=tk.BOTH, expand=True)
+        tk.Label(root, text="Assign Nozzle Index to Each Color",
+                 bg=BG, fg=ACCENT, font=("Segoe UI", 12, "bold")).pack(pady=(14, 2))
+        tk.Label(root, text="Uncheck to exclude a color. Edit index to override auto-assignment.",
+                 bg=BG, fg="#64748b", font=("Segoe UI", 12)).pack(pady=(0, 10))
+
+        tk.Frame(root, bg="#e2e8f0", height=1).pack(fill="x", padx=16, pady=(0, 4))
+
+        # Single grid table — header + rows share the same column geometry
+        table = tk.Frame(root, bg=BG)
+        table.pack(fill="both", expand=True, padx=16)
+        # Columns: 0=check, 1=swatch, 2=hex, 3=pixels, 4=%, 5=index
+        COL_PAD = 10
+        for col, minw in enumerate([28, 40, 110, 90, 60, 70]):
+            table.grid_columnconfigure(col, minsize=minw, pad=COL_PAD)
+
+        # Header
+        for col, text in enumerate(["", "", "Hex", "Pixels", "%", "Index"]):
+            tk.Label(table, text=text, bg=BG, fg="#94a3b8",
+                     font=("Segoe UI", 11, "bold"), anchor="w"
+                     ).grid(row=0, column=col, sticky="w", pady=(0, 4))
 
         checkbox_vars = {}
+        index_vars = {}
 
-        selected_colors = []
-
-        def on_closing():
-            nonlocal selected_colors
-            selected_colors = [color for color, var in checkbox_vars.items() if var.get()]
-            root.destroy()
-
-        for hex_code in hex_codes:
-            color_frame = tk.Frame(frame, borderwidth=1, relief="solid")
-            color_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        for data_row, (auto_idx, hex_code) in enumerate(enumerate(ordered, start=1), start=1):
+            count = color_counts[hex_code]
+            pct = 100 * count / total_opaque if total_opaque else 0
+            bg = PANEL if data_row % 2 == 0 else "#f8fafc"
 
             var = tk.BooleanVar(value=True)
             checkbox_vars[hex_code] = var
-            checkbox = tk.Checkbutton(color_frame, variable=var)
-            checkbox.pack(side=tk.LEFT)
+            tk.Checkbutton(table, variable=var, bg=bg, activebackground=bg,
+                           relief="flat").grid(row=data_row, column=0, sticky="w", pady=3)
 
-            color_label = tk.Label(
-                color_frame,
-                text=hex_code,
-                bg=hex_code,
-                font=("Arial", 12),
-                fg="white" if int(hex_code[1:], 16) < 0x888888 else "black",
-            )
-            color_label.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
+            tk.Label(table, bg=hex_code, relief="solid", bd=1, width=3
+                     ).grid(row=data_row, column=1, sticky="ew", padx=2, pady=3, ipady=6)
+
+            tk.Label(table, text=hex_code, bg=bg, fg=FG,
+                     font=("Consolas", 12), anchor="w"
+                     ).grid(row=data_row, column=2, sticky="w", pady=3)
+
+            tk.Label(table, text=f"{count:,}", bg=bg, fg="#475569",
+                     font=("Segoe UI", 12), anchor="e"
+                     ).grid(row=data_row, column=3, sticky="e", pady=3)
+
+            tk.Label(table, text=f"{pct:.1f}%", bg=bg, fg="#475569",
+                     font=("Segoe UI", 12), anchor="e"
+                     ).grid(row=data_row, column=4, sticky="e", pady=3)
+
+            idx_var = tk.StringVar(value=str(auto_idx))
+            index_vars[hex_code] = idx_var
+            tk.Spinbox(table, from_=1, to=99, textvariable=idx_var, width=4,
+                       font=("Segoe UI", 12), relief="solid", bd=1,
+                       bg=PANEL, fg=FG).grid(row=data_row, column=5, sticky="w", pady=3)
+
+        tk.Frame(root, bg="#e2e8f0", height=1).pack(fill="x", padx=16, pady=(8, 0))
+
+        result = {"colors": [], "index_map": {}}
+
+        def on_submit():
+            selected = []
+            index_map = {}
+            for hex_code in ordered:
+                if checkbox_vars[hex_code].get():
+                    selected.append(hex_code)
+                    try:
+                        idx = int(index_vars[hex_code].get())
+                    except ValueError:
+                        idx = ordered.index(hex_code) + 1
+                    index_map[hex_code.lower()] = idx
+            result["colors"] = selected
+            result["index_map"] = index_map
+            root.destroy()
+
+        def on_closing():
+            on_submit()
+
+        tk.Button(root, text="Confirm & Continue →", command=on_submit,
+                  bg=ACCENT, fg="white", relief="flat",
+                  font=("Segoe UI", 12, "bold"), padx=16, pady=6,
+                  activebackground="#1d4ed8", activeforeground="white",
+                  cursor="hand2").pack(pady=12)
 
         root.protocol("WM_DELETE_WINDOW", on_closing)
+        print(f"[DEBUG] Entering mainloop with {len(ordered)} colors, window: {root}")
         root.mainloop()
+        print("[DEBUG] mainloop exited")
 
-        return selected_colors
+        return result["colors"], result["index_map"]
     except Exception as e:
         print(f"Error counting unique colors: {e}")
-        return []
+        return [], {}
 
 
 def extract_color(image_path, hex_color, temp_images_folder):

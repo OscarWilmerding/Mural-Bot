@@ -54,9 +54,24 @@ void startLargeStringSend(const String &strToSend) {
 
   unsigned long t0 = millis();
   const unsigned long startTimeout = 1000;
+  int startRetries = 0;
+  const int maxStartRetries = 20;
   while (!startAckReceived) {
+    if (Serial.available()) {
+      Serial.println("Serial input detected, aborting large string send.");
+      largeStringInProgress = false;
+      while (Serial.available()) Serial.read();
+      return;
+    }
     if (millis() - t0 > startTimeout) {
-      Serial.println("No start-ack, resending 0x10...");
+      if (++startRetries > maxStartRetries) {
+        Serial.println("Max start-ack retries reached, aborting.");
+        largeStringInProgress = false;
+        return;
+      }
+      Serial.print("No start-ack, resending 0x10... (attempt ");
+      Serial.print(startRetries);
+      Serial.println(")");
       sendStartPacket();
       t0 = millis();
     }
@@ -165,5 +180,28 @@ void handleSendTriggerCommand() {
 void sendSinglePaintBurst() {
   Serial.println("Sending paint burst command...");
   startLargeStringSend("paint burst");
+}
+
+void emergencyStop() {
+  // Halt steppers immediately
+  stepper1.setCurrentPosition(stepper1.currentPosition());
+  stepper2.setCurrentPosition(stepper2.currentPosition());
+
+  // Clear all state that could cause further movement or command execution
+  runMode                = false;
+  movementInProgress     = false;
+  sendTriggerAfterMovement = false;
+  waitingForConfirmation = false;
+  largeStringInProgress  = false;
+
+  // Send stop command to chassis
+  uint8_t stopPacket[1] = { 0x20 };
+  esp_now_send(chassisAddress, stopPacket, sizeof(stopPacket));
+
+  // Drain serial buffer so the stop bytes don't get processed as a command
+  while (Serial.available()) Serial.read();
+
+  Serial.println("EMERGENCY STOP");
+  printCurrentPositions();
 }
 

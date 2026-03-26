@@ -20,6 +20,9 @@ class HubGUI:
         except Exception:
             pass
 
+        # debounce state
+        self._last_click       = {}
+
         # serial state
         self.ser               = None
         self.rx_q              = queue.Queue()
@@ -58,9 +61,9 @@ class HubGUI:
         ttk.Button(bar, text="Update Ports", width=14,
                    command=self.refresh_ports).grid(row=0, column=1, padx=3)
         ttk.Button(bar, text="Connect", width=12,
-                   command=self.open_port).grid(row=0, column=2, padx=3)
+                   command=lambda: self._debounced("connect", self.open_port)).grid(row=0, column=2, padx=3)
         ttk.Button(bar, text="Reset Port", width=12,
-                   command=self.reset_port).grid(row=0, column=3, padx=3)
+                   command=lambda: self._debounced("reset_port", self.reset_port)).grid(row=0, column=3, padx=3)
         ttk.Button(bar, text="Save Log", width=12,
                    command=self.save_log).grid(row=0, column=4, padx=3)
 
@@ -109,7 +112,7 @@ class HubGUI:
         def simple_btn(text):
             nonlocal row
             ttk.Button(p, text=text, width=14,
-                       command=lambda t=text: self.send(t)).grid(row=row, column=0, sticky="w", pady=2)
+                       command=lambda t=text: self._debounced(t, lambda: self.send(t))).grid(row=row, column=0, sticky="w", pady=2)
             row += 1
 
         simple_btn("go")
@@ -119,13 +122,13 @@ class HubGUI:
         ttk.Radiobutton(p, text="to", variable=self.move_a_mode, value="to").grid(row=row, column=1, sticky="w")
         ttk.Radiobutton(p, text="by", variable=self.move_a_mode, value="by").grid(row=row, column=2, sticky="w")
         self.move_a_entry = ttk.Entry(p, width=8); self.move_a_entry.grid(row=row, column=3, sticky="w")
-        ttk.Button(p, text="Send", command=self.send_move_a).grid(row=row, column=4, sticky="w", padx=4); row += 1
+        ttk.Button(p, text="Send", command=lambda: self._debounced("move_a", self.send_move_a)).grid(row=row, column=4, sticky="w", padx=4); row += 1
 
         ttk.Label(p, text="move B").grid(row=row, column=0, sticky="e")
         ttk.Radiobutton(p, text="to", variable=self.move_b_mode, value="to").grid(row=row, column=1, sticky="w")
         ttk.Radiobutton(p, text="by", variable=self.move_b_mode, value="by").grid(row=row, column=2, sticky="w")
         self.move_b_entry = ttk.Entry(p, width=8); self.move_b_entry.grid(row=row, column=3, sticky="w")
-        ttk.Button(p, text="Send", command=self.send_move_b).grid(row=row, column=4, sticky="w", padx=4); row += 1
+        ttk.Button(p, text="Send", command=lambda: self._debounced("move_b", self.send_move_b)).grid(row=row, column=4, sticky="w", padx=4); row += 1
 
         ttk.Label(p, text="set A to").grid(row=row, column=0, sticky="e")
         self.set_a_entry = ttk.Entry(p, width=8); self.set_a_entry.grid(row=row, column=1, sticky="w")
@@ -186,15 +189,15 @@ class HubGUI:
 
         # quick buttons: clean, forever, ?
         c = 0
-        def rbtn(label, payload):
+        def rbtn(label, cmd):
             nonlocal r, c
-            ttk.Button(f, text=label, width=14,
-                       command=lambda s=payload: self.send_relay(s)).grid(row=r, column=c, pady=2, sticky="w")
+            ttk.Button(f, text=label, width=14, command=cmd).grid(row=r, column=c, pady=2, sticky="w")
             c = (c + 1) % 6
             if c == 0:
                 r += 1
-        for lbl in ("clean", "forever", "?"):
-            rbtn(lbl, lbl)
+        rbtn("clean", lambda: self._debounced("clean", self.do_clean))
+        for lbl in ("forever", "?"):
+            rbtn(lbl, lambda s=lbl: self.send_relay(s))
         if c != 0:
             r += 1
             c = 0
@@ -217,7 +220,7 @@ class HubGUI:
         ttk.Label(f, text="trig").grid(row=r, column=0, sticky="e", padx=2)
         self.trig_single = ttk.Entry(f, width=8); self.trig_single.grid(row=r, column=1, sticky="w")
         ttk.Button(f, text="Send", width=14,
-               command=lambda: self.send_relay(f"trig {self.trig_single.get().strip()}" )).grid(row=r, column=2, sticky="w")
+               command=lambda: self._debounced("trig_single", lambda: self.send_relay(f"trig {self.trig_single.get().strip()}"))).grid(row=r, column=2, sticky="w")
         r += 1
 
         # trig s,c,d - labels
@@ -229,7 +232,7 @@ class HubGUI:
         self.trig_s = ttk.Entry(f, width=4); self.trig_c = ttk.Entry(f, width=4); self.trig_d = ttk.Entry(f, width=4)
         self.trig_s.grid(row=r, column=1); self.trig_c.grid(row=r, column=2); self.trig_d.grid(row=r, column=3)
         ttk.Button(f, text="Send", width=14,
-                   command=lambda: self.send_relay(f"trig {self.trig_s.get().strip()},{self.trig_c.get().strip()},{self.trig_d.get().strip()}")).grid(row=r, column=4, sticky="w")
+                   command=lambda: self._debounced("trig_scd", lambda: self.send_relay(f"trig {self.trig_s.get().strip()},{self.trig_c.get().strip()},{self.trig_d.get().strip()}"))).grid(row=r, column=4, sticky="w")
         r += 1
 
         # calibration sol,low,high,step - labels
@@ -387,6 +390,13 @@ class HubGUI:
         self.root.after(100, self.check_rx_queue)
 
     # ───────── helpers ─────────
+    def _debounced(self, key, fn, delay=1.0):
+        now = time.time()
+        if now - self._last_click.get(key, 0) < delay:
+            return
+        self._last_click[key] = now
+        fn()
+
     def send(self, text):
         text = text.strip()
         if not text:
@@ -440,18 +450,54 @@ class HubGUI:
                 f.write(log_content)
             messagebox.showinfo("Save log", f"Log saved to {path}")
 
+    def _confirm_close_to_pulley(self, val_str):
+        """Return True if safe to proceed (either value > 1.5 or user confirmed)."""
+        try:
+            if float(val_str) > 1.5:
+                return True
+        except ValueError:
+            return True  # non-numeric, let the device handle it
+        win = tk.Toplevel(self.root)
+        win.title("Warning")
+        win.grab_set()
+        win.resizable(False, False)
+        confirmed = [False]
+        tk.Label(win, text="Are you sure you want to move here?\nThis is very close to the pulley\nand risks overloading cable tension.",
+                 font=("TkDefaultFont", 11), pady=12, padx=16, justify="center").pack()
+        btn_frame = tk.Frame(win); btn_frame.pack(pady=(0, 12))
+        tk.Button(btn_frame, text="Cancel", width=12,
+                  command=win.destroy).pack(side="left", padx=8)
+        def _continue():
+            confirmed[0] = True
+            win.destroy()
+        tk.Button(btn_frame, text="Continue", width=12, bg="#c0392b", fg="white",
+                  activebackground="#922b21", activeforeground="white",
+                  command=_continue).pack(side="left", padx=8)
+        win.wait_window()
+        return confirmed[0]
+
     def send_move_a(self):
         val = self.move_a_entry.get().strip()
         if not val:
             return
-        cmd = f"move a to {val}" if self.move_a_mode.get() == "to" else f"move a {val}"
+        if self.move_a_mode.get() == "to":
+            if not self._confirm_close_to_pulley(val):
+                return
+            cmd = f"move a to {val}"
+        else:
+            cmd = f"move a {val}"
         self.send(cmd)
 
     def send_move_b(self):
         val = self.move_b_entry.get().strip()
         if not val:
             return
-        cmd = f"move b to {val}" if self.move_b_mode.get() == "to" else f"move b {val}"
+        if self.move_b_mode.get() == "to":
+            if not self._confirm_close_to_pulley(val):
+                return
+            cmd = f"move b to {val}"
+        else:
+            cmd = f"move b {val}"
         self.send(cmd)
 
     def send_solenoid(self, sol, entry):
@@ -468,6 +514,29 @@ class HubGUI:
         if not num or not val:
             return
         self.send_relay(f"solenoid {num} {val}")
+
+    def do_clean(self):
+        """Set pulse width to 5ms, fire trig 10 times at 2s intervals, then restore."""
+        saved_pw = self.pw_entry.get().strip()
+        self.send_relay("5")
+        self.pw_entry.delete(0, tk.END)
+        self.pw_entry.insert(0, "5")
+
+        TOTAL = 10
+        INTERVAL_MS = 2000
+
+        def fire(remaining):
+            self.send_relay("trig")
+            if remaining > 1:
+                self.root.after(INTERVAL_MS, lambda: fire(remaining - 1))
+            else:
+                # restore original pulse width
+                if saved_pw:
+                    self.send_relay(saved_pw)
+                    self.pw_entry.delete(0, tk.END)
+                    self.pw_entry.insert(0, saved_pw)
+
+        self.root.after(INTERVAL_MS, lambda: fire(TOTAL))
 
     def on_close(self):
         # stop mouse listener if running
@@ -493,7 +562,7 @@ class HubGUI:
         def _on_click(x, y, button, pressed):
             if pressed and button in (Button.x1, Button.x2):
                 try:
-                    self.send_relay("trig")
+                    self._debounced("mouse_trig", lambda: self.send_relay("trig"))
                 except Exception:
                     pass
 

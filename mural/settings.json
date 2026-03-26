@@ -1,0 +1,17 @@
+{
+  "file_path": "C:/Users/oewil/Downloads/mask-result.png",
+  "width": 323,
+  "pixel_size": 0.01,
+  "cable_sepperation": 4.572,
+  "dist_from_pulley": 3.85,
+  "floor_dist_from_pulleys": 4.5,
+  "chassis_length_below_nozzles": 0.3,
+  "offset": 0.0,
+  "color_mode": "Exact Color Match",
+  "number_of_colors": 2,
+  "n_value": 3,
+  "peak_velocity": 0.5,
+  "slicing_option": "multi color velocity slicing",
+  "Num_nozzles": 8,
+  "notes": ""
+}

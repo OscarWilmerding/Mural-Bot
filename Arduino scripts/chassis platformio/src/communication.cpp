@@ -7,6 +7,7 @@ static int    expectedChunks      = 0;
 static int    receivedChunks      = 0;
 static String largeStringBuffer;
 bool newMessageReady = false;
+volatile bool stopRequested = false;
 
 struct_message incomingMessage;
 struct_message confirmationMessage;
@@ -153,7 +154,23 @@ void processReceivedString() {
     delete[] patternList;
 }
 
+void executeStop() {
+    stopRequested     = true;
+    largeStringActive = false;
+    receivedChunks    = 0;
+    expectedChunks    = 0;
+    largeStringBuffer = "";
+    newMessageReady   = false;
+    initLedger();
+    for (int s = 1; s <= NUM_SOLENOIDS; s++) pullSolenoid(s, LOW);
+    Serial.println("STOP received: all solenoids killed, state cleared.");
+}
+
 void onDataRecv(const uint8_t *mac_addr, const uint8_t *incomingData, int len) {
+    if (len == 1 && incomingData[0] == 0x20) {
+        executeStop();
+        return;
+    }
     if (len >= 1) handleLargeStringPacket(incomingData, len);
 }
 

@@ -26,8 +26,8 @@ void move_to_position(float position1, float position2) {
   movementInProgress = true;
 }
 
-// blocking movement
-void move_to_position_blocking(float position1, float position2) {
+// blocking movement — returns true on success, false if emergency-stopped
+bool move_to_position_blocking(float position1, float position2) {
   long targetPosition1 = position1 * stepsPerMeter * motor1Direction;
   long targetPosition2 = position2 * stepsPerMeter * motor2Direction;
 
@@ -45,11 +45,16 @@ void move_to_position_blocking(float position1, float position2) {
   Serial.println(position2);
 
   while ((stepper1.distanceToGo() != 0) || (stepper2.distanceToGo() != 0)) {
+    if (Serial.available()) {
+      emergencyStop();
+      return false;
+    }
     stepper1.run();
     stepper2.run();
   }
 
   Serial.println("Blocking move complete.");
+  return true;
 }
 
 // Helper function to calculate ending pulley lengths for a stripe command
@@ -106,21 +111,21 @@ void four_corners() {
   Serial.println("Triggering at Corner 1");
   sendSinglePaintBurst();
   delay(5000);  // 5 second wait after trigger
-  
-  // Corner 2: Last stripe starting position
-  Serial.println("Moving to Corner 2 (Last stripe start)");
-  move_to_position_blocking(lastStripe->startPulleyA, lastStripe->startPulleyB);
-  Serial.println("Triggering at Corner 2");
-  sendSinglePaintBurst();
-  delay(5000);  // 5 second wait after trigger
-  
+
   // Corner 3: First stripe ending position
   Serial.println("Moving to Corner 3 (First stripe end)");
   move_to_position_blocking(firstEndA, firstEndB);
   Serial.println("Triggering at Corner 3");
   sendSinglePaintBurst();
   delay(5000);  // 5 second wait after trigger
-  
+
+  // Corner 2: Last stripe starting position
+  Serial.println("Moving to Corner 2 (Last stripe start)");
+  move_to_position_blocking(lastStripe->startPulleyA, lastStripe->startPulleyB);
+  Serial.println("Triggering at Corner 2");
+  sendSinglePaintBurst();
+  delay(5000);  // 5 second wait after trigger
+
   // Corner 4: Last stripe ending position
   Serial.println("Moving to Corner 4 (Last stripe end)");
   move_to_position_blocking(lastEndA, lastEndB);

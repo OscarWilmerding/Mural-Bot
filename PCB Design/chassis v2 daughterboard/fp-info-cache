@@ -1,4 +1,4 @@
-24783380861463213
+24785153779453165
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -99630,6 +99630,13 @@ head
 0
 0
 0
+chassis v2 primary board
+modified jst zh used
+JST ZH series connector, B2B-ZR (http://www.jst-mfg.com/product/pdf/eng/eZH.pdf), generated with kicad-footprint-generator
+connector JST ZH vertical
+0
+2
+2
 chassis v2 primary board
 strong switch
 

@@ -1,9 +1,11 @@
 import tkinter as tk
-from tkinter import filedialog
+from tkinter import filedialog, ttk
 from PIL import Image
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib.patches as mpatches
 import math
 import random
 from sklearn.cluster import KMeans
@@ -17,6 +19,43 @@ import json
 
 root_folder = r'C:/Users/oewil/OneDrive/Desktop/Mural-Bot/mural'
 gcode_filepath = os.path.join(root_folder, "gcode.txt")
+settings_filepath = os.path.join(root_folder, "settings.json")
+
+
+def load_settings():
+    defaults = {
+        "file_path": r"C:/Users/oewil/OneDrive/Desktop/Mural-Bot/mural/imput images/jules eye 257 wide.jpg",
+        "width": 310,
+        "pixel_size": 0.01,
+        "cable_sepperation": 4.6,
+        "dist_from_pulley": 4.2,
+        "floor_dist_from_pulleys": 6.0,
+        "chassis_length_below_nozzles": 0.3,
+        "offset": 0.0,
+        "color_mode": "Simplify Image",
+        "number_of_colors": 2,
+        "n_value": 3,
+        "peak_velocity": 0.5,
+        "slicing_option": "multi color velocity slicing",
+        "Num_nozzles": 8,
+        "notes": "horizontal sep = 12mm, vertical sep = 20mm\nwall width 9ft → 228px at 12mm/px\nJules eye temp target 257px\n",
+    }
+    if os.path.exists(settings_filepath):
+        try:
+            with open(settings_filepath, 'r') as f:
+                saved = json.load(f)
+            defaults.update(saved)
+        except Exception as e:
+            print(f"Could not load settings, using defaults: {e}")
+    return defaults
+
+
+def save_settings(settings_dict):
+    try:
+        with open(settings_filepath, 'w') as f:
+            json.dump(settings_dict, f, indent=2)
+    except Exception as e:
+        print(f"Could not save settings: {e}")
 
 reduced_image_path = os.path.join(root_folder, "temp.png")
 processed_image_path = os.path.join(root_folder, "processed_image_path.png")
@@ -29,19 +68,23 @@ if not os.path.exists(temp_images_folder):
     os.makedirs(temp_images_folder)
     print(f"Created directory: {temp_images_folder}")
 
-# Global variables - THESE ALSO SET AUTOFILLED DEFAULTS
-file_path = r"C:/Users/oewil/OneDrive/Desktop/Mural-Bot/mural/imput images/jules eye 257 wide.jpg"
-width = 257  # in pixels (should be an integer)
-pixel_size = 0.012  # size of each pixel in meters
-cable_sepperation = 4.6  # in meters (this is the pulley spacing)
-dist_from_pulley = 3.95  # distance from pulleys to bottom of mural (m)
-offset = 0.0  # offset of image from center to the left (m)
-color_mode = 'Simplify Image'  # default color mode
-number_of_colors = 2  # default number of colors for 'Simplify Image' method
-n_value = 3  # default N value for NxN methods
-peak_velocity = 0.5  # in meters per sec
-slicing_option = 'multi color velocity slicing'  # default slicing option
-Num_nozzles = 7 # number of nozzles / pixels per stripe (was hardcoded as 4). Default changed to 8 and exposed in GUI.
+# Global variables - loaded from settings.json if it exists, otherwise use defaults in load_settings()
+_s = load_settings()
+file_path = _s["file_path"]
+width = _s["width"]
+pixel_size = _s["pixel_size"]
+cable_sepperation = _s["cable_sepperation"]
+dist_from_pulley = _s["dist_from_pulley"]
+floor_dist_from_pulleys = _s["floor_dist_from_pulleys"]
+chassis_length_below_nozzles = _s["chassis_length_below_nozzles"]
+offset = _s["offset"]
+color_mode = _s["color_mode"]
+number_of_colors = _s["number_of_colors"]
+n_value = _s["n_value"]
+peak_velocity = _s["peak_velocity"]
+slicing_option = _s["slicing_option"]
+Num_nozzles = _s["Num_nozzles"]
+notes = _s["notes"]
 
 
 HAS_PRINTED_COLOR_MAPPING = False
@@ -66,8 +109,17 @@ import multi_color_slicing
 
 def initial_popup():
     """
-    Displays a GUI popup to collect user inputs for various parameters.
+    Displays a GUI popup to collect user inputs for various parameters,
+    with a live engineering drawing showing the bot geometry.
     """
+    BG = "#f5f5f5"
+    PANEL_BG = "#ffffff"
+    ACCENT = "#2563eb"
+    LABEL_FG = "#1e293b"
+    ENTRY_BG = "#ffffff"
+    BORDER = "#cbd5e1"
+    WARN_COLOR = "#dc2626"
+
     def browse_file():
         global file_path
         filetypes = (
@@ -77,143 +129,419 @@ def initial_popup():
         file_path = filedialog.askopenfilename(filetypes=filetypes)
         file_path_entry.delete(0, tk.END)
         file_path_entry.insert(0, file_path)
+        update_drawing()
 
     def submit():
         global file_path, width, pixel_size, number_of_colors
         global cable_sepperation, dist_from_pulley, offset, color_mode, n_value
-        global slicing_option, Num_nozzles
+        global slicing_option, Num_nozzles, floor_dist_from_pulleys, chassis_length_below_nozzles, notes
         file_path = file_path_entry.get()
-        width = int(width_entry.get())
+        color_mode = color_mode_var.get()
+        if color_mode == 'Exact Color Match':
+            from PIL import Image as _PILImg
+            width = _PILImg.open(file_path).size[0]
+        else:
+            width = int(width_entry.get())
         Num_nozzles = int(nozzles_entry.get())
         pixel_size = float(pixel_size_entry.get())
         cable_sepperation = float(cable_sepperation_entry.get())
         dist_from_pulley = float(dist_from_pulley_entry.get())
+        floor_dist_from_pulleys = float(floor_dist_entry.get())
+        chassis_length_below_nozzles = float(chassis_below_entry.get())
         offset = float(offset_entry.get())
-        color_mode = color_mode_var.get()
         if color_mode in ['Simplify Image', 'Dynamic Scatter NxN']:
             number_of_colors = int(number_of_colors_entry.get())
         if color_mode in ['RGB Scatter NxN', 'Dynamic Scatter NxN']:
             n_value = int(n_value_entry.get())
         slicing_option = slicing_option_var.get()
+        notes = notes_text.get('1.0', 'end-1c')
+        save_settings({
+            "file_path": file_path,
+            "width": width,
+            "pixel_size": pixel_size,
+            "cable_sepperation": cable_sepperation,
+            "dist_from_pulley": dist_from_pulley,
+            "floor_dist_from_pulleys": floor_dist_from_pulleys,
+            "chassis_length_below_nozzles": chassis_length_below_nozzles,
+            "offset": offset,
+            "color_mode": color_mode,
+            "number_of_colors": number_of_colors,
+            "n_value": n_value,
+            "peak_velocity": peak_velocity,
+            "slicing_option": slicing_option,
+            "Num_nozzles": Num_nozzles,
+            "notes": notes,
+        })
+        root.quit()
         root.destroy()
 
     def on_color_mode_change(*args):
         selected_mode = color_mode_var.get()
-        # Show/hide Number of Colors
+        if selected_mode == 'Exact Color Match':
+            width_label.grid_remove()
+            width_entry.grid_remove()
+        else:
+            width_label.grid(row=3, column=0, sticky="e", padx=(0, 8), pady=3)
+            width_entry.grid(row=3, column=1, sticky="ew", pady=3)
         if selected_mode in ['Simplify Image', 'Dynamic Scatter NxN']:
-            number_of_colors_label.grid(row=3, column=0, padx=10, pady=10)
-            number_of_colors_entry.grid(row=3, column=1, padx=10, pady=10)
+            number_of_colors_label.grid(row=14, column=0, sticky="e", padx=(0, 8), pady=3)
+            number_of_colors_entry.grid(row=14, column=1, sticky="ew", pady=3)
         else:
             number_of_colors_label.grid_remove()
             number_of_colors_entry.grid_remove()
-        # Show/hide N value
         if selected_mode in ['RGB Scatter NxN', 'Dynamic Scatter NxN']:
-            n_value_label.grid(row=4, column=0, padx=10, pady=10)
-            n_value_entry.grid(row=4, column=1, padx=10, pady=10)
+            n_value_label.grid(row=15, column=0, sticky="e", padx=(0, 8), pady=3)
+            n_value_entry.grid(row=15, column=1, sticky="ew", pady=3)
         else:
             n_value_label.grid_remove()
             n_value_entry.grid_remove()
 
+    def safe_float(entry, fallback):
+        try:
+            return float(entry.get())
+        except ValueError:
+            return fallback
+
+    def safe_int(entry, fallback):
+        try:
+            return int(entry.get())
+        except ValueError:
+            return fallback
+
+    def update_drawing(*args):
+        try:
+            w_px = safe_int(width_entry, width)
+            px_sz = safe_float(pixel_size_entry, pixel_size)
+            cab_sep = safe_float(cable_sepperation_entry, cable_sepperation)
+            d_pull = safe_float(dist_from_pulley_entry, dist_from_pulley)
+            flr = safe_float(floor_dist_entry, floor_dist_from_pulleys)
+            cbl = safe_float(chassis_below_entry, chassis_length_below_nozzles)
+            off = safe_float(offset_entry, offset)
+            n_noz = safe_int(nozzles_entry, Num_nozzles)
+
+            # Derived mural dimensions
+            mural_w = w_px * px_sz
+            # Height not directly an input; approximate as ~0.75 * width for display
+            # Use dist_from_pulley as the vertical span to bottom of mural
+            mural_h = d_pull  # dist_from_pulley is dist from pulleys to bottom of mural
+
+            ax.cla()
+            ax.set_facecolor('#f8fafc')
+
+            # --- coordinate system: origin at midpoint between pulleys ---
+            # Pulleys at (-cab_sep/2, 0) and (+cab_sep/2, 0)
+            # y increases downward (drawing convention)
+            # Mural top starts at y = dist_from_pulley - mural_h (i.e., above mural bottom)
+            # Mural bottom at y = dist_from_pulley
+            # Floor at y = flr
+
+            pl = -cab_sep / 2
+            pr = +cab_sep / 2
+            mural_bottom_y = d_pull
+            img_center_x = -off  # midpoint between pulleys, shifted by offset
+
+            # Load image to get true physical dimensions
+            img_path = file_path_entry.get()
+            preview_img = None
+            phys_w = mural_w  # fallback
+            phys_h = mural_h  # fallback
+            try:
+                if os.path.isfile(img_path):
+                    preview_img = Image.open(img_path).convert("RGB")
+                    img_px_w, img_px_h = preview_img.size
+                    phys_w = img_px_w * px_sz
+                    phys_h = img_px_h * px_sz
+            except Exception:
+                pass
+
+            # Derive left/right from centre so image is always centred
+            mural_left = img_center_x - phys_w / 2
+            mural_right = img_center_x + phys_w / 2
+
+            # Blue bounding box follows actual image physical size
+            mural_top_y = mural_bottom_y - phys_h
+
+            # Chassis at bottom-centre of mural
+            chassis_x = img_center_x
+            chassis_y = mural_bottom_y
+
+            # Chassis below line bottom
+            chassis_tail_y = chassis_y + cbl
+
+            # --- Draw floor ---
+            floor_color = WARN_COLOR if chassis_tail_y >= flr else "#64748b"
+            ax.axhline(y=flr, color=floor_color, linewidth=2, linestyle='--', zorder=1)
+            ax.text(pr + 0.1, flr, f"Floor\n{flr:.2f}m", color=floor_color,
+                    fontsize=7, va='center', ha='left')
+
+            # --- Draw mural area (matches image physical size) ---
+            mural_rect = mpatches.FancyBboxPatch(
+                (mural_left, mural_top_y),
+                phys_w, phys_h,
+                boxstyle="square,pad=0",
+                linewidth=1.2, edgecolor="#2563eb", facecolor="#dbeafe", zorder=2
+            )
+            ax.add_patch(mural_rect)
+
+            # --- Image preview ---
+            if preview_img is not None:
+                try:
+                    preview_arr = np.array(preview_img)
+                    ax.imshow(preview_arr,
+                              extent=[mural_left, mural_left + phys_w,
+                                      mural_bottom_y, mural_top_y],
+                              aspect='auto', alpha=0.35, zorder=3,
+                              interpolation='bilinear')
+                except Exception:
+                    pass
+
+            ax.text(mural_left + phys_w / 2, mural_top_y + phys_h * 0.06,
+                    f"{phys_w:.2f} × {phys_h:.2f} m",
+                    fontsize=7, ha='center', va='top', color="#1e40af",
+                    zorder=4, bbox=dict(facecolor='white', alpha=0.6,
+                                        edgecolor='none', pad=1))
+
+            # --- Draw pulleys ---
+            for px_coord, label, ha in [(pl, "A", "right"), (pr, "B", "left")]:
+                ax.plot(px_coord, 0, 'o', markersize=10, color="#475569", zorder=5)
+                offset_x = -0.12 if ha == "right" else 0.12
+                ax.text(px_coord + offset_x, 0, label, fontsize=9, fontweight='bold',
+                        ha=ha, va='center', color="#475569")
+
+            # --- Draw cables from pulleys to chassis ---
+            ax.plot([pl, chassis_x], [0, chassis_y], color="#94a3b8", linewidth=1.2,
+                    zorder=3, linestyle='-')
+            ax.plot([pr, chassis_x], [0, chassis_y], color="#94a3b8", linewidth=1.2,
+                    zorder=3, linestyle='-')
+
+            # --- Draw chassis nozzle row ---
+            nozzle_half_w = (n_noz - 1) * px_sz / 2 if n_noz > 1 else 0
+            ax.plot([chassis_x - nozzle_half_w, chassis_x + nozzle_half_w],
+                    [chassis_y, chassis_y],
+                    color="#0f172a", linewidth=3, zorder=6, solid_capstyle='round')
+
+            # --- Draw chassis tail below nozzles ---
+            tail_color = WARN_COLOR if chassis_tail_y >= flr else "#0f172a"
+            ax.plot([chassis_x, chassis_x], [chassis_y, chassis_tail_y],
+                    color=tail_color, linewidth=2.5, zorder=6, solid_capstyle='round')
+            # dimension annotation for chassis tail
+            ax.annotate('', xy=(chassis_x + 0.15, chassis_tail_y),
+                        xytext=(chassis_x + 0.15, chassis_y),
+                        arrowprops=dict(arrowstyle='<->', color=tail_color, lw=1.2))
+            ax.text(chassis_x + 0.22, (chassis_y + chassis_tail_y) / 2,
+                    f"{cbl:.3f}m", fontsize=7, va='center', color=tail_color)
+
+            if chassis_tail_y >= flr:
+                overlap = chassis_tail_y - flr
+                ax.text(chassis_x + 0.22, flr - 0.05,
+                        f"⚠ {overlap:.3f}m overlap!", fontsize=7,
+                        color=WARN_COLOR, va='top', fontweight='bold')
+
+            # --- Dimension annotations ---
+            # Pulley spacing
+            ax.annotate('', xy=(pr, -0.35), xytext=(pl, -0.35),
+                        arrowprops=dict(arrowstyle='<->', color="#475569", lw=1))
+            ax.text(0, -0.42, f"Pulley spacing: {cab_sep:.2f}m",
+                    fontsize=7, ha='center', color="#475569")
+
+            # dist_from_pulley (pulley to mural bottom)
+            ann_x = mural_left - 0.2
+            ax.annotate('', xy=(ann_x, mural_bottom_y), xytext=(ann_x, 0),
+                        arrowprops=dict(arrowstyle='<->', color="#475569", lw=1))
+            ax.text(ann_x - 0.05, mural_bottom_y / 2,
+                    f"{d_pull:.2f}m", fontsize=7, ha='right', va='center', color="#475569",
+                    rotation=90)
+
+            ax.set_title("Visualization",
+                         fontsize=9, pad=8, color=LABEL_FG)
+            ax.set_xlabel("x (m)", fontsize=8)
+            ax.set_ylabel("y (m)", fontsize=8)
+            ax.tick_params(labelsize=7)
+
+            # Set limits with y inverted (large bottom = deep, 0 = pulley level)
+            x_pad = cab_sep * 0.25
+            y_pad = flr * 0.08
+            ax.set_xlim(pl - x_pad - 0.4, pr + x_pad + 0.6)
+            ax.set_ylim(flr + y_pad, -0.6)
+
+            # Equal aspect AFTER limits so 1m on x == 1m on y
+            ax.set_aspect('equal', adjustable='box')
+
+            fig.tight_layout()
+            canvas.draw()
+
+            # --- Update stats labels ---
+            import math
+            dist_a_to_br = math.sqrt((mural_right - pl) ** 2 + d_pull ** 2)
+            dist_b_to_bl = math.sqrt((mural_left - pr) ** 2 + d_pull ** 2)
+            longest_a = flr + cab_sep + dist_a_to_br
+            longest_b = flr + dist_b_to_bl
+            stat_a_label.config(text=f"Longest A cable:  {longest_a:.3f} m  "
+                                     f"(floor {flr:.2f} + spacing {cab_sep:.2f} + diagonal {dist_a_to_br:.3f})")
+            stat_b_label.config(text=f"Longest B cable:  {longest_b:.3f} m  "
+                                     f"(floor {flr:.2f} + diagonal {dist_b_to_bl:.3f})")
+        except Exception:
+            pass
+
+    # ---- Root window ----
     root = tk.Tk()
-    root.title("Input Window")
+    root.title("Mural Bot — Configuration")
+    root.configure(bg=BG)
+    root.resizable(True, True)
 
-    tk.Label(root, text="File Path:").grid(row=0, column=0, padx=10, pady=10)
-    file_path_entry = tk.Entry(root, width=40)
-    file_path_entry.grid(row=0, column=1, padx=10, pady=10)
+    # ---- Two-column layout: form left, drawing right ----
+    form_frame = tk.Frame(root, bg=BG, padx=16, pady=16)
+    form_frame.grid(row=0, column=0, sticky="nsew")
+
+    draw_frame = tk.Frame(root, bg=PANEL_BG, padx=8, pady=8,
+                          relief="flat", bd=1, highlightbackground=BORDER,
+                          highlightthickness=1)
+    draw_frame.grid(row=0, column=1, sticky="nsew", padx=(0, 16), pady=16)
+
+    root.grid_columnconfigure(0, weight=0)
+    root.grid_columnconfigure(1, weight=1)
+    root.grid_rowconfigure(0, weight=1)
+
+    # ---- Section header helper ----
+    def section(parent, text, row):
+        lbl = tk.Label(parent, text=text, bg=BG, fg=ACCENT,
+                       font=("Segoe UI", 12, "bold"))
+        lbl.grid(row=row, column=0, columnspan=2, sticky="w", pady=(12, 2))
+
+    def lbl(parent, text, row):
+        tk.Label(parent, text=text, bg=BG, fg=LABEL_FG,
+                 font=("Segoe UI", 12)).grid(row=row, column=0, sticky="e",
+                                            padx=(0, 8), pady=3)
+
+    def entry(parent, val, row, width_chars=18):
+        e = tk.Entry(parent, width=width_chars, bg=ENTRY_BG, fg=LABEL_FG,
+                     relief="solid", bd=1, font=("Segoe UI", 12),
+                     highlightthickness=0)
+        e.grid(row=row, column=1, sticky="ew", pady=3)
+        e.insert(0, str(val))
+        return e
+
+    form_frame.grid_columnconfigure(1, weight=1)
+
+    # ---- Image ----
+    section(form_frame, "IMAGE", 0)
+    lbl(form_frame, "File Path:", 1)
+    file_path_entry = tk.Entry(form_frame, width=30, bg=ENTRY_BG, fg=LABEL_FG,
+                               relief="solid", bd=1, font=("Segoe UI", 12))
+    file_path_entry.grid(row=1, column=1, sticky="ew", pady=3)
     file_path_entry.insert(0, file_path)
-    browse_button = tk.Button(root, text="Browse", command=browse_file)
-    browse_button.grid(row=0, column=2, padx=10, pady=10)
+    browse_button = tk.Button(form_frame, text="Browse", command=browse_file,
+                              bg=ACCENT, fg="white", relief="flat",
+                              font=("Segoe UI", 12), padx=8, pady=2,
+                              activebackground="#1d4ed8", activeforeground="white",
+                              cursor="hand2")
+    browse_button.grid(row=1, column=2, padx=(4, 0), pady=3)
 
-    tk.Label(root, text="Width in Pixels:").grid(row=1, column=0, padx=10, pady=10)
-    width_entry = tk.Entry(root)
-    width_entry.grid(row=1, column=1, padx=10, pady=10)
-    width_entry.insert(0, str(width))
+    # ---- Print settings ----
+    section(form_frame, "PRINT", 2)
+    width_label = tk.Label(form_frame, text="Width (px):", bg=BG, fg=LABEL_FG,
+                           font=("Segoe UI", 12))
+    width_label.grid(row=3, column=0, sticky="e", padx=(0, 8), pady=3)
+    width_entry = entry(form_frame, width, 3)
 
-    # Nozzles per stripe (stripe width)
-    nozzles_label = tk.Label(root, text="Nozzles per stripe:")
-    nozzles_entry = tk.Entry(root)
-    nozzles_entry.grid(row=2, column=1, padx=10, pady=10)
-    nozzles_label.grid(row=2, column=0, padx=10, pady=10)
-    nozzles_entry.insert(0, str(Num_nozzles))
+    lbl(form_frame, "Pixel Size (m):", 4)
+    pixel_size_entry = entry(form_frame, pixel_size, 4)
 
-    # Number of Colors (initially hidden)
-    number_of_colors_label = tk.Label(root, text="Number of Colors:")
-    number_of_colors_entry = tk.Entry(root)
+    lbl(form_frame, "Nozzles per stripe:", 5)
+    nozzles_entry = entry(form_frame, Num_nozzles, 5)
+
+    # Number of Colors (hidden)
+    number_of_colors_label = tk.Label(form_frame, text="Number of Colors:",
+                                      bg=BG, fg=LABEL_FG, font=("Segoe UI", 12))
+    number_of_colors_entry = tk.Entry(form_frame, width=18, bg=ENTRY_BG, fg=LABEL_FG,
+                                      relief="solid", bd=1, font=("Segoe UI", 12))
     number_of_colors_entry.insert(0, str(number_of_colors))
-    number_of_colors_label.grid_remove()
-    number_of_colors_entry.grid_remove()
 
-    # N Value for NxN methods (initially hidden)
-    n_value_label = tk.Label(root, text="Value of N:")
-    n_value_entry = tk.Entry(root)
+    # N Value (hidden)
+    n_value_label = tk.Label(form_frame, text="Value of N:", bg=BG, fg=LABEL_FG,
+                             font=("Segoe UI", 12))
+    n_value_entry = tk.Entry(form_frame, width=18, bg=ENTRY_BG, fg=LABEL_FG,
+                             relief="solid", bd=1, font=("Segoe UI", 12))
     n_value_entry.insert(0, str(n_value))
-    n_value_label.grid_remove()
-    n_value_entry.grid_remove()
 
-    # Pixel Size (m)
-    pixel_size_label = tk.Label(root, text="Pixel Size (m):")
-    pixel_size_label.grid(row=5, column=0, padx=10, pady=10)
-    pixel_size_entry = tk.Entry(root)
-    pixel_size_entry.grid(row=5, column=1, padx=10, pady=10)
-    pixel_size_entry.insert(0, str(pixel_size))
+    # ---- Geometry ----
+    section(form_frame, "GEOMETRY", 6)
+    lbl(form_frame, "Pulley Spacing (m):", 7)
+    cable_sepperation_entry = entry(form_frame, cable_sepperation, 7)
 
-    # Pulley Spacing (m)
-    cable_sepperation_label = tk.Label(root, text="Pulley Spacing (m):")
-    cable_sepperation_label.grid(row=6, column=0, padx=10, pady=10)
-    cable_sepperation_entry = tk.Entry(root)
-    cable_sepperation_entry.grid(row=6, column=1, padx=10, pady=10)
-    cable_sepperation_entry.insert(0, str(cable_sepperation))
+    lbl(form_frame, "Pulleys → Mural Bottom (m):", 8)
+    dist_from_pulley_entry = entry(form_frame, dist_from_pulley, 8)
 
-    # Distance from Pulleys to Bottom of Mural (m)
-    dist_from_pulley_label = tk.Label(root, text="Distance from Pulleys to Bottom of Mural (m):")
-    dist_from_pulley_label.grid(row=7, column=0, padx=10, pady=10)
-    dist_from_pulley_entry = tk.Entry(root)
-    dist_from_pulley_entry.grid(row=7, column=1, padx=10, pady=10)
-    dist_from_pulley_entry.insert(0, str(dist_from_pulley))
+    lbl(form_frame, "Pulleys → Floor (m):", 9)
+    floor_dist_entry = entry(form_frame, floor_dist_from_pulleys, 9)
 
-    # Offset of Image from Center to the Left (m)
-    offset_label = tk.Label(root, text="Offset of Image from Center to the Left (m):")
-    offset_label.grid(row=8, column=0, padx=10, pady=10)
-    offset_entry = tk.Entry(root)
-    offset_entry.grid(row=8, column=1, padx=10, pady=10)
-    offset_entry.insert(0, str(offset))
+    lbl(form_frame, "Chassis Length Below Nozzles (m):", 10)
+    chassis_below_entry = entry(form_frame, chassis_length_below_nozzles, 10)
 
-    # Color Mode Dropdown
+    lbl(form_frame, "Offset from Center Left (m):", 11)
+    offset_entry = entry(form_frame, offset, 11)
+
+    # ---- Color / Slicing ----
+    section(form_frame, "COLOR & SLICING", 12)
     color_mode_var = tk.StringVar(value=color_mode)
-    color_mode_var.trace('w', on_color_mode_change)  # Trace changes
-    tk.Label(root, text="Color Mode:").grid(row=9, column=0, padx=10, pady=10)
-    color_options = ['RGB', 'CMYK', 'Simplify Image', 'RGB Scatter NxN', 'Dynamic Scatter NxN']
-    color_dropdown = tk.OptionMenu(root, color_mode_var, *color_options)
-    color_dropdown.grid(row=9, column=1, padx=10, pady=10)
-    
-    # Trigger initial visibility based on default color_mode
+    color_mode_var.trace('w', on_color_mode_change)
+    lbl(form_frame, "Color Mode:", 13)
+    color_options = ['RGB', 'CMYK', 'Simplify Image', 'Exact Color Match', 'RGB Scatter NxN', 'Dynamic Scatter NxN']
+    color_dropdown = tk.OptionMenu(form_frame, color_mode_var, *color_options)
+    color_dropdown.config(bg=ENTRY_BG, fg=LABEL_FG, relief="solid",
+                          font=("Segoe UI", 12), highlightthickness=0)
+    color_dropdown.grid(row=13, column=1, sticky="ew", pady=3)
+
+    slicing_option_var = tk.StringVar(value=slicing_option)
+    lbl(form_frame, "Slicing:", 16)
+    slicing_options = ['mono color velocity slicing', 'multi color velocity slicing']
+    slicing_dropdown = tk.OptionMenu(form_frame, slicing_option_var, *slicing_options)
+    slicing_dropdown.config(bg=ENTRY_BG, fg=LABEL_FG, relief="solid",
+                            font=("Segoe UI", 12), highlightthickness=0)
+    slicing_dropdown.grid(row=16, column=1, sticky="ew", pady=3)
+
     on_color_mode_change()
 
-    # Slicing Options Dropdown
-    slicing_option_var = tk.StringVar(value=slicing_option)  # default value
-    tk.Label(root, text="Slicing Options:").grid(row=10, column=0, padx=10, pady=10)
-    
-    # UPDATED slicing_options: 'mono color velocity slicing' (old velocity) + new 'multi color velocity slicing'
-    slicing_options = ['position slicing', 'mono color velocity slicing', 'multi color velocity slicing']
-    slicing_dropdown = tk.OptionMenu(root, slicing_option_var, *slicing_options)
-    slicing_dropdown.grid(row=10, column=1, padx=10, pady=10)
+    # ---- Notes ----
+    section(form_frame, "NOTES", 17)
+    notes_text = tk.Text(form_frame, width=36, height=4, wrap='word',
+                         font=("Segoe UI", 12), bg=PANEL_BG, fg="#1e293b",
+                         relief="solid", bd=1)
+    notes_text.insert('1.0', notes)
+    notes_text.grid(row=18, column=0, columnspan=3, sticky="ew", pady=3)
 
-    # Notes area (read-only in the GUI; edit the text directly in the code)
-    notes_label = tk.Label(root, text="Notes:")
-    notes_label.grid(row=11, column=0, padx=10, pady=10)
-    notes_text = tk.Text(root, width=50, height=6, wrap='word', font=("Arial", 10))
-    filler = (
-        "horizontal seperation = 12mm , vertical seperation = 20mm\n"
-        "aiming wall width 9ft (with 12mm pixels means 228 pixels wide)\n"
-        "Jules eye temp target 257\n"
-    )
-    notes_text.insert('1.0', filler)
-    notes_text.configure(state='disabled')
-    notes_text.grid(row=11, column=1, columnspan=2, padx=10, pady=10)
+    # ---- Submit ----
+    submit_button = tk.Button(form_frame, text="Generate G-Code →", command=submit,
+                              bg=ACCENT, fg="white", relief="flat",
+                              font=("Segoe UI", 12, "bold"), padx=16, pady=6,
+                              activebackground="#1d4ed8", activeforeground="white",
+                              cursor="hand2")
+    submit_button.grid(row=19, column=0, columnspan=3, pady=(16, 4))
 
-    submit_button = tk.Button(root, text="Submit", command=submit)
-    submit_button.grid(row=12, column=0, columnspan=3, pady=20)
+    # ---- Engineering drawing ----
+    fig, ax = plt.subplots(figsize=(5, 7))
+    fig.patch.set_facecolor(PANEL_BG)
+    canvas = FigureCanvasTkAgg(fig, master=draw_frame)
+    canvas.get_tk_widget().pack(fill="both", expand=True)
 
+    # ---- Stats below drawing ----
+    stats_frame = tk.Frame(draw_frame, bg=PANEL_BG, pady=6)
+    stats_frame.pack(fill="x")
+    tk.Frame(stats_frame, bg=BORDER, height=1).pack(fill="x", pady=(0, 6))
+    stat_a_label = tk.Label(stats_frame, text="Longest A cable: —", bg=PANEL_BG,
+                            fg=LABEL_FG, font=("Segoe UI", 12), anchor="w")
+    stat_a_label.pack(fill="x", padx=8)
+    stat_b_label = tk.Label(stats_frame, text="Longest B cable: —", bg=PANEL_BG,
+                            fg=LABEL_FG, font=("Segoe UI", 12), anchor="w")
+    stat_b_label.pack(fill="x", padx=8)
+
+    # Bind live update to all relevant entries
+    for widget in [file_path_entry, width_entry, pixel_size_entry, nozzles_entry,
+                   cable_sepperation_entry, dist_from_pulley_entry,
+                   floor_dist_entry, chassis_below_entry, offset_entry]:
+        widget.bind("<KeyRelease>", update_drawing)
+
+    update_drawing()
     root.mainloop()
 
 def validate_image(file_path):
@@ -265,16 +593,56 @@ def simplify_image_pillow(reduced_image_path, num_colors):
         else:
             alpha = None
 
-        # Convert image to use a palette with the specified number of colors
+        # Quantize to N colors then convert back to RGBA/RGB so the saved file
+        # is a standard mode PNG that PIL can reliably reopen.
         simplified_image = image.convert(mode='P', palette=Image.ADAPTIVE, colors=num_colors)
         if has_alpha:
+            simplified_image = simplified_image.convert('RGBA')
             simplified_image.putalpha(alpha)
+        else:
+            simplified_image = simplified_image.convert('RGB')
 
         # Save the new image
         simplified_image.save(processed_image_path)
         print(f'Simplified image saved as {processed_image_path}')
     except Exception as e:
         print(f"Error simplifying image: {e}")
+
+
+def exact_color_match(reduced_image_path):
+    """
+    Like simplify_image_pillow but auto-detects the palette size from the image.
+    Errors out if the image has more than 10 unique colors.
+    """
+    try:
+        image = Image.open(reduced_image_path)
+        has_alpha = image.mode == 'RGBA'
+        if has_alpha:
+            alpha = image.split()[-1]
+            rgb_image = image.convert('RGB')
+        else:
+            alpha = None
+            rgb_image = image.convert('RGB')
+
+        unique_colors = len(set(rgb_image.getdata()))
+        if unique_colors > 10:
+            raise ValueError(
+                f"this file is not meant for this mode reduce number of colors in your image "
+                f"(found {unique_colors} unique colors, max is 10)"
+            )
+
+        simplified_image = rgb_image.convert(mode='P', palette=Image.ADAPTIVE, colors=unique_colors)
+        if has_alpha:
+            simplified_image = simplified_image.convert('RGBA')
+            simplified_image.putalpha(alpha)
+        else:
+            simplified_image = simplified_image.convert('RGB')
+
+        simplified_image.save(processed_image_path)
+        print(f'Exact color match image saved as {processed_image_path} ({unique_colors} colors)')
+    except Exception as e:
+        print(f"Error in exact color match: {e}")
+        raise
 
 
 def process_image_rgb_scatter_nxn(image_path, n):
@@ -674,11 +1042,12 @@ def generate_position_data(hex_path, hex_code):
     return slicing_styles.generate_position_data(hex_path, hex_code, gcode_filepath, dist_from_pulley, cable_sepperation, width, pixel_size, offset, Num_nozzles)
 
 
-def generate_position_data_mono_velocity_sequential_colors(hex_path, hex_code):
+def generate_position_data_mono_velocity_sequential_colors(hex_paths_and_codes):
     """
     Generates position data for the painting robot in a 'mono color velocity slicing' manner.
+    hex_paths_and_codes: list of (hex_path, hex_code) tuples.
     """
-    return slicing_styles.generate_position_data_mono_velocity_sequential_colors(hex_path, hex_code, gcode_filepath, dist_from_pulley, cable_sepperation, width, pixel_size, offset, Num_nozzles)
+    return slicing_styles.generate_position_data_mono_velocity_sequential_colors(hex_paths_and_codes, gcode_filepath, dist_from_pulley, cable_sepperation, width, pixel_size, Num_nozzles)
 
 
 def get_color_name(hex_code):
@@ -695,8 +1064,9 @@ def generate_column_pattern_multi(img, column_index, color_index_map, output_fil
     return multi_color_slicing.generate_column_pattern_multi(img, column_index, color_index_map, output_file)
 
 def generate_position_data_multi_color_velocity_once(
-    simplified_image_path, 
-    all_selected_hex_codes
+    simplified_image_path,
+    all_selected_hex_codes,
+    color_index_map=None,
 ):
     """
     Perform multi-color velocity slicing in a single pass.
@@ -716,6 +1086,7 @@ def generate_position_data_multi_color_velocity_once(
         dist_from_pulley,
         width,
         Num_nozzles,
+        color_index_map=color_index_map,
     )
 
 # Initiate the GUI at the beginning
@@ -726,7 +1097,12 @@ if not validate_image(file_path):
     print("Exiting due to invalid image file.")
     sys.exit(1)
 
-resize_image(file_path, width)
+if color_mode != 'Exact Color Match':
+    resize_image(file_path, width)
+else:
+    # Exact Color Match uses the image as-is — just copy to reduced_image_path
+    import shutil
+    shutil.copy2(file_path, reduced_image_path)
 
 try:
     # Process image based on selected color mode
@@ -736,6 +1112,8 @@ try:
         process_image_cmy(reduced_image_path)
     elif color_mode == 'Simplify Image':
         simplify_image_pillow(reduced_image_path, number_of_colors)
+    elif color_mode == 'Exact Color Match':
+        exact_color_match(reduced_image_path)
     elif color_mode == 'RGB Scatter NxN':
         process_image_rgb_scatter_nxn(reduced_image_path, n_value)
     elif color_mode == 'Dynamic Scatter NxN':
@@ -746,24 +1124,25 @@ except Exception as e:
     print(f"Error during image processing: {e}")
     sys.exit(1)
 
-selected_hex_codes = count_unique_hex_colors(processed_image_path)
+# Close matplotlib figures so the embedded Tk backend doesn't poison the next Tk root
+import matplotlib.pyplot as _plt
+_plt.close('all')
+
+print("[DEBUG] Opening color assignment window...")
+selected_hex_codes, color_index_map = count_unique_hex_colors(processed_image_path)
+print(f"[DEBUG] Color window closed. Got {len(selected_hex_codes)} colors: {selected_hex_codes}")
 create_text_file(gcode_filepath)
 
-if slicing_option == 'multi color velocity slicing':
-    # We only need one pass on the entire simplified image.
-    # We'll pass in `processed_image_path` plus the entire list of `selected_hex_codes`.
-    generate_position_data_multi_color_velocity_once(processed_image_path, selected_hex_codes)
-else:
-    # Existing logic for 'position slicing' or 'mono color velocity slicing' 
-    # that loops over each color layer, if that’s still needed
+if slicing_option == "multi color velocity slicing":
+    generate_position_data_multi_color_velocity_once(processed_image_path, selected_hex_codes, color_index_map)
+elif slicing_option == "mono color velocity slicing":
+    hex_paths_and_codes = []
     for hex_code in selected_hex_codes:
-        hex_code_stripped = hex_code.lstrip('#')
-        hex_path = os.path.join(temp_images_folder, hex_code_stripped + '.png')
-
-        if slicing_option == 'position slicing':
-            generate_position_data(hex_path, hex_code)
-        elif slicing_option == 'mono color velocity slicing':
-            generate_position_data_mono_velocity_sequential_colors(hex_path, hex_code)
+        extract_color(processed_image_path, hex_code)
+        hex_code_stripped = hex_code.lstrip("#")
+        hex_path = os.path.join(temp_images_folder, hex_code_stripped + ".png")
+        hex_paths_and_codes.append((hex_path, hex_code))
+    generate_position_data_mono_velocity_sequential_colors(hex_paths_and_codes)
 
 # Print the global variables to verify the input data
 print("File Path:", file_path)
@@ -780,10 +1159,15 @@ if color_mode in ['RGB Scatter NxN', 'Dynamic Scatter NxN']:
 print("Slicing Option:", slicing_option)
 print("Nozzles per stripe:", Num_nozzles)
 
-if slicing_option == 'multi color velocity slicing':
+if slicing_option == "multi color velocity slicing":
     with open("C:/Users/oewil/OneDrive/Desktop/Mural-Bot/mural/gcode viewer.py") as f:
         exec(f.read())
 else:
     generate_preview_image(selected_hex_codes)
 
-print('GCODE GENERATOR IS DONE')
+import shutil as _shutil
+_arduino_data = r"C:\Users\oewil\OneDrive\Desktop\Mural-Bot\Arduino scripts\Base Module Platformio\data"
+_shutil.copy2(gcode_filepath, os.path.join(_arduino_data, os.path.basename(gcode_filepath)))
+print(f"GCode also copied to {_arduino_data}")
+
+print("GCODE GENERATOR IS DONE")

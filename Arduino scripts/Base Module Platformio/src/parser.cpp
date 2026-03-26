@@ -292,8 +292,10 @@ void startNextCommand() {
       Serial.println("Generated JSON Data for STRIPE:");
       Serial.println(stripeData);
 
+      currentCommandIndex++;
+
       Serial.println("Moving to initial stripe position...");
-      move_to_position_blocking(cmd.startPulleyA, cmd.startPulleyB);
+      if (!move_to_position_blocking(cmd.startPulleyA, cmd.startPulleyB)) return;
 
       stepper1.setAcceleration(0);
       stepper2.setAcceleration(0);
@@ -303,15 +305,15 @@ void startNextCommand() {
       Serial.println("Done moving to initial position.");
       delay(2000);
 
-      startLargeStringSend(stripeData);
-
       if (pauseAtTheTop > 0) {
         Serial.print("Pausing at the top for: ");
         Serial.print(pauseAtTheTop);
         Serial.println(" ms");
         delay(pauseAtTheTop);
-        Serial.println("Pause complete. Beginning stripe movement...");
+        Serial.println("Pause complete. Sending stripe data...");
       }
+
+      startLargeStringSend(stripeData);
 
       float timeForMovementSeconds = cmd.drop / (stripeVelocity * stripeVelocityMultiplier);
       float timeForMovementMs = timeForMovementSeconds * 1000.0;
@@ -327,6 +329,10 @@ void startNextCommand() {
       Serial.println("Entering stripe movement loop...");
       printCurrentPositions();
       while (millis() - startTime < timeForMovementMs) {
+        if (Serial.available()) {
+          emergencyStop();
+          return;
+        }
         unsigned long currentTime = millis();
         stepper1.runSpeed();
         stepper2.runSpeed();
@@ -357,11 +363,10 @@ void startNextCommand() {
       
       // Print stripe completion message
       Serial.print("Stripe index ");
-      Serial.print(currentCommandIndex + 1);  // Display index as 1-indexed
+      Serial.print(currentCommandIndex);  // already incremented
       Serial.println(" completed.");
 
       movementInProgress = false;
-      currentCommandIndex++;
 
       stepper1.setCurrentPosition(stepper1.currentPosition());
       stepper2.setCurrentPosition(stepper2.currentPosition());

@@ -6,7 +6,7 @@ import utils
 # State used to ensure the color mapping is printed only once
 HAS_PRINTED_COLOR_MAPPING = False
 
-def generate_position_data_multi_color_velocity_once(simplified_image_path, all_selected_hex_codes, gcode_filepath, pixel_size, cable_sepperation, dist_from_pulley, width, num_nozzles):
+def generate_position_data_multi_color_velocity_once(simplified_image_path, all_selected_hex_codes, gcode_filepath, pixel_size, cable_sepperation, dist_from_pulley, width, num_nozzles, color_index_map=None):
     """Perform multi-color velocity slicing and write results to the given gcode file.
     The ``width`` argument used to be the only measurement of mural width, but
     callers sometimes pass a value that does not match the actual image size.
@@ -33,15 +33,18 @@ def generate_position_data_multi_color_velocity_once(simplified_image_path, all_
         print(f"Total mural height: {h * pixel_size:.4f} meters ({h} pixels)")
         print("=====================================\n")
 
-        # Reorder colors so that white (#ffffff) comes last
-        white_hex = '#ffffff'
-        non_white_colors = [c for c in all_selected_hex_codes if c.lower() != white_hex.lower()]
-        white_in_colors = any(c.lower() == white_hex.lower() for c in all_selected_hex_codes)
-        reordered_colors = non_white_colors + ([white_hex] if white_in_colors else [])
-
-        color_index_map = {}
-        for i, hex_col in enumerate(reordered_colors, start=1):
-            color_index_map[hex_col.lower()] = i
+        # Build index map: use caller-supplied map if provided, otherwise auto-assign
+        if color_index_map is None:
+            white_hex = '#ffffff'
+            non_white_colors = [c for c in all_selected_hex_codes if c.lower() != white_hex.lower()]
+            white_in_colors = any(c.lower() == white_hex.lower() for c in all_selected_hex_codes)
+            reordered_colors = non_white_colors + ([white_hex] if white_in_colors else [])
+            color_index_map = {}
+            for i, hex_col in enumerate(reordered_colors, start=1):
+                color_index_map[hex_col.lower()] = i
+        else:
+            reordered_colors = sorted(color_index_map.keys(),
+                                      key=lambda c: color_index_map[c])
 
         if not HAS_PRINTED_COLOR_MAPPING:
             with open(gcode_filepath, 'a') as f:

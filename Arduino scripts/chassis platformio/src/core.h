@@ -35,4 +35,7 @@ void processReceivedString();
 void onDataRecv(const uint8_t *mac_addr, const uint8_t *incomingData, int len);
 void onDataSent(const uint8_t *mac_addr, esp_now_send_status_t status);
 
+void executeStop();
+
 extern bool newMessageReady;
+extern volatile bool stopRequested;

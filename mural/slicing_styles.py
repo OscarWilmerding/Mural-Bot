@@ -44,30 +44,63 @@ def generate_position_data(hex_path, hex_code, gcode_filepath, dist_from_pulley,
         print(f"Error generating position data: {e}")
 
 
-def generate_position_data_mono_velocity_sequential_colors(hex_path, hex_code, gcode_filepath, dist_from_pulley, cable_sepperation, width, pixel_size, offset, num_nozzles):
+def generate_position_data_mono_velocity_sequential_colors(hex_paths_and_codes, gcode_filepath, dist_from_pulley, cable_sepperation, width, pixel_size, num_nozzles):
+    """
+    hex_paths_and_codes: list of (hex_path, hex_code) tuples, one per color.
+
+    Writes one STRIPE block per column.  Inside each stripe all colors are
+    handled sequentially with a 'change color to:' line followed by a pattern
+    array.  Pattern characters: '1' = paint this color, 'x' = skip.
+    Format mirrors the multi-color gcode so the two outputs are consistent.
+    """
     try:
-        print("flag 1")
-        img = Image.open(hex_path).convert('RGBA')
-        w, h = img.size
+        color_images = []
+        for hex_path, hex_code in hex_paths_and_codes:
+            img = Image.open(hex_path).convert('RGBA')
+            color_images.append((img, hex_code))
+
+        if not color_images:
+            print("No color images to process.")
+            return
+
+        w, h = color_images[0][0].size
         number_of_drawn_columns = w // num_nozzles
 
         with open(gcode_filepath, 'a') as f:
             f.write(f"number of drawn columns = {number_of_drawn_columns}\n")
             f.write(f"pulley spacing = {cable_sepperation}\n")
+            f.write("BEGIN MONO COLOR VELOCITY SLICING\n")
 
-            f.write(f"change color to:{hex_code}\n")
-            for c in range(number_of_drawn_columns):
-                f.write(f"STRIPE - column #{c}\n")
-                start_x = (c * num_nozzles) - (num_nozzles // 2)
-                f.write(f"starting/ending position pixel values:  ({start_x},{h}),({start_x},{0})\n")
-                f.write(str(generate_column_pattern(img, c, num_nozzles)) + "\n")
-                f.write(
-                    f"drop: {pixel_size*h}\n"
-                    f"starting pulley values:  "
-                    # width for the pulley math should be the actual image width
-                    f"{round(utils.length_a(start_x, h, dist_from_pulley, cable_sepperation, w, pixel_size, offset), 6)},"
-                    f"{round(utils.length_b(start_x, h, dist_from_pulley, cable_sepperation, w, pixel_size, offset), 6)}\n"
-                )
+            for img, hex_code in color_images:
+                f.write(f"change color to:{hex_code}\n")
+
+                for c in range(number_of_drawn_columns):
+                    f.write(f"STRIPE - column #{c}\n")
+
+                    start_x = (c * num_nozzles) - (num_nozzles // 2)
+                    f.write(f"starting/ending position pixel values:  ({start_x},{h}),({start_x},{0})\n")
+
+                    col_start = num_nozzles * c
+                    patterns = []
+                    for y in range(h):
+                        row_pattern = ""
+                        for nozzle_idx in range(num_nozzles):
+                            x_coord = col_start + nozzle_idx
+                            if x_coord < 0 or x_coord >= w:
+                                row_pattern += "x"
+                                continue
+                            r, g, b, a = img.getpixel((x_coord, y))
+                            row_pattern += "1" if a > 0 else "x"
+                        patterns.append(row_pattern)
+                    f.write('pattern: ' + json.dumps(patterns) + "\n")
+
+                    drop_val = pixel_size * h
+                    f.write(f"drop: {drop_val}\n")
+                    la = round(utils.length_a(start_x, h, dist_from_pulley, cable_sepperation, w, pixel_size), 6)
+                    lb = round(utils.length_b(start_x, h, dist_from_pulley, cable_sepperation, w, pixel_size), 6)
+                    f.write(f"starting pulley values:  {la},{lb}\n")
+
+            f.write("END MONO COLOR VELOCITY SLICING\n")
 
     except Exception as e:
         print(f"Error generating position data: {e}")
