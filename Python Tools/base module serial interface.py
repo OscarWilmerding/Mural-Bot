@@ -3,10 +3,12 @@ import tkinter.font as tkfont
 from tkinter import ttk, scrolledtext, messagebox, filedialog
 import serial, serial.tools.list_ports
 import threading, queue, time, datetime
+import os, json
 
 BAUD = 115200
 NL   = b'\n'
 HANDSHAKE_MS = 3000
+SPRAY_PIXEL_LIMIT = 25000      # alert threshold (pixels per color)
 
 
 class HubGUI:
@@ -22,6 +24,19 @@ class HubGUI:
 
         # debounce state
         self._last_click       = {}
+
+        # spray pixel counting
+        self.pixel_counts         = {}   # {color_idx_str: int}
+        self.pixel_alerted        = {}   # {color_idx_str: bool}
+        self.pixel_indicators     = {}   # {color_idx_str: tk.Button}
+        self.color_hex_map        = {}   # {color_idx_str: "#rrggbb"}
+        self._stripe_json_pending = False
+        self._stripe_json_buffer  = ""
+        self._pixel_bar_col       = 1
+
+        # command index tracking
+        self._cmd_display_idx = None   # last known index (1-indexed, as Arduino prints)
+        self._cmd_canceled    = False  # True when EMERGENCY STOP fired mid-command
 
         # serial state
         self.ser               = None
@@ -39,6 +54,8 @@ class HubGUI:
         self.make_topbar()
         self.make_tabs()
         self.make_console()
+        self._load_color_map()
+        self.make_pixel_toolbar()
         # start global mouse listener (maps side buttons to 'trig')
         self._start_mouse_listener()
 
@@ -381,6 +398,19 @@ class HubGUI:
                 if line == "__CONNECTED__\n":
                     self.status_lbl.config(text="connected")
                     continue
+                stripped = line.strip()
+                # stripe pixel counting
+                if stripped == "Generated JSON Data for STRIPE:":
+                    self._stripe_json_pending = True
+                    self._stripe_json_buffer  = ""
+                elif self._stripe_json_pending:
+                    self._stripe_json_buffer += stripped
+                    if self._stripe_json_buffer.endswith("}"):
+                        self._stripe_json_pending = False
+                        self._process_stripe_json(self._stripe_json_buffer)
+                        self._stripe_json_buffer = ""
+                # command index tracking
+                self._parse_cmd_index_line(stripped)
                 self.console.configure(state="normal")
                 self.console.insert(tk.END, line)
                 self.console.see(tk.END)
@@ -569,6 +599,193 @@ class HubGUI:
         self._mouse_listener = Listener(on_click=_on_click)
         self._mouse_listener.daemon = True
         self._mouse_listener.start()
+
+
+    # ───────── spray pixel counting ─────────
+    def _load_color_map(self):
+        """Parse color index→hex from gcode.txt (../mural/gcode.txt relative to this script)."""
+        try:
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            gcode_path = os.path.normpath(os.path.join(script_dir, "..", "mural", "gcode.txt"))
+            with open(gcode_path, "r", encoding="utf-8") as f:
+                in_section = False
+                for raw in f:
+                    ln = raw.strip()
+                    if ln == "-- MULTI-COLOR INDEX MAPPING --":
+                        in_section = True
+                        continue
+                    if ln == "-- END OF COLOR MAPPING --":
+                        break
+                    if in_section and ln.startswith("Index ") and "=>" in ln:
+                        parts = ln.split("=>")
+                        idx     = parts[0].replace("Index", "").strip()
+                        hex_val = parts[1].strip()
+                        self.color_hex_map[idx] = hex_val
+        except Exception:
+            pass
+
+    def make_pixel_toolbar(self):
+        """Persistent bottom toolbar: command index indicator + per-color spray pixel counts."""
+        self.root.rowconfigure(2, weight=1)   # console row expands → toolbar always pinned
+        self.root.rowconfigure(3, weight=0)   # toolbar row fixed height
+        self._pixel_bar = ttk.Frame(self.root, padding=(6, 4))
+        self._pixel_bar.grid(row=3, sticky="ew", padx=6, pady=(2, 6))
+
+        # ── command index section ──
+        idx_frame = ttk.Frame(self._pixel_bar)
+        idx_frame.grid(row=0, column=0, padx=(0, 2), sticky="ns")
+
+        ttk.Label(idx_frame, text="cmd idx").grid(row=0, column=0, columnspan=2, sticky="w")
+
+        self._cmd_idx_label = tk.Label(idx_frame, text="?",
+                                       font=tkfont.Font(size=20, weight="bold"),
+                                       width=4, anchor="center")
+        self._cmd_idx_label.grid(row=1, column=0, sticky="w")
+        self._cmd_idx_label.bind("<Button-1>", lambda _: self._clear_cmd_canceled())
+
+        self._cmd_idx_plus_btn = ttk.Button(idx_frame, text="+1", width=3,
+                                            command=self._cmd_progress_by_1,
+                                            state="disabled")
+        self._cmd_idx_plus_btn.grid(row=1, column=1, padx=(4, 0), sticky="s")
+
+        self._cmd_canceled_label = tk.Label(idx_frame, text="",
+                                            fg="#e74c3c",
+                                            font=tkfont.Font(size=9, weight="bold"))
+        self._cmd_canceled_label.grid(row=2, column=0, columnspan=2, sticky="w")
+
+        # separator between cmd idx and spray px sections
+        ttk.Separator(self._pixel_bar, orient="vertical").grid(
+            row=0, column=1, sticky="ns", padx=(6, 8))
+
+        # ── spray pixel section ──
+        ttk.Label(self._pixel_bar, text="Spray px:").grid(row=0, column=2, padx=(0, 8))
+        self._pixel_bar_col = 3
+
+    def _get_or_create_indicator(self, color_idx):
+        """Return indicator button for color_idx, creating it on first call."""
+        if color_idx in self.pixel_indicators:
+            return self.pixel_indicators[color_idx]
+        hex_str  = self.color_hex_map.get(color_idx, "")
+        top_line = f"{color_idx}  {hex_str}" if hex_str else f"Color {color_idx}"
+        btn = tk.Button(self._pixel_bar,
+                        text=f"{top_line}\n0",
+                        relief="raised", padx=8, pady=4,
+                        justify="center",
+                        command=lambda c=color_idx: self._reset_pixel_count(c))
+        btn.grid(row=0, column=self._pixel_bar_col, padx=4)
+        btn._default_bg  = btn.cget("bg")
+        btn._default_fg  = btn.cget("fg")
+        btn._default_abg = btn.cget("activebackground")
+        btn._default_afg = btn.cget("activeforeground")
+        self._pixel_bar_col += 1
+        self.pixel_indicators[color_idx] = btn
+        self.pixel_counts[color_idx]     = 0
+        self.pixel_alerted[color_idx]    = False
+        return btn
+
+    def _process_stripe_json(self, json_str):
+        """Count per-color pixels in a stripe JSON and update indicators."""
+        try:
+            data    = json.loads(json_str)
+            pattern = data.get("pattern", [])
+            tally   = {}
+            for row in pattern:
+                for ch in row:
+                    if ch.isdigit() and ch != "0":
+                        tally[ch] = tally.get(ch, 0) + 1
+            for color_idx, count in tally.items():
+                self._get_or_create_indicator(color_idx)
+                self.pixel_counts[color_idx] += count
+                self._update_indicator(color_idx)
+        except Exception:
+            pass
+
+    def _update_indicator(self, color_idx):
+        """Refresh button label and color; play chime if threshold just crossed."""
+        btn      = self.pixel_indicators[color_idx]
+        count    = self.pixel_counts[color_idx]
+        hex_str  = self.color_hex_map.get(color_idx, "")
+        top_line = f"{color_idx}  {hex_str}" if hex_str else f"Color {color_idx}"
+        btn.config(text=f"{top_line}\n{count:,}")
+        was_alerted = self.pixel_alerted[color_idx]
+        now_alerted = count >= SPRAY_PIXEL_LIMIT
+        if now_alerted:
+            btn.config(bg="#e74c3c", fg="white",
+                       activebackground="#c0392b", activeforeground="white")
+            if not was_alerted:
+                self.pixel_alerted[color_idx] = True
+                self._play_chime()
+        else:
+            btn.config(bg=btn._default_bg,  fg=btn._default_fg,
+                       activebackground=btn._default_abg, activeforeground=btn._default_afg)
+
+    def _reset_pixel_count(self, color_idx):
+        """Reset count and alert state for one color (called when user clicks indicator)."""
+        self.pixel_counts[color_idx]  = 0
+        self.pixel_alerted[color_idx] = False
+        self._update_indicator(color_idx)
+
+    def _parse_cmd_index_line(self, stripped):
+        """Update command index state from a single stripped serial line."""
+        if stripped.startswith("Executing STRIPE command #") or \
+           stripped.startswith("Starting MOVE command #"):
+            try:
+                n = int(stripped.rsplit("#", 1)[1])
+                self._cmd_display_idx = n
+                self._cmd_canceled    = False
+                self._update_cmd_display()
+            except (IndexError, ValueError):
+                pass
+        elif stripped == "EMERGENCY STOP":
+            if self._cmd_display_idx is not None:
+                self._cmd_canceled = True
+                self._update_cmd_display()
+        elif stripped.startswith("Command index set to: "):
+            try:
+                n = int(stripped.split(": ", 1)[1])
+                self._cmd_display_idx = n
+                self._cmd_canceled    = False
+                self._update_cmd_display()
+            except (IndexError, ValueError):
+                pass
+        elif stripped.startswith("Run index reset"):
+            self._cmd_display_idx = 1
+            self._cmd_canceled    = False
+            self._update_cmd_display()
+
+    def _update_cmd_display(self):
+        """Refresh the command index label, canceled text, and +1 button state."""
+        if self._cmd_display_idx is None:
+            self._cmd_idx_label.config(text="?", fg="black")
+            self._cmd_canceled_label.config(text="")
+            self._cmd_idx_plus_btn.config(state="disabled")
+        else:
+            self._cmd_idx_label.config(text=str(self._cmd_display_idx),
+                                       fg="#e74c3c" if self._cmd_canceled else "black")
+            self._cmd_canceled_label.config(
+                text="canceled" if self._cmd_canceled else "")
+            self._cmd_idx_plus_btn.config(state="normal")
+
+    def _cmd_progress_by_1(self):
+        """Send 'set command index N+1' where N is the currently displayed index."""
+        if self._cmd_display_idx is None:
+            return
+        self.send(f"set command index {self._cmd_display_idx + 1}")
+
+    def _clear_cmd_canceled(self):
+        """Clear the canceled flag when user clicks the index label."""
+        self._cmd_canceled = False
+        self._update_cmd_display()
+
+    def _play_chime(self):
+        """Play a 3-second alert beep in a background thread (non-blocking)."""
+        def _beep():
+            try:
+                import winsound
+                winsound.Beep(1000, 3000)
+            except Exception:
+                pass
+        threading.Thread(target=_beep, daemon=True).start()
 
 
 if __name__ == "__main__":

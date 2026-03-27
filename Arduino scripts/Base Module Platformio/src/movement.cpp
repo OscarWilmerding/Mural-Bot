@@ -105,33 +105,44 @@ void four_corners() {
   calculateEndingLengths(*firstStripe, firstEndA, firstEndB);
   calculateEndingLengths(*lastStripe, lastEndA, lastEndB);
   
+  auto interruptibleDelay = [](unsigned long ms) -> bool {
+    unsigned long t0 = millis();
+    while (millis() - t0 < ms) {
+      if (Serial.available()) {
+        emergencyStop();
+        return false;
+      }
+    }
+    return true;
+  };
+
   // Corner 1: First stripe starting position
   Serial.println("Moving to Corner 1 (First stripe start)");
-  move_to_position_blocking(firstStripe->startPulleyA, firstStripe->startPulleyB);
+  if (!move_to_position_blocking(firstStripe->startPulleyA, firstStripe->startPulleyB)) return;
   Serial.println("Triggering at Corner 1");
   sendSinglePaintBurst();
-  delay(5000);  // 5 second wait after trigger
+  if (!interruptibleDelay(5000)) return;
 
   // Corner 3: First stripe ending position
   Serial.println("Moving to Corner 3 (First stripe end)");
-  move_to_position_blocking(firstEndA, firstEndB);
+  if (!move_to_position_blocking(firstEndA, firstEndB)) return;
   Serial.println("Triggering at Corner 3");
   sendSinglePaintBurst();
-  delay(5000);  // 5 second wait after trigger
+  if (!interruptibleDelay(5000)) return;
 
   // Corner 2: Last stripe starting position
   Serial.println("Moving to Corner 2 (Last stripe start)");
-  move_to_position_blocking(lastStripe->startPulleyA, lastStripe->startPulleyB);
+  if (!move_to_position_blocking(lastStripe->startPulleyA, lastStripe->startPulleyB)) return;
   Serial.println("Triggering at Corner 2");
   sendSinglePaintBurst();
-  delay(5000);  // 5 second wait after trigger
+  if (!interruptibleDelay(5000)) return;
 
   // Corner 4: Last stripe ending position
   Serial.println("Moving to Corner 4 (Last stripe end)");
-  move_to_position_blocking(lastEndA, lastEndB);
+  if (!move_to_position_blocking(lastEndA, lastEndB)) return;
   Serial.println("Triggering at Corner 4");
   sendSinglePaintBurst();
-  delay(5000);  // 5 second wait after trigger
+  if (!interruptibleDelay(5000)) return;
   
   Serial.println("Four corners movement complete");
 }
