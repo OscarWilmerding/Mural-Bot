@@ -22,7 +22,7 @@ constexpr uint8_t SOLENOID_PINS[] = {
     13, // 13 (extra port)
     26,
 //    14,
-    12  // 14 (buzzer)
+    12  // 14 (buzzer) ripped buzzer off board thought it was problem but wasnt
 };
 constexpr int NUM_SOLENOIDS = sizeof(SOLENOID_PINS) / sizeof(SOLENOID_PINS[0]);
 

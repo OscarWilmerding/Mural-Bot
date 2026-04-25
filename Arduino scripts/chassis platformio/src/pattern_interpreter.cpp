@@ -10,7 +10,7 @@ static int      dbg_orphans     = 0;
 static uint32_t dbg_max_late_ms = 0;
 static uint32_t dbg_max_gap_ms  = 0;
 static int      dbg_fires[NUM_SOLENOIDS];
-
+ 
 void initLedger() {
     for (int i = 0; i < MAX_LEDGER_SIZE; i++) {
         ledger[i] = { -1, 0, 0, false };

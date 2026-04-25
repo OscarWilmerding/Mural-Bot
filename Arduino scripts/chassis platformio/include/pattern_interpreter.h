@@ -9,7 +9,7 @@ struct ledgerEntry {
     uint16_t pulseWidthMs;    // width for this event
     bool     triggered;       // whether we've already gone HIGH
 };
-
+ 
 extern ledgerEntry ledger[MAX_LEDGER_SIZE];
 
 void initLedger();
