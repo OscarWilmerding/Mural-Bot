@@ -392,15 +392,15 @@
 		(uuid "a8d441ef-783b-44c3-a0bf-659808f59c77")
 	)
 	(embedded_fonts no)
-	(model "${KICAD9_3DMODEL_DIR}/Connector_JST.3dshapes/JST_ZH_B2B-ZR_1x02_P1.50mm_Vertical.wrl"
+	(model "C:/Users/oewil/Downloads/B2B-ZR--3DModel-STEP-56544.STEP"
 		(offset
-			(xyz 0 0 0)
+			(xyz 1 -0.5 1)
 		)
 		(scale
 			(xyz 1 1 1)
 		)
 		(rotate
-			(xyz 0 0 0)
+			(xyz -90 -0 -0)
 		)
 	)
 )

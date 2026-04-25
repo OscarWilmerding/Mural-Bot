@@ -39,3 +39,8 @@ void executeStop();
 
 extern bool newMessageReady;
 extern volatile bool stopRequested;
+extern uint32_t stripeReceiveTime;
+
+// Diagnostic log saved across cable swaps — read with "dump" serial command
+constexpr int DIAG_LOG_SIZE = 512;
+extern char diagLog[DIAG_LOG_SIZE];

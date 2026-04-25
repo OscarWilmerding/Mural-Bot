@@ -44,7 +44,7 @@ def generate_position_data(hex_path, hex_code, gcode_filepath, dist_from_pulley,
         print(f"Error generating position data: {e}")
 
 
-def generate_position_data_mono_velocity_sequential_colors(hex_paths_and_codes, gcode_filepath, dist_from_pulley, cable_sepperation, width, pixel_size, num_nozzles):
+def generate_position_data_mono_velocity_sequential_colors(hex_paths_and_codes, gcode_filepath, dist_from_pulley, cable_sepperation, width, pixel_size, num_nozzles, offset=0.0):
     """
     hex_paths_and_codes: list of (hex_path, hex_code) tuples, one per color.
 
@@ -75,9 +75,9 @@ def generate_position_data_mono_velocity_sequential_colors(hex_paths_and_codes, 
                 f.write(f"change color to:{hex_code}\n")
 
                 for c in range(number_of_drawn_columns):
-                    f.write(f"STRIPE - column #{c}\n")
+                    f.write(f"STRIPE - column #{c + 1}\n")
 
-                    start_x = (c * num_nozzles) - (num_nozzles // 2)
+                    start_x = (c * num_nozzles) + (num_nozzles // 2)
                     f.write(f"starting/ending position pixel values:  ({start_x},{h}),({start_x},{0})\n")
 
                     col_start = num_nozzles * c
@@ -96,8 +96,8 @@ def generate_position_data_mono_velocity_sequential_colors(hex_paths_and_codes, 
 
                     drop_val = pixel_size * h
                     f.write(f"drop: {drop_val}\n")
-                    la = round(utils.length_a(start_x, h, dist_from_pulley, cable_sepperation, w, pixel_size), 6)
-                    lb = round(utils.length_b(start_x, h, dist_from_pulley, cable_sepperation, w, pixel_size), 6)
+                    la = round(utils.length_a(start_x, h, dist_from_pulley, cable_sepperation, w, pixel_size, offset), 6)
+                    lb = round(utils.length_b(start_x, h, dist_from_pulley, cable_sepperation, w, pixel_size, offset), 6)
                     f.write(f"starting pulley values:  {la},{lb}\n")
 
             f.write("END MONO COLOR VELOCITY SLICING\n")

@@ -98,4 +98,15 @@
 		(uuid "8ec4906e-fc2a-44d1-9cc3-2b0b722d63c9")
 	)
 	(embedded_fonts no)
+	(model "C:/Users/oewil/Downloads/RA1113112R.STEP"
+		(offset
+			(xyz 2 -10 -2.5)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 180 -0 -0)
+		)
+	)
 )

@@ -22,6 +22,16 @@ void onDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
 }
 
 void onDataRecv(const uint8_t *mac_addr, const uint8_t *incomingData, int len) {
+  if (len == 1) {
+    switch (incomingData[0]) {
+      case 0x30: processSerialCommand("move a -0.01"); break;
+      case 0x31: processSerialCommand("move b -0.01"); break;
+      case 0x32: processSerialCommand("move a 0.01");  break;
+      case 0x33: processSerialCommand("move b 0.01");  break;
+    }
+    return;
+  }
+
   if (len == (int)sizeof(struct_message)) {
     memcpy(&incomingMessage, incomingData, sizeof(incomingMessage));
     if (incomingMessage.command == 0x10) {      // start-ack

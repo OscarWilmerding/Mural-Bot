@@ -60,7 +60,7 @@ unsigned long confirmationStartTime   = 0;
 unsigned long confirmationTimeout     = 5000;  // Default 5s
 
 // meters -> steps
-float stepsPerMeter       = 8835; //corrected mar 25 from 9718
+float stepsPerMeter       = 8395; //CALLIBRATED RANGE IS 8835 FROM PARKING LOT, THIS IS AN ARTIFICIALLY LOWERED NUMBER 5% SMALLER
 
 // Motor directions
 int motor1Direction       = -1;
@@ -78,7 +78,7 @@ unsigned long pauseAtTheTop   = 5000;  // Blocking delay before stripe initiates
 // From G-code
 float pulleySpacing        = 0.0;
 int   numberOfDrawnColumns = 0;
-float stripeVelocity       = 0.125;
+float stripeVelocity       = 0.125*1.7;
 
 // Velocity recalc cadence
 unsigned long velocityCalcDelay = 100;

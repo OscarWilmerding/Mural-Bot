@@ -1,4 +1,4 @@
-24785153779453165
+24786943781792850
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -99560,6 +99560,13 @@ chassis v2 primary board
 0
 12
 12
+chassis v2 primary board
+Adafruit_Feather_new
+Common footprint for the Adafruit Feather series of boards, https://learn.adafruit.com/adafruit-feather/feather-specification
+Adafruit Feather
+0
+28
+28
 chassis v2 primary board
 Battery pigtail
 

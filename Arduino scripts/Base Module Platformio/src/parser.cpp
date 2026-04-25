@@ -292,8 +292,6 @@ void startNextCommand() {
       Serial.println("Generated JSON Data for STRIPE:");
       Serial.println(stripeData);
 
-      currentCommandIndex++;
-
       Serial.println("Moving to initial stripe position...");
       if (!move_to_position_blocking(cmd.startPulleyA, cmd.startPulleyB)) return;
 
@@ -360,10 +358,12 @@ void startNextCommand() {
 
       Serial.println("Finished stripe movement loop.");
       printCurrentPositions();
-      
+
+      currentCommandIndex++;
+
       // Print stripe completion message
       Serial.print("Stripe index ");
-      Serial.print(currentCommandIndex);  // already incremented
+      Serial.print(currentCommandIndex);
       Serial.println(" completed.");
 
       movementInProgress = false;

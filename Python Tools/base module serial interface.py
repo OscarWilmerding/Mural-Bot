@@ -8,7 +8,7 @@ import os, json
 BAUD = 115200
 NL   = b'\n'
 HANDSHAKE_MS = 3000
-SPRAY_PIXEL_LIMIT = 25000      # alert threshold (pixels per color)
+SPRAY_PIXEL_LIMIT = 23000      # alert threshold (pixels per color)
 
 
 class HubGUI:
@@ -546,14 +546,14 @@ class HubGUI:
         self.send_relay(f"solenoid {num} {val}")
 
     def do_clean(self):
-        """Set pulse width to 5ms, fire trig 10 times at 2s intervals, then restore."""
+        """Set pulse width to 20ms, fire trig 8 times at 1s intervals, then restore."""
         saved_pw = self.pw_entry.get().strip()
-        self.send_relay("5")
+        self.send_relay("20")
         self.pw_entry.delete(0, tk.END)
         self.pw_entry.insert(0, "5")
 
-        TOTAL = 10
-        INTERVAL_MS = 2000
+        TOTAL = 8
+        INTERVAL_MS = 1000
 
         def fire(remaining):
             self.send_relay("trig")
@@ -778,11 +778,11 @@ class HubGUI:
         self._update_cmd_display()
 
     def _play_chime(self):
-        """Play a 3-second alert beep in a background thread (non-blocking)."""
+        """Play a 8-second alert beep in a background thread (non-blocking)."""
         def _beep():
             try:
                 import winsound
-                winsound.Beep(1000, 3000)
+                winsound.Beep(2000, 8000)
             except Exception:
                 pass
         threading.Thread(target=_beep, daemon=True).start()

@@ -517,7 +517,7 @@
       "plot": "grb/",
       "pos_files": "",
       "specctra_dsn": "",
-      "step": "",
+      "step": "chassis v2 primary board BUTTON SWITCH OTHER SIDE.step",
       "svg": "",
       "vrml": ""
     },

@@ -3,6 +3,7 @@ import math
 import webcolors
 from PIL import Image
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 
 # Utilities extracted from the main script. These functions are pure helpers and
@@ -20,7 +21,8 @@ def validate_image(file_path):
 
 
 def create_text_file(file_path):
-    starting_lines = ["//this is the start of the gcode", "\n"]
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    starting_lines = ["//this is the start of the gcode", f"// generated {timestamp}", "\n"]
 
     with open(file_path, 'w') as file:
         for line in starting_lines:
@@ -44,34 +46,38 @@ def generate_preview_image(processed_image_path):
         print(f"Error displaying processed image: {e}")
 
 
-def length_a(x, y, dist_from_pulley, cable_sepperation, width, pixel_size):
+def length_a(x, y, dist_from_pulley, cable_sepperation, width, pixel_size, offset=0.0):
     y_component = dist_from_pulley - y * pixel_size
-    x_horizontal = (cable_sepperation / 2) - ((width * pixel_size) / 2) + x * pixel_size
+    x_horizontal_no_offset = (cable_sepperation / 2) - ((width * pixel_size) / 2) + x * pixel_size
+    x_horizontal = x_horizontal_no_offset + offset
     length_A = math.sqrt(y_component ** 2 + x_horizontal ** 2)
-    
+
     print(f"\n    length_a calculation:")
     print(f"      y_component = dist_from_pulley - y*pixel_size = {dist_from_pulley} - {y}*{pixel_size} = {y_component:.4f}")
-    print(f"      x_horizontal = (cable_sep/2) - (width*pixel_size/2) + x*pixel_size")
+    print(f"      x_horizontal (no offset) = (cable_sep/2) - (width*pixel_size/2) + x*pixel_size")
     print(f"               = ({cable_sepperation/2:.2f}) - ({width * pixel_size / 2:.4f}) + {x * pixel_size:.4f}")
-    print(f"               = {x_horizontal:.4f}")
+    print(f"               = {x_horizontal_no_offset:.4f}")
+    print(f"      apply offset: x_horizontal = x_horizontal_no_offset + offset = {x_horizontal_no_offset:.4f} + {offset:.4f} = {x_horizontal:.4f}")
+    print(f"      (positive offset shifts image right of center)")
     print(f"      length_A = sqrt({y_component:.4f}² + {x_horizontal:.4f}²) = sqrt({y_component**2:.6f} + {x_horizontal**2:.6f}) = {length_A:.6f}")
-    
+
     return length_A
 
 
-def length_b(x, y, dist_from_pulley, cable_sepperation, width, pixel_size):
+def length_b(x, y, dist_from_pulley, cable_sepperation, width, pixel_size, offset=0.0):
     y_component = dist_from_pulley - y * pixel_size
-    x_horizontal = cable_sepperation - ((cable_sepperation / 2) - ((width * pixel_size) / 2) + x * pixel_size)
+    x_horizontal_a = (cable_sepperation / 2) - ((width * pixel_size) / 2) + x * pixel_size + offset
+    x_horizontal = cable_sepperation - x_horizontal_a
     length_B = math.sqrt(y_component ** 2 + x_horizontal ** 2)
-    
+
     print(f"\n    length_b calculation:")
     print(f"      y_component = dist_from_pulley - y*pixel_size = {dist_from_pulley} - {y}*{pixel_size} = {y_component:.4f}")
-    print(f"      x_horizontal = cable_sep - ((cable_sep/2) - (width*pixel_size/2) + x*pixel_size)")
-    print(f"               = {cable_sepperation} - (({cable_sepperation/2:.2f}) - ({width * pixel_size / 2:.4f}) + {x * pixel_size:.4f})")
-    print(f"               = {cable_sepperation} - ({(cable_sepperation/2) - ((width * pixel_size)/2) + x * pixel_size:.4f})")
-    print(f"               = {x_horizontal:.4f}")
+    print(f"      x_horizontal_a = (cable_sep/2) - (width*pixel_size/2) + x*pixel_size + offset")
+    print(f"               = ({cable_sepperation/2:.2f}) - ({width * pixel_size / 2:.4f}) + {x * pixel_size:.4f} + {offset:.4f}")
+    print(f"               = {x_horizontal_a:.4f}")
+    print(f"      x_horizontal = cable_sep - x_horizontal_a = {cable_sepperation} - {x_horizontal_a:.4f} = {x_horizontal:.4f}")
     print(f"      length_B = sqrt({y_component:.4f}² + {x_horizontal:.4f}²) = sqrt({y_component**2:.6f} + {x_horizontal**2:.6f}) = {length_B:.6f}")
-    
+
     return length_B
 
 

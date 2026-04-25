@@ -110,4 +110,15 @@
 		(uuid "6b7fea34-7d9d-4e53-8a95-fe8efd3a488b")
 	)
 	(embedded_fonts no)
+	(model "C:/Users/oewil/Downloads/B3F-1052--3DModel-STEP-273799.STEP"
+		(offset
+			(xyz 0 -14 -2)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 90 -0 -90)
+		)
+	)
 )

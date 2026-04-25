@@ -174,4 +174,15 @@
 		(uuid "34c5622e-68db-4831-8601-1012bdda1562")
 	)
 	(embedded_fonts no)
+	(model "C:/Users/oewil/Downloads/3D_AST12505.stp"
+		(offset
+			(xyz 6.5 -7.5 11)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -90 -0 -0)
+		)
+	)
 )

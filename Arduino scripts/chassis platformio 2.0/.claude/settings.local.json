@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp 'c:/Users/oewil/OneDrive/Desktop/Mural-Bot/Arduino scripts/chassis platformio/platformio.ini' 'c:/Users/oewil/OneDrive/Desktop/Mural-Bot/Arduino scripts/chassis platformio 2.0/platformio.ini')",
+      "Bash(cp 'c:/Users/oewil/OneDrive/Desktop/Mural-Bot/Arduino scripts/chassis platformio/src/main.cpp' 'c:/Users/oewil/OneDrive/Desktop/Mural-Bot/Arduino scripts/chassis platformio 2.0/src/main.cpp')",
+      "Bash(cp 'c:/Users/oewil/OneDrive/Desktop/Mural-Bot/Arduino scripts/chassis platformio/src/communication.cpp' 'c:/Users/oewil/OneDrive/Desktop/Mural-Bot/Arduino scripts/chassis platformio 2.0/src/communication.cpp')",
+      "Bash(cp 'c:/Users/oewil/OneDrive/Desktop/Mural-Bot/Arduino scripts/chassis platformio/src/pattern_interpreter.cpp' 'c:/Users/oewil/OneDrive/Desktop/Mural-Bot/Arduino scripts/chassis platformio 2.0/src/pattern_interpreter.cpp')",
+      "Bash(cp 'c:/Users/oewil/OneDrive/Desktop/Mural-Bot/Arduino scripts/chassis platformio/src/serial_commands.cpp' 'c:/Users/oewil/OneDrive/Desktop/Mural-Bot/Arduino scripts/chassis platformio 2.0/src/serial_commands.cpp')",
+      "Bash(pio run *)"
+    ]
+  }
+}

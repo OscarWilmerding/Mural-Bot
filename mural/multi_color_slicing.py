@@ -6,7 +6,7 @@ import utils
 # State used to ensure the color mapping is printed only once
 HAS_PRINTED_COLOR_MAPPING = False
 
-def generate_position_data_multi_color_velocity_once(simplified_image_path, all_selected_hex_codes, gcode_filepath, pixel_size, cable_sepperation, dist_from_pulley, width, num_nozzles, color_index_map=None):
+def generate_position_data_multi_color_velocity_once(simplified_image_path, all_selected_hex_codes, gcode_filepath, pixel_size, cable_sepperation, dist_from_pulley, width, num_nozzles, offset=0.0, color_index_map=None, skip_black=False):
     """Perform multi-color velocity slicing and write results to the given gcode file.
     The ``width`` argument used to be the only measurement of mural width, but
     callers sometimes pass a value that does not match the actual image size.
@@ -61,20 +61,20 @@ def generate_position_data_multi_color_velocity_once(simplified_image_path, all_
             f.write("BEGIN MULTI-COLOR VELOCITY SLICING\n")
 
             for c in range(number_of_drawn_columns):
-                f.write(f"STRIPE - column #{c}\n")
+                f.write(f"STRIPE - column #{c + 1}\n")
 
                 # compute the pixel‑coordinate for the centre of the current stripe.
                 # the earlier version hard‑coded "4" and "-2" which assumed 4 pixels
                 # per stripe; changing `num_nozzles` (pixels per stripe) broke the
                 # pulley math.  use the same value for both the human‑readable
                 # pixel report and the pulley calculation so they stay in sync.
-                start_x = (c * num_nozzles) - (num_nozzles // 2)
+                start_x = (c * num_nozzles) + (num_nozzles // 2)
                 f.write(f"starting/ending position pixel values:  ({start_x},{h}),({start_x},{0})\n")
                 
                 print(f"STRIPE #{c}:")
                 print(f"  c = {c}")
                 print(f"  num_nozzles = {num_nozzles}")
-                print(f"  start_x = (c * num_nozzles) - (num_nozzles // 2) = ({c} * {num_nozzles}) - ({num_nozzles} // 2) = {start_x}")
+                print(f"  start_x = (c * num_nozzles) + (num_nozzles // 2) = ({c} * {num_nozzles}) - ({num_nozzles} // 2) = {start_x}")
                 print(f"  start_x in meters = {start_x * pixel_size:.4f} m")
                 print(f"  Mural width in meters = {w * pixel_size:.4f} m")
                 print(f"  Mural center x-position in meters = {(w * pixel_size) / 2:.4f} m")
@@ -92,7 +92,7 @@ def generate_position_data_multi_color_velocity_once(simplified_image_path, all_
                             continue
 
                         r, g, b, a = img.getpixel((x_coord, y))
-                        if a == 0 or (r == 0 and g == 0 and b == 0):
+                        if a == 0 or (skip_black and r == 0 and g == 0 and b == 0):
                             row_pattern += "x"
                         else:
                             px_hex = "#{:02x}{:02x}{:02x}".format(r, g, b).lower()
@@ -118,8 +118,8 @@ def generate_position_data_multi_color_velocity_once(simplified_image_path, all_
                 print(f"    pixel_size = {pixel_size} m")
 
                 # use the exact same start_x and the *image* width for the pulley calculation
-                la = round(utils.length_a(start_x, h, dist_from_pulley, cable_sepperation, w, pixel_size), 6)
-                lb = round(utils.length_b(start_x, h, dist_from_pulley, cable_sepperation, w, pixel_size), 6)
+                la = round(utils.length_a(start_x, h, dist_from_pulley, cable_sepperation, w, pixel_size, offset), 6)
+                lb = round(utils.length_b(start_x, h, dist_from_pulley, cable_sepperation, w, pixel_size, offset), 6)
                 
                 print(f"\n  Pulley calculation results:")
                 print(f"    length_a = {la} m")

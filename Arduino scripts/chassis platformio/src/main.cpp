@@ -4,6 +4,7 @@
 
 // Global variables from config.h
 uint8_t hubAddress[] = {0x48, 0x27, 0xE2, 0xE6, 0xE6, 0x58};
+char diagLog[DIAG_LOG_SIZE] = "no stripe run yet";
 float durationMs = 10.0f; // ms (may be fractional) - global default
 float solenoidDurationMs[14]; // per-solenoid overrides (will be initialized to durationMs in setup)
 float preActivationDelay = 0.0f; // ms (may be fractional)

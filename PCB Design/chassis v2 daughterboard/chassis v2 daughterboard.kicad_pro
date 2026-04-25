@@ -528,7 +528,7 @@
       "plot": "Order 1.1/",
       "pos_files": "",
       "specctra_dsn": "",
-      "step": "",
+      "step": "chassis v2 daughterboard FLIPPED PORTS.step",
       "svg": "",
       "vrml": ""
     },

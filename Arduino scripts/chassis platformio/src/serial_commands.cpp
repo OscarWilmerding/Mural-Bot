@@ -1,4 +1,5 @@
 #include "hardware.h"
+#include "core.h"
 
 void printHelp() {
     Serial.println(F("=== Available Serial Commands ==="));
@@ -12,6 +13,7 @@ void printHelp() {
     Serial.println(F("solenoid <N> <dur>   – set pulse width for solenoid N only (fractional allowed)"));
     Serial.println(F("calibration <solenoid>,<low>,<high>,<step> – sweep pulse widths"));
     Serial.println(F("heater <1|2|both> <0-100>% – set heater PWM duty cycle"));
+    Serial.println(F("dump                 – print last stripe diagnostic log"));
     Serial.println(F("?                    – show this help list"));
 }
 
@@ -127,6 +129,9 @@ void processCommand(String input) {
             pullSolenoidForUs(sol, usec);
         }
         delay(fixedPostActivationDelay);
+    }
+    else if (input.equalsIgnoreCase("dump")) {
+        Serial.print("DIAG: "); Serial.println(diagLog);
     }
     else if (input == "?") {
         printHelp();

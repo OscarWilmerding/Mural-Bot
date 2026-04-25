@@ -238,7 +238,7 @@ def initial_popup():
             pl = -cab_sep / 2
             pr = +cab_sep / 2
             mural_bottom_y = d_pull
-            img_center_x = -off  # midpoint between pulleys, shifted by offset
+            img_center_x = off  # midpoint between pulleys, shifted by offset (positive = right)
 
             # Load image to get true physical dimensions
             img_path = file_path_entry.get()
@@ -249,8 +249,14 @@ def initial_popup():
                 if os.path.isfile(img_path):
                     preview_img = Image.open(img_path).convert("RGB")
                     img_px_w, img_px_h = preview_img.size
-                    phys_w = img_px_w * px_sz
-                    phys_h = img_px_h * px_sz
+                    mode = color_mode_var.get()
+                    if mode == 'Exact Color Match':
+                        phys_w = img_px_w * px_sz
+                        phys_h = img_px_h * px_sz
+                    else:
+                        aspect = img_px_h / img_px_w
+                        phys_w = w_px * px_sz
+                        phys_h = w_px * aspect * px_sz
             except Exception:
                 pass
 
@@ -516,7 +522,25 @@ def initial_popup():
                               font=("Segoe UI", 12, "bold"), padx=16, pady=6,
                               activebackground="#1d4ed8", activeforeground="white",
                               cursor="hand2")
-    submit_button.grid(row=19, column=0, columnspan=3, pady=(16, 4))
+    submit_button.grid(row=19, column=0, columnspan=3, pady=(16, 2))
+
+    def visualize_existing():
+        global visualize_only, visualize_gcode_path
+        path = filedialog.askopenfilename(
+            title="Select G-Code file",
+            filetypes=[("Text files", "*.txt"), ("All files", "*.*")]
+        )
+        if path:
+            visualize_only = True
+            visualize_gcode_path = path
+            root.quit()
+            root.destroy()
+
+    viz_button = tk.Button(form_frame, text="Visualize existing gcode", command=visualize_existing,
+                           bg=BG, fg="#64748b", relief="flat",
+                           font=("Segoe UI", 9), padx=6, pady=1,
+                           activeforeground="#1e293b", cursor="hand2")
+    viz_button.grid(row=20, column=0, columnspan=3, pady=(0, 4))
 
     # ---- Engineering drawing ----
     fig, ax = plt.subplots(figsize=(5, 7))
@@ -1047,7 +1071,7 @@ def generate_position_data_mono_velocity_sequential_colors(hex_paths_and_codes):
     Generates position data for the painting robot in a 'mono color velocity slicing' manner.
     hex_paths_and_codes: list of (hex_path, hex_code) tuples.
     """
-    return slicing_styles.generate_position_data_mono_velocity_sequential_colors(hex_paths_and_codes, gcode_filepath, dist_from_pulley, cable_sepperation, width, pixel_size, Num_nozzles)
+    return slicing_styles.generate_position_data_mono_velocity_sequential_colors(hex_paths_and_codes, gcode_filepath, dist_from_pulley, cable_sepperation, width, pixel_size, Num_nozzles, offset)
 
 
 def get_color_name(hex_code):
@@ -1067,13 +1091,15 @@ def generate_position_data_multi_color_velocity_once(
     simplified_image_path,
     all_selected_hex_codes,
     color_index_map=None,
+    skip_black=False,
 ):
     """
     Perform multi-color velocity slicing in a single pass.
     - Scans the entire 'simplified_image_path' (which is your processed_image_path).
     - Breaks columns in 4-pixel increments (same as the mono function).
     - For each pixel:
-        * If alpha=0 or pure black => prints 'x' and also prints a debug message.
+        * If alpha=0 => prints 'x'.
+        * If skip_black=True and pure black => also prints 'x' (used for RGB/CMYK modes).
         * Otherwise => prints the digit that corresponds to that color in 'all_selected_hex_codes'.
     - Prints color mapping exactly once.
     """
@@ -1086,11 +1112,28 @@ def generate_position_data_multi_color_velocity_once(
         dist_from_pulley,
         width,
         Num_nozzles,
+        offset,
         color_index_map=color_index_map,
+        skip_black=skip_black,
     )
 
 # Initiate the GUI at the beginning
+visualize_only = False
+visualize_gcode_path = None
 initial_popup()
+
+if visualize_only:
+    _viewer_ns = {"__name__": "not_main"}
+    with open("C:/Users/oewil/OneDrive/Desktop/Mural-Bot/mural/gcode viewer.py") as _f:
+        exec(_f.read(), _viewer_ns)
+    _color_map, _stripes = _viewer_ns["parse_gcode_file"](visualize_gcode_path)
+    _img = _viewer_ns["create_image_from_stripes"](_color_map, _stripes)
+    _final_img = _viewer_ns["add_legend_to_image"](_img, _color_map)
+    plt.figure()
+    plt.imshow(_final_img)
+    plt.axis('off')
+    plt.show()
+    sys.exit(0)
 
 # Validate the image
 if not validate_image(file_path):
@@ -1134,7 +1177,7 @@ print(f"[DEBUG] Color window closed. Got {len(selected_hex_codes)} colors: {sele
 create_text_file(gcode_filepath)
 
 if slicing_option == "multi color velocity slicing":
-    generate_position_data_multi_color_velocity_once(processed_image_path, selected_hex_codes, color_index_map)
+    generate_position_data_multi_color_velocity_once(processed_image_path, selected_hex_codes, color_index_map, skip_black=color_mode in ('RGB', 'CMYK'))
 elif slicing_option == "mono color velocity slicing":
     hex_paths_and_codes = []
     for hex_code in selected_hex_codes:
